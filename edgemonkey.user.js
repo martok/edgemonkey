@@ -1,6 +1,6 @@
 ﻿// ==UserScript==
 // @name           EdgeMonkey
-// @copyright      (c)2008, Martok
+// @copyright      (c)2009, Martok
 // @namespace      entwickler-ecke.de
 // @description    Krams fuer die Entwickler-Ecke
 // @include        http://*.entwickler-ecke.de/*
@@ -16,6 +16,10 @@ const ScriptVersion = 0.16;
 
 // @changelog
 /*
+
+0.17           09-02-**
+  -better search.php for empty resultsets
+
 
 0.16           09-02-06
   -highlight fixed
@@ -51,7 +55,7 @@ const ScriptVersion = 0.16;
 
 const sburl = '/shoutbox_view.php?';
 const sb_per_page = 30;
-const RELEASE = 1;
+const RELEASE = 0;
 
 var console = unsafeWindow.console;
 // just in case s/o does not have Firebug
@@ -365,51 +369,56 @@ SettingsStore.prototype = {
 
 
 function ButtonBar() {
-  tds = document.getElementsByTagName('td');
-  for(i=0;i<tds.length;i++) {
-    td = tds[i];
-    if (td.className.match(/navbarnav/) && td.innerHTML.match(/Navigation\:/)) {
-      cont = td.parentNode.parentNode;
+	this.mainTable = null;
+	tab = document.getElementsByTagName('table');
+	for (var i=0; i<tab.length;i++) {
+		if (tab[i].className=='overall') {this.mainTable=tab[i]; break;}
+	}
+	
+	this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
+	console.log(this.navTable);
+  //man könnte auch XPath nehmen... :P
 
-      sep = document.createElement('tr');
-      dummy = document.createElement('td');
-      dummy.className='navbarleft';
-      sep.appendChild(dummy);
-      dummy = document.createElement('td');
-      dummy.colSpan='2';
-      dummy.style.cssText = "margin: 0px; padding: 0px; height: 2px; background-image: url(./graphics/navBar.gif);";
-      sep.appendChild(dummy);
 
-      dummy = document.createElement('td');
-      dummy.className='navbarright';
-      sep.appendChild(dummy);
-      cont.insertBefore(sep, last_child(cont,'tr'));
+  cont = this.navTable.getElementsByTagName('tbody')[0];
 
-      this.row = document.createElement('tr');
-        dummy = document.createElement('td');
-        dummy.className='navbarleft';
-        this.row.appendChild(dummy);
+  sep = document.createElement('tr');
+  dummy = document.createElement('td');
+  dummy.className='navbarleft';
+  sep.appendChild(dummy);
+  dummy = document.createElement('td');
+  dummy.colSpan='2';
+  dummy.style.cssText = "margin: 0px; padding: 0px; height: 2px; background-image: url(./graphics/navBar.gif);";
+  sep.appendChild(dummy);
 
-        dummy = document.createElement('td');
-        dummy.colSpan='2';
-        dummy.className='navbarfunctions';
-          this.container=document.createElement('span');
-          this.container.className='nav';
+  dummy = document.createElement('td');
+  dummy.className='navbarright';
+  sep.appendChild(dummy);
+  cont.insertBefore(sep, last_child(cont,'tr'));
 
-          sp=document.createElement('span');
-          sp.style.cssText="color: rgb(0, 0, 0);";
-          sp.innerHTML='EdgeMonkey:&nbsp;';
-          this.container.appendChild(sp);
-          //buttons
-          dummy.appendChild(this.container);
-        this.row.appendChild(dummy);
-        dummy = document.createElement('td');
-        dummy.className='navbarright';
-        this.row.appendChild(dummy);
-      cont.insertBefore(this.row, last_child(cont,'tr'));
-      break;
-    }
-  }
+  this.row = document.createElement('tr');
+    dummy = document.createElement('td');
+    dummy.className='navbarleft';
+    this.row.appendChild(dummy);
+
+    dummy = document.createElement('td');
+    dummy.colSpan='2';
+    dummy.className='navbarfunctions';
+      this.container=document.createElement('span');
+      this.container.className='nav';
+
+      sp=document.createElement('span');
+      sp.style.cssText="color: rgb(0, 0, 0);";
+      sp.innerHTML='EdgeMonkey:&nbsp;';
+      this.container.appendChild(sp);
+      //buttons
+      dummy.appendChild(this.container);
+    this.row.appendChild(dummy);
+    dummy = document.createElement('td');
+    dummy.className='navbarright';
+    this.row.appendChild(dummy);
+  cont.insertBefore(this.row, last_child(cont,'tr'));
+
 }
 
 ButtonBar.prototype = {
@@ -657,6 +666,7 @@ function Pagehacks() {
   if (Settings.GetValue('pagehack','monospace')) this.cssHacks();
   unsafeWindow.em_buttonbar.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs prüfen','em_pagehacks.checkPMs()','em_checkPM');
   this.AddCustomStyles();
+  if (Location.indexOf('search.php?mode=results')>=0) this.FixEmptyResults();
 }
 
 Pagehacks.prototype = {
@@ -702,6 +712,15 @@ Pagehacks.prototype = {
       head.appendChild(style);
     }
 
+  },
+  FixEmptyResults: function () {
+  	sp = unsafeWindow.em_buttonbar.mainTable.getElementsByTagName('span');
+  	for (var i=0; i<sp.length; i++) {
+  		if (sp[i].firstChild.textContent.match(/Keine Beiträge/)) {
+  			sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zurück zum Suchformular</a>';
+  			break;
+  		}
+  	}
   }
 
 }
@@ -710,7 +729,8 @@ Settings = new SettingsStore();
 Ajax = new AJAXObject();
 UserMan = new UserManager();
 unsafeWindow.em_settings = Settings;
-if (window.location.href.match(/shoutbox_view.php/)) {
+Location = window.location.href;
+if (Location.match(/shoutbox_view.php/)) {
   if (UserMan.loggedOnUser) unsafeWindow.em_shout_cnt = new ShoutboxWindow();
 } else
 {
