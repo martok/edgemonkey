@@ -65,6 +65,51 @@ if (!console || RELEASE) {
 }
 var Settings;
 
+var colorTpl = {
+    0:{
+        name:'none',
+        friendlyname:'Keine Hervorhebung',
+        style1:'',
+        style2:'',
+    },
+    1:{
+        name:'red',
+        friendlyname:'Helles Rot',
+        style1:'',
+        style2:'',
+    },
+    2:{
+        name:'yellow',
+        friendlyname:'Freundliches Gelb',
+        style1:'',
+        style2:'',
+    },
+    3:{
+        name:'green',
+        friendlyname:'Moderat(iv) Grün',
+        style1:'',
+        style2:'',
+    },
+    4:{
+        name:'blue',
+        friendlyname:'Himmlisch Blau',
+        style1:'',
+        style2:'',
+    },
+    5:{
+        name:'pink',
+        friendlyname:'Schwules Pink',
+        style1:'',
+        style2:'',
+    },
+    6:{
+        name:'grey',
+        friendlyname:'Trist Grau',
+        style1:'',
+        style2:'',
+    }
+};
+
 function last_child(node,kind)
 {
   c = node.getElementsByTagName(kind);
@@ -181,16 +226,26 @@ function UserWindow(title, name,options,previous,body_element) {
 
 function OverlayWindow(x,y,w,h,content,id)
 {
+  console.log('Overlay start');
   wn = document.createElement('div');
   wn.className='overlay';
-  wn.style.cssText = 'background:url(./graphics/navBar.gif);border:2px solid #197BB5;left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h;
-  wn.id=id;
-  wn.close = function() {this.parentNode.removeChild(this);this.style.cssText+=' display:none' };
+  wn.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h;
 
+  console.log('Overlay Frame Window');
+  wn.cwn = document.createElement('div');
+  wn.id=id;
+  wn.close = function() {
+    this.parentNode.removeChild(this);
+    this.style.cssText+=' display:none'
+    };
+
+  console.log('Overlay Caption Bar Window');
   wn.ctrl=document.createElement('div');
   wn.ctrl.window = wn;
-  wn.appendChild(wn.ctrl);
+  wn.cwn.appendChild(wn.ctrl);
   wn.ctrl.style.cssText='text-align:right;background:url(../templates/subSilver/images/cellpic3.gif);padding:3px;cursor:move;';
+
+  console.log('Overlay Caption Bar Close Button');
   wn.ctrl.closebtn=document.createElement('span');
   wn.moving = false;
   addEvent(wn.ctrl,'mousedown',function(dv,event) {
@@ -230,10 +285,33 @@ function OverlayWindow(x,y,w,h,content,id)
   wn.ctrl.closebtn.style.cssText='cursor:pointer;color:#FF9E00;font-weight:bold';
   addEvent(wn.ctrl.closebtn,'click',function(ev) {  ev.window.close() } );
 
+  console.log('Overlay Drop Shadow');
+  var pwn = wn;
+  var swtop = 0;
+  for(i=10; i>=0; i--) {
+    var filterCSS = 'position:relative; overflow:visible; display:block;';
+    filterCSS += 'left:'+i+'px; top:-'+(swtop-i)+'px;';
+    filterCSS += 'min-width:'+(w+i)+';min-height:'+(h+i)+';';
+    swtop += h+i;
+    filterCSS += 'z-index:-'+(100+i)+';';
+    filterCSS += 'background-color: #000;';
+    filterCSS += 'opacity: '+(0.5-i/20)+';';
+    var shadow = document.createElement('div');
+    //shadow.className='overlay';
+    shadow.style.cssText = filterCSS;
+    wn.appendChild(shadow);
+  }
+
+  wn.cwn.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
+
+  console.log('Overlay Content Area');
   wn.cont=document.createElement('div');
   wn.cont.window = wn;
-  wn.appendChild(wn.cont);
+  wn.cwn.appendChild(wn.cont);
   wn.cont.innerHTML=content;
+  wn.appendChild(wn.cwn);
+
+  console.log('Overlay finish');
   document.getElementsByTagName('body')[0].appendChild(wn);
   return wn;
 }
@@ -293,7 +371,7 @@ SettingsStore.prototype = {
     this.Values['sb.highlight_me']=false;
     this.Values['sb.highlight_mod']=false;
   },
-  
+
   GetValue: function(sec,key) {
   	return this.Values[sec+'.'+key];
   },
@@ -742,7 +820,5 @@ if (Location.match(/shoutbox_view.php/)) {
     unsafeWindow.em_pagehacks = new Pagehacks();
     unsafeWindow.em_shouts = new ShoutboxControls();
 }
-
-
 
 
