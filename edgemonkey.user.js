@@ -17,11 +17,12 @@ const ScriptVersion = 0.17;
 // @changelog
 /*
 
-0.17           09-02-**
+0.17           09-02-14
   -better search.php for empty resultsets
   -Overlay shadow by BenBE
   -better movable overlay window
   -dropshadow option by BenBE
+  -cleaned up variable declarations
 
 
 0.16           09-02-06
@@ -115,7 +116,7 @@ var colorTpl = new Array(
 
 function last_child(node,kind)
 {
-  c = node.getElementsByTagName(kind);
+  var c = node.getElementsByTagName(kind);
   return c[c.length-1];
 }
 
@@ -134,7 +135,7 @@ function addEvent(elementObject, eventName, functionObject, wantCapture)
         evt.preventDefault();
         evt.stopPropagation();
       },
-     a);
+      a);
 }
 
 function addGlobalEvent(elementObject, eventName, functionObject, wantCapture)
@@ -145,7 +146,7 @@ function addGlobalEvent(elementObject, eventName, functionObject, wantCapture)
       function (evt) {
         functionObject(elementObject, evt)
       },
-     a);
+      a);
 }
 
 function addHeadrow(tbl, content, colspan)
@@ -201,7 +202,7 @@ AJAXObject.prototype = {
     {
       request.postBody = "";
       for (name in postData)
-      request.postBody += name+"="+escape(postData[name])+"&";
+        request.postBody += name+"="+escape(postData[name])+"&";
 
       request.open("POST", url, async);
       request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=iso-8859-1');
@@ -209,32 +210,31 @@ AJAXObject.prototype = {
     return request;
   },
   SyncRequest: function(url,postData) {
-    request = this.prepareRequest(url,postData,false);
+    var request = this.prepareRequest(url,postData,false);
     request.send(request.postBody);
     return request.responseText;
   },
   AsyncRequest: function(url,postData,div,callback) {
     function readyEvent(aEvt) {
-      if (request.readyState == 4) {
-        if(request.status == 200) {
-        if (!isUndef(div) && div!=null) {div.innerHTML = request.responseText}
+      var req = aEvt.target;
+      if (req.readyState == 4) {
+        if(req.status == 200) {
+        if (!isUndef(div) && div!=null) {div.innerHTML = req.responseText}
         if (!isUndef(callback) && callback!=null) {callback(div);}
         }
       }
     }
-    request = this.prepareRequest(url,postData,true);
+    var request = this.prepareRequest(url,postData,true);
     request.onreadystatechange = readyEvent;
     return request.send(request.postBody);
   }
 }
 
-
-
 function UserWindow(title, name,options,previous,body_element) {
   if (!isUndef(previous)) {
     if (previous && !previous.closed) previous.close();
   }
-  wnd = window.open('',name,options);
+  var wnd = window.open('',name,options);
   wnd.document.open();
   wnd.document.write(
         '<html><head><script>Settings=opener.em_settings</script>'+
@@ -258,7 +258,6 @@ function UserWindow(title, name,options,previous,body_element) {
     default:  bd+=body_element.toString;
   }
   wnd.document.write(bd+'</body>');
-
   wnd.document.write('</html>');
   wnd.document.close();
   this.Window = wnd;
@@ -269,17 +268,17 @@ function UserWindow(title, name,options,previous,body_element) {
   }
 }
 
-if (!document.getElementsByClassName) 
-document.getElementsByClassName = function(className, tagName) {
-	mat = document.getElementsByTagName(isUndef(tagName)?'*':tagName);
-	arr = new Array();
-	for (var i=0; i<mat.length; i++) {
-		if (mat[i].className.indexOf(className)!=-1) {
-			arr.push(mat[i]);
-		}
-	}
-	
-	return arr;
+if (!document.getElementsByClassName) {
+  document.getElementsByClassName = function(className, tagName) {
+  var mat = document.getElementsByTagName(isUndef(tagName)?'*':tagName);
+  var arr = new Array();
+  for (var i=0; i<mat.length; i++) {
+      if (mat[i].className.indexOf(className)!=-1) {
+        arr.push(mat[i]);
+      }
+    }
+  return arr;
+  }
 }
 
 function bringToFront(obj)
@@ -292,16 +291,16 @@ function bringToFront(obj)
     // other absolute-positioned divs
     for (i = 0; i < divs.length; i++)
     {
-        var item = divs[i];
-        if (item == obj ||
-            item.style.zIndex == '')
-            continue;
+      var item = divs[i];
+      if (item == obj || item.style.zIndex == '') {
+        continue;
+      }
 
-        cur_index = parseInt(item.style.zIndex);
-        if (max_index < cur_index)
-        {
-            max_index = cur_index;
-        }
+      cur_index = parseInt(item.style.zIndex);
+      if (max_index < cur_index)
+      {
+        max_index = cur_index;
+      }
     }
 
     obj.style.zIndex = max_index + 1;
@@ -311,7 +310,7 @@ function bringToFront(obj)
 function OverlayWindow(x,y,w,h,content,id)
 {
   console.log('Overlay start');
-  wn = document.createElement('div');
+  var wn = document.createElement('div');
   wn.className='overlayWin';
   wn.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h;
 
@@ -360,7 +359,7 @@ function OverlayWindow(x,y,w,h,content,id)
   addEvent(wn.ctrl,'mouseup',function(dv,event) {
     var win = dv.window;
     if (win.moving) {
-    	win.moving=false;
+      win.moving=false;
       //win.style.zIndex = win.zSort;
     }
   });
@@ -398,7 +397,7 @@ function OverlayWindow(x,y,w,h,content,id)
   wn.cont.innerHTML=content;
   wn.appendChild(wn.cwn);
 
-	bringToFront(wn);
+  bringToFront(wn);
   console.log('Overlay finish');
   document.getElementsByTagName('body')[0].appendChild(wn);
   return wn;
@@ -425,8 +424,8 @@ function SettingsStore() {
 
   this.RestoreDefaults();
   this.LoadFromDisk();
-  co = document.cookie.split(';');
-  re = /\s?(\w*)=(.*)\s?/;
+  var co = document.cookie.split(';');
+  var re = /\s?(\w*)=(.*)\s?/;
   this.cookies = new Object();
   for (i=0; i<co.length; i++) {
     c = co[i];
@@ -462,15 +461,16 @@ SettingsStore.prototype = {
   },
 
   GetValue: function(sec,key) {
-  	return this.Values[sec+'.'+key];
+    return this.Values[sec+'.'+key];
   },
   SetValue: function(sec,key,val) {
-  	this.Values[sec+'.'+key] = val;
+    this.Values[sec+'.'+key] = val;
   },
 
   FillDialog: function() {
-    tbl = this.Window.Document.createElement('table');
+    var tbl = this.Window.Document.createElement('table');
     tbl.className = 'forumline';
+
     addHeadrow(tbl,'Ansicht',2);
     addSettingsRow(tbl, 'Codeblöcke als monospace anzeigen',
         '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="">':'>'));
@@ -516,9 +516,9 @@ SettingsStore.prototype = {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
             'HEIGHT=400,resizable=yes,WIDTH=500', this.Window);
     this.FillDialog();
-    tbl = this.Window.Document.createElement('table');
+    var tbl = this.Window.Document.createElement('table');
     with (tbl.insertRow(tbl.rows.length)) {
-      c = insertCell(0);
+      var c = insertCell(0);
       c.innerHTML = '<input type="button" value="Speichern" class="mainoption">';
       addEvent(c, 'click', this.ev_SaveDialog);
       insertCell(1).innerHTML = '<input type="button" class="liteoption" onclick="window.close()" value="Schließen">';
@@ -533,21 +533,19 @@ SettingsStore.prototype = {
 
 
 function ButtonBar() {
-	this.mainTable = null;
-	tab = document.getElementsByTagName('table');
-	for (var i=0; i<tab.length;i++) {
-		if (tab[i].className=='overall') {this.mainTable=tab[i]; break;}
-	}
+  this.mainTable = null;
+  var tab = document.getElementsByTagName('table');
+  for (var i=0; i<tab.length;i++) {
+    if (tab[i].className=='overall') {this.mainTable=tab[i]; break;}
+  }
 
-	this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
-	console.log(this.navTable);
+  this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
   //man könnte auch XPath nehmen... :P
 
+  var cont = this.navTable.getElementsByTagName('tbody')[0];
 
-  cont = this.navTable.getElementsByTagName('tbody')[0];
-
-  sep = document.createElement('tr');
-  dummy = document.createElement('td');
+  var sep = document.createElement('tr');
+  var dummy = document.createElement('td');
   dummy.className='navbarleft';
   sep.appendChild(dummy);
   dummy = document.createElement('td');
@@ -561,33 +559,33 @@ function ButtonBar() {
   cont.insertBefore(sep, last_child(cont,'tr'));
 
   this.row = document.createElement('tr');
-    dummy = document.createElement('td');
-    dummy.className='navbarleft';
-    this.row.appendChild(dummy);
+  dummy = document.createElement('td');
+  dummy.className='navbarleft';
+  this.row.appendChild(dummy);
 
-    dummy = document.createElement('td');
-    dummy.colSpan='2';
-    dummy.className='navbarfunctions';
-      this.container=document.createElement('span');
-      this.container.className='nav';
+  dummy = document.createElement('td');
+  dummy.colSpan='2';
+  dummy.className='navbarfunctions';
+  this.container=document.createElement('span');
+  this.container.className='nav';
 
-      sp=document.createElement('span');
-      sp.style.cssText="color: rgb(0, 0, 0);";
-      sp.innerHTML='EdgeMonkey:&nbsp;';
-      this.container.appendChild(sp);
-      //buttons
-      dummy.appendChild(this.container);
-    this.row.appendChild(dummy);
-    dummy = document.createElement('td');
-    dummy.className='navbarright';
-    this.row.appendChild(dummy);
+  var sp=document.createElement('span');
+  sp.style.cssText="color: rgb(0, 0, 0);";
+  sp.innerHTML='EdgeMonkey:&nbsp;';
+  this.container.appendChild(sp);
+
+  //buttons
+  dummy.appendChild(this.container);
+  this.row.appendChild(dummy);
+  dummy = document.createElement('td');
+  dummy.className='navbarright';
+  this.row.appendChild(dummy);
   cont.insertBefore(this.row, last_child(cont,'tr'));
-
 }
 
 ButtonBar.prototype = {
   addButton: function(img,caption,script,id) {
-    btn = document.createElement('a');
+    var btn = document.createElement('a');
     btn.target="_self";
     btn.className="gensmall";
     btn.href='javascript:'+script;
@@ -595,8 +593,8 @@ ButtonBar.prototype = {
     if (img!='') btn.innerHTML+='<img class="navbar" border="0" alt="'+caption+'" src="'+img+'" style="width: 19px; height: 18px;">';
     if (caption!='') btn.innerHTML+=caption;
     this.container.appendChild(btn);
-    a=this.container.innerHTML;
-    a+=' &nbsp;&nbsp; ';
+    var a=this.container.innerHTML;
+    a+='&nbsp; &nbsp; ';
     this.container.innerHTML=a;
   }
 }
@@ -621,8 +619,8 @@ UserManager.prototype = {
   getUID: function(name) {
     if (!name) return -1;
     if (isUndef(this.knownUIDs[name])) {
-      prof = AJAXSyncRequest('user_'+name+'.html');
-      id = prof.match(/vc\.php\?mode=new&amp;ref_type=1&amp;id=([0-9]*)\"/ );
+      var prof = AJAXSyncRequest('user_'+name+'.html');
+      var id = prof.match(/vc\.php\?mode=new&amp;ref_type=1&amp;id=([0-9]*)\"/ );
       if (id) this.knownUIDs[name] = id[1];
       Settings.store_field('uidcache', this.knownUIDs);
     }
@@ -684,7 +682,7 @@ function ShoutboxControls() {
 
 ShoutboxControls.prototype = {
   current_start: function () {
-    st = this.shout_url.match(/start=(\d*)/);
+    var st = this.shout_url.match(/start=(\d*)/);
     if (st == null)
       return 0
     else
@@ -692,18 +690,18 @@ ShoutboxControls.prototype = {
   },
 
   setUrl: function (url) {
-    ifr = this.get_iframe();
+    var ifr = this.get_iframe();
     ifr.contentDocument.location.href = url;
     this.shout_url = url;
   },
 
   newer_page: function () {
-    p = this.current_start() - sb_per_page;
+    var p = this.current_start() - sb_per_page;
     this.goto_page(p);
   },
 
   older_page: function () {
-    p = this.current_start() + sb_per_page;
+    var p = this.current_start() + sb_per_page;
     this.goto_page(p);
   },
 
@@ -732,16 +730,16 @@ ShoutboxControls.prototype = {
 }
 
 function ShoutboxWindow() {
-  trs = document.getElementsByTagName('tr');
+  var trs = document.getElementsByTagName('tr');
   this.shouts = new Array();
-  for (i=0; i<trs.length; i++) {
-    shout = trs[i].firstChild;
+  for (var i=0; i<trs.length; i++) {
+    var shout = trs[i].firstChild;
     this.shouts.push(shout);
-    a = shout.firstChild;
-    div = document.createElement('div');
-    std = document.createElement('span');
-    for (j=0;j<shout.childNodes.length+5;j++) {
-      nd = shout.removeChild(shout.firstChild);
+    var a = shout.firstChild;
+    var div = document.createElement('div');
+    var std = document.createElement('span');
+    for (var j=0;j<shout.childNodes.length+5;j++) {
+      var nd = shout.removeChild(shout.firstChild);
       if (nd.nodeName=='BR') {
         break;
       } else {
@@ -759,13 +757,13 @@ function ShoutboxWindow() {
     }
     std.className = 'incell left';
     div.appendChild(std);
-    cnt = document.createElement('div');
+    var cnt = document.createElement('div');
     cnt.innerHTML = shout.innerHTML;
     shout.innerHTML = '';
     shout.insertBefore(cnt, shout.firstChild);
     shout.insertBefore(div, shout.firstChild);
 
-    tools = document.createElement('span');
+    var tools = document.createElement('span');
     tools.className+=' incell right';
     tools.innerHTML+='<a href="javascript:em_shout_cnt.ev_anekdote('+i+')>A</a>';
     div.appendChild(tools);
@@ -800,9 +798,9 @@ ShoutboxWindow.prototype = {
     var an='';
     an+= '[user]'+item.getElementsByTagName('a')[0].firstChild.innerHTML+'[/user]';
     an+= ' [color=#777777]'+item.getElementsByTagName('span')[2].innerHTML+'[/color]\n';
-    sht = item.childNodes[1].childNodes;
-    res = new Array();
-    for (i=0;i<sht.length;i++) {
+    var sht = item.childNodes[1].childNodes;
+    var res = new Array();
+    for (var i=0;i<sht.length;i++) {
       switch (sht[i].tagName) {
         case 'A': res.push('[url='+sht[i].href+']'+sht[i].innerHTML+'[/url]');break;
         case 'IMG': res.push(sht[i].alt);break;
@@ -814,7 +812,7 @@ ShoutboxWindow.prototype = {
   },
 
   ev_anekdote: function(idx) {
-    ih = (this.Anekdoter)?this.Anekdoter.Body.firstChild.innerHTML:'';
+    var ih = (this.Anekdoter)?this.Anekdoter.Body.firstChild.innerHTML:'';
     this.Anekdoter = new UserWindow('EdgeMonkey :: SB-Anekdoter', 'em_wnd_sbanekdote',
           'HEIGHT=400,resizable=yes,WIDTH=500,scrollbars=yes',undefined,'<pre></pre>');
 
@@ -841,7 +839,7 @@ Pagehacks.prototype = {
     var w = OverlayWindow(lft,btm,400,225,'','em_pmcheck');
     var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,w.cont,
       function(div) {
-        a=div.getElementsByTagName('a');
+        var a=div.getElementsByTagName('a');
         for(i=0;i<a.length;i++) {
           if (a[i].href.match(/window\.close/)) {
             a[i].removeAttribute('href');
@@ -875,16 +873,16 @@ Pagehacks.prototype = {
       style.innerHTML+= ' div.overlayWin { position: absolute; z-index: 1;}';
       head.appendChild(style);
     }
-
   },
+
   FixEmptyResults: function () {
-  	sp = unsafeWindow.em_buttonbar.mainTable.getElementsByTagName('span');
-  	for (var i=0; i<sp.length; i++) {
-  		if (sp[i].firstChild.textContent.match(/Keine Beiträge/)) {
-  			sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zurück zum Suchformular</a>';
-  			break;
-  		}
-  	}
+    var sp = unsafeWindow.em_buttonbar.mainTable.getElementsByTagName('span');
+    for (var i=0; i<sp.length; i++) {
+      if (sp[i].firstChild.textContent.match(/Keine Beiträge/)) {
+        sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zurück zum Suchformular</a>';
+        break;
+      }
+    }
   }
 
 }
@@ -906,4 +904,3 @@ if (Location.match(/shoutbox_view.php/)) {
     unsafeWindow.em_pagehacks = new Pagehacks();
     unsafeWindow.em_shouts = new ShoutboxControls();
 }
-
