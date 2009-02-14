@@ -21,6 +21,7 @@ const ScriptVersion = 0.17;
   -better search.php for empty resultsets
   -Overlay shadow by BenBE
   -better movable overlay window
+  -dropshadow option by BenBE
 
 
 0.16           09-02-06
@@ -149,11 +150,39 @@ function addGlobalEvent(elementObject, eventName, functionObject, wantCapture)
 
 function addHeadrow(tbl, content, colspan)
 {
-  r = tbl.insertRow(-1);
-  th = document.createElement('th');
+  var r = tbl.insertRow(-1);
+  var th = document.createElement('th');
   th.colSpan = colspan;
   th.innerHTML = content;
   r.appendChild(th);
+  tbl.zebra = false;
+}
+
+function addSettingsRow(tbl, caption, innerHTML) {
+  var rowClass = tbl.zebra ? 'row1' : 'row2';
+  tbl.zebra = !tbl.zebra;
+
+  var r = tbl.insertRow(-1);
+
+  var td_left = r.insertCell(-1);
+  var td_right = r.insertCell(-1);
+
+  td_left.className = rowClass;
+  td_right.className = rowClass;
+
+  var ot = r.optionText = document.createElement('span');
+  var oc = r.optionControl = document.createElement('div');
+
+  ot.className = 'gensmall';
+  ot.innerHTML = caption;
+
+  oc.className = 'gensmall';
+  oc.innerHTML = innerHTML;
+
+  td_left.appendChild(ot);
+  td_right.appendChild(oc);
+
+  return r;
 }
 
 function AJAXObject() {
@@ -344,18 +373,20 @@ function OverlayWindow(x,y,w,h,content,id)
   console.log('Overlay Drop Shadow');
   var pwn = wn;
   var swtop = 0;
-  for(i=10; i>=0; i--) {
-    var filterCSS = 'position:relative; overflow:visible; display:block;';
-    filterCSS += 'left:'+i+'px; top:-'+(swtop-i)+'px;';
-    filterCSS += 'min-width:'+(w+i)+';min-height:'+(h+i)+';';
-    swtop += h+i;
-    filterCSS += 'z-index:-'+(100+i)+';';
-    filterCSS += 'background-color: #000;';
-    filterCSS += 'opacity: '+(0.5-i/20)+';';
-    var shadow = document.createElement('div');
-    //shadow.className='overlay';
-    shadow.style.cssText = filterCSS;
-    wn.appendChild(shadow);
+  if(Settings.GetValue('ui', 'showDropShadow')) {
+    for(i=10; i>=0; i--) {
+      var filterCSS = 'position:relative; overflow:visible; display:block;';
+      filterCSS += 'left:'+i+'px; top:-'+(swtop-i)+'px;';
+      filterCSS += 'min-width:'+(w+i)+';min-height:'+(h+i)+';';
+      swtop += h+i;
+      filterCSS += 'z-index:-'+(100+i)+';';
+      filterCSS += 'background-color: #000;';
+      filterCSS += 'opacity: '+(0.5-i/20)+';';
+      var shadow = document.createElement('div');
+      //shadow.className='overlay';
+      shadow.style.cssText = filterCSS;
+      wn.appendChild(shadow);
+    }
   }
 
   wn.cwn.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
@@ -423,10 +454,11 @@ SettingsStore.prototype = {
 
   RestoreDefaults: function() {
     this.Values = new Object();
-    this.Values['pagehack.monospace']=false;
+    this.Values['pagehack.monospace']=true;
     this.Values['sb.anek_reverse']=true;
     this.Values['sb.highlight_me']=false;
     this.Values['sb.highlight_mod']=false;
+    this.Values['ui.showDropShadows']=true;
   },
 
   GetValue: function(sec,key) {
@@ -440,29 +472,26 @@ SettingsStore.prototype = {
     tbl = this.Window.Document.createElement('table');
     tbl.className = 'forumline';
     addHeadrow(tbl,'Ansicht',2);
-    with (tbl.insertRow(-1)) {
-      insertCell(-1).innerHTML = 'Codeblöcke als monospace anzeigen';
-      insertCell(-1).innerHTML = '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="">':'>');
-    }
+    addSettingsRow(tbl, 'Codeblöcke als monospace anzeigen',
+        '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="">':'>'));
+    addSettingsRow(tbl, 'Schlagschatten unter Popup-Fenstern',
+        '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="">':'>'));
+
     addHeadrow(tbl,'Shoutbox',2);
-    with (tbl.insertRow(-1)) {
-      insertCell(-1).innerHTML = 'Anekdoten oben einfügen';
-      insertCell(-1).innerHTML = '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="">':'>');
-    }
-    with (tbl.insertRow(-1)) {
-      insertCell(-1).innerHTML = 'Shouts von mir hervorheben<br />(nur mit Auto-Login)';
-      insertCell(-1).innerHTML = '<input name="sb_highlight_me" type="checkbox" '+(this.GetValue('sb','highlight_me')?'checked="">':'>');
-    }
-    with (tbl.insertRow(-1)) {
-      insertCell(-1).innerHTML = 'Shouts von Moderatoren/Admins hervorheben';
-      insertCell(-1).innerHTML = '<input name="sb_highlight_mod" type="checkbox" '+(this.GetValue('sb','highlight_mod')?'checked="">':'>');
-    }
+    addSettingsRow(tbl, 'Anekdoten oben einfügen',
+        '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="">':'>'));
+    addSettingsRow(tbl,'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
+        '<input name="sb_highlight_me" type="checkbox" '+(this.GetValue('sb','highlight_me')?'checked="">':'>'));
+    addSettingsRow(tbl,'Shouts von Moderatoren/Admins hervorheben',
+        '<input name="sb_highlight_mod" type="checkbox" '+(this.GetValue('sb','highlight_mod')?'checked="">':'>'));
+
     this.Window.Body.appendChild(tbl);
   },
 
   ev_SaveDialog: function(evt) {
     with (Settings.Window.Document) {
       Settings.SetValue('pagehack','monospace', getElementsByName('ph_mono')[0].checked);
+      Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
       Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].checked);
       Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].checked);
@@ -509,7 +538,7 @@ function ButtonBar() {
 	for (var i=0; i<tab.length;i++) {
 		if (tab[i].className=='overall') {this.mainTable=tab[i]; break;}
 	}
-	
+
 	this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
 	console.log(this.navTable);
   //man könnte auch XPath nehmen... :P
@@ -877,5 +906,4 @@ if (Location.match(/shoutbox_view.php/)) {
     unsafeWindow.em_pagehacks = new Pagehacks();
     unsafeWindow.em_shouts = new ShoutboxControls();
 }
-
 
