@@ -12,13 +12,15 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.16;
+const ScriptVersion = 0.17;
 
 // @changelog
 /*
 
 0.17           09-02-**
   -better search.php for empty resultsets
+  -Overlay shadow by BenBE
+  -better movable overlay window
 
 
 0.16           09-02-06
@@ -65,50 +67,50 @@ if (!console || RELEASE) {
 }
 var Settings;
 
-var colorTpl = {
-    0:{
+var colorTpl = new Array(
+    {
         name:'none',
         friendlyname:'Keine Hervorhebung',
         style1:'',
         style2:'',
     },
-    1:{
+    {
         name:'red',
         friendlyname:'Helles Rot',
         style1:'',
         style2:'',
     },
-    2:{
+    {
         name:'yellow',
         friendlyname:'Freundliches Gelb',
         style1:'',
         style2:'',
     },
-    3:{
+    {
         name:'green',
         friendlyname:'Moderat(iv) Grün',
         style1:'',
         style2:'',
     },
-    4:{
+    {
         name:'blue',
         friendlyname:'Himmlisch Blau',
         style1:'',
         style2:'',
     },
-    5:{
+    {
         name:'pink',
         friendlyname:'Schwules Pink',
         style1:'',
         style2:'',
     },
-    6:{
+    {
         name:'grey',
         friendlyname:'Trist Grau',
         style1:'',
         style2:'',
     }
-};
+);
 
 function last_child(node,kind)
 {
@@ -121,14 +123,28 @@ function isUndef(what)
   return (typeof what == "undefined");
 }
 
-function addEvent(elementObject, eventName, functionObject)
+function addEvent(elementObject, eventName, functionObject, wantCapture)
 {
+  var a = isUndef(wantCapture) ? false : wantCapture;
   if(document.addEventListener)
     elementObject.addEventListener(eventName,
       function (evt) {
+        functionObject(elementObject, evt);
+        evt.preventDefault();
+        evt.stopPropagation();
+      },
+     a);
+}
+
+function addGlobalEvent(elementObject, eventName, functionObject, wantCapture)
+{
+  var a = isUndef(wantCapture) ? false : wantCapture;
+  if(document.addEventListener)
+    document.body.addEventListener(eventName,
+      function (evt) {
         functionObject(elementObject, evt)
       },
-      false);
+     a);
 }
 
 function addHeadrow(tbl, content, colspan)
@@ -224,11 +240,50 @@ function UserWindow(title, name,options,previous,body_element) {
   }
 }
 
+if (!document.getElementsByClassName) 
+document.getElementsByClassName = function(className, tagName) {
+	mat = document.getElementsByTagName(isUndef(tagName)?'*':tagName);
+	arr = new Array();
+	for (var i=0; i<mat.length; i++) {
+		if (mat[i].className.indexOf(className)!=-1) {
+			arr.push(mat[i]);
+		}
+	}
+	
+	return arr;
+}
+
+function bringToFront(obj)
+{
+    var divs = document.getElementsByClassName('overlayWin','div');
+    var max_index = 0;
+    var cur_index;
+
+    // Compute the maximal z-index of
+    // other absolute-positioned divs
+    for (i = 0; i < divs.length; i++)
+    {
+        var item = divs[i];
+        if (item == obj ||
+            item.style.zIndex == '')
+            continue;
+
+        cur_index = parseInt(item.style.zIndex);
+        if (max_index < cur_index)
+        {
+            max_index = cur_index;
+        }
+    }
+
+    obj.style.zIndex = max_index + 1;
+    return max_index;
+}
+
 function OverlayWindow(x,y,w,h,content,id)
 {
   console.log('Overlay start');
   wn = document.createElement('div');
-  wn.className='overlay';
+  wn.className='overlayWin';
   wn.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h;
 
   console.log('Overlay Frame Window');
@@ -257,8 +312,9 @@ function OverlayWindow(x,y,w,h,content,id)
     win.mov_pr_y = y;
     win.left = parseInt(win.style.left,10);
     win.top = parseInt(win.style.top,10);
+    win.zSort = bringToFront(win);
   });
-  addEvent(wn.ctrl,'mousemove',function(dv,event) {
+  addGlobalEvent(wn.ctrl,'mousemove',function(dv,event) {
     var win = dv.window;
     if (win.moving) {
       var x=event.clientX + window.scrollX;
@@ -270,13 +326,13 @@ function OverlayWindow(x,y,w,h,content,id)
 
       win.mov_pr_x = x;
       win.mov_pr_y = y;
-      event.preventDefault();
     }
-  });
+  },true);
   addEvent(wn.ctrl,'mouseup',function(dv,event) {
     var win = dv.window;
     if (win.moving) {
     	win.moving=false;
+      //win.style.zIndex = win.zSort;
     }
   });
   wn.ctrl.closebtn.window = wn;
@@ -311,6 +367,7 @@ function OverlayWindow(x,y,w,h,content,id)
   wn.cont.innerHTML=content;
   wn.appendChild(wn.cwn);
 
+	bringToFront(wn);
   console.log('Overlay finish');
   document.getElementsByTagName('body')[0].appendChild(wn);
   return wn;
@@ -786,7 +843,7 @@ Pagehacks.prototype = {
     {
       style = document.createElement('style');
       style.type = 'text/css';
-      style.innerHTML+= ' div.overlay { position: absolute; z-index: 1;}';
+      style.innerHTML+= ' div.overlayWin { position: absolute; z-index: 1;}';
       head.appendChild(style);
     }
 
