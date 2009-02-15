@@ -17,6 +17,10 @@ const ScriptVersion = 0.17;
 // @changelog
 /*
 
+0.18           09-02-**
+  -Flat Styles by BenBE
+  -overlay window pos fix
+
 0.17           09-02-14
   -better search.php for empty resultsets
   -Overlay shadow by BenBE
@@ -257,9 +261,18 @@ function UserWindow(title, name,options,previous,body_element) {
         '<link rel="stylesheet" type="text/css" href="styles/styles_others.css">'+
         '<style type="text/css">'+"\n"+
         '<!--'+"\n"+
-        ' body { padding: 5px; }'+
-        ' input.mainoption { background-color:#FAFAFC; font-weight:bold; }'+
-        ' input.liteoption { background-color:#FAFAFC; font-weight:normal; }'+
+        'body { padding: 5px; }'+
+        'input.mainoption { background-color:#FAFAFC; font-weight:bold; }'+
+        'input.liteoption { background-color:#FAFAFC; font-weight:normal; }'+
+        'td.cat,td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom {'+
+        '    background-image: url(../templates/subSilver/images/cellpic1.gif);'+
+        '    background-color:#DBE4EB; border: #FFFFFF; border-style: solid; height: 28px;'+
+        '}'+
+        'td.cat,td.catHead,td.catBottom {'+
+        '    height: 29px;'+
+        '    border-width: 0px 0px 0px 0px;'+
+        '}'+
+        '-->'+"\n"+
         '</style>'+
     '<title>'+title+'</title></head>');
   var bd = '<body bgcolor="#E5E5E5" text="#000000" link="#006699" vlink="#5493B4">';
@@ -469,7 +482,8 @@ SettingsStore.prototype = {
     this.Values['sb.anek_reverse']=true;
     this.Values['sb.highlight_me']=false;
     this.Values['sb.highlight_mod']=false;
-    this.Values['ui.showDropShadows']=true;
+    this.Values['ui.showDropShadow']=true;
+    this.Values['ui.useFlatStyle']=false;
   },
 
   GetValue: function(sec,key) {
@@ -482,12 +496,15 @@ SettingsStore.prototype = {
   FillDialog: function() {
     var tbl = this.Window.Document.createElement('table');
     tbl.className = 'forumline';
+    tbl.style.cssText = 'width:98%; align:center;';
 
     addHeadrow(tbl,'Ansicht',2);
     addSettingsRow(tbl, 'Codeblöcke als monospace anzeigen',
         '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="">':'>'));
     addSettingsRow(tbl, 'Schlagschatten unter Popup-Fenstern',
         '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="">':'>'));
+    addSettingsRow(tbl, 'Nutze ein flacheres Layout für Formulare',
+        '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="">':'>'));
 
     addHeadrow(tbl,'Shoutbox',2);
     addSettingsRow(tbl, 'Anekdoten oben einfügen',
@@ -497,6 +514,7 @@ SettingsStore.prototype = {
     addSettingsRow(tbl,'Shouts von Moderatoren/Admins hervorheben',
         '<input name="sb_highlight_mod" type="checkbox" '+(this.GetValue('sb','highlight_mod')?'checked="">':'>'));
 
+    this.Window.OptionsTable = tbl;
     this.Window.Body.appendChild(tbl);
   },
 
@@ -504,6 +522,7 @@ SettingsStore.prototype = {
     with (Settings.Window.Document) {
       Settings.SetValue('pagehack','monospace', getElementsByName('ph_mono')[0].checked);
       Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
+      Settings.SetValue('ui','useFlatStyle', getElementsByName('ui_flatstyle')[0].checked);
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
       Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].checked);
       Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].checked);
@@ -516,6 +535,7 @@ SettingsStore.prototype = {
   },
 
   ev_ClearAll: function(evt) {
+  	if (!confirm("Sollen wirklich alle Einstellungen zurückgesetzt werden?")) return false;
     Settings.RestoreDefaults();
     Settings_SaveToDisk();
     if (confirm("Einstellugen auf Standard zurückgesetzt.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?")) {
@@ -526,17 +546,27 @@ SettingsStore.prototype = {
 
   ShowSettingsDialog: function() {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
-            'HEIGHT=400,resizable=yes,WIDTH=500', this.Window);
+            'HEIGHT=400,WIDTH=500,resizable=yes', this.Window);
     this.FillDialog();
-    var tbl = this.Window.Document.createElement('table');
-    with (tbl.insertRow(tbl.rows.length)) {
-      var c = insertCell(0);
-      c.innerHTML = '<input type="button" value="Speichern" class="mainoption">';
-      addEvent(c, 'click', this.ev_SaveDialog);
-      insertCell(1).innerHTML = '<input type="button" class="liteoption" onclick="window.close()" value="Schließen">';
-      c = insertCell(2);
-      c.innerHTML = '<input type="button" value="Alles Zur&uuml;cksetzen" class="liteoption">';
-      addEvent(c, 'click', this.ev_ClearAll);
+//    var tbl = this.Window.Document.createElement('table');
+    var tbl = this.Window.OptionsTable;
+    var row = tbl.insertRow(-1);
+    with (row) {
+      var c = document.createElement('td');
+      row.appendChild(c);
+      c.colSpan = 2;
+      c.className = 'catBottom';
+      c.style.cssText = 'text-align:center;';
+      c.innerHTML = '&nbsp;';
+      c.innerHTML += '<input type="button" class="mainoption" value="Speichern">';
+      c.innerHTML += '&nbsp;&nbsp;';
+      c.innerHTML += '<input type="button" class="mainoption" onclick="window.close()" value="Schließen">';
+      c.innerHTML += '&nbsp;&nbsp;';
+      c.innerHTML += '<input type="button" class="mainoption" value="Alles Zur&uuml;cksetzen">';
+      c.innerHTML += '&nbsp;';
+      var i = c.getElementsByTagName('input');
+      addEvent(i[0], 'click', this.ev_SaveDialog);
+      addEvent(i[2], 'click', this.ev_ClearAll);
     }
     this.Window.Body.appendChild(tbl);
   }
@@ -549,6 +579,11 @@ function ButtonBar() {
   var tab = document.getElementsByTagName('table');
   for (var i=0; i<tab.length;i++) {
     if (tab[i].className=='overall') {this.mainTable=tab[i]; break;}
+  }
+
+  if(isUndef(this.mainTable) || null == this.mainTable) {
+    this.container = {appendChild:function(a){},innerHTML:''};
+    return;
   }
 
   this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
@@ -654,7 +689,16 @@ UserManager.prototype = {
 function ShoutboxControls() {
   this.shout_obj = document.getElementById('sidebar_shoutbox');
 
-  this.get_iframe = function () { return this.shout_obj.getElementsByTagName('iframe')[0] }
+  this.get_iframe = function () {
+    if(isUndef(this.shout_obj) || null == this.shout_obj) {
+      return null;
+    }
+    return this.shout_obj.getElementsByTagName('iframe')[0];
+  }
+
+  if(this.get_iframe() == null) {
+    return;
+  }
 
   this.shout_url = this.get_iframe().src;
 
@@ -675,7 +719,7 @@ function ShoutboxControls() {
     this.contButtons.appendChild(this.btnNewer);
 
     this.edtDirect = this.shout_obj.getElementsByTagName('input')[0].cloneNode(false);
-    this.edtDirect.style.cssText='width: 50px;margin:0 1px 0 1px';
+    this.edtDirect.style.cssText='width: 50px;margin:0 1px 0 1px; text-align:center;';
     this.edtDirect.value = 0;
     this.edtDirect.setAttribute('onchange', '');
     this.edtDirect.setAttribute('onkeydown', '');
@@ -688,7 +732,6 @@ function ShoutboxControls() {
     this.btnOlder.title='Ältere Shouts';
     this.btnOlder.setAttribute('onclick', 'em_shouts.older_page()');
     this.contButtons.appendChild(this.btnOlder);
-
   }
 }
 
@@ -867,7 +910,7 @@ Pagehacks.prototype = {
       var rules = document.styleSheets[s].cssRules;
       for (var r = 0; r < rules.length; r++) {
         var rule = rules[r];
-        if (rule.selectorText.match(/\.code(Cell|comment|key|string|char|number|compilerdirective)|textarea\.posting_body/))
+        if (!isUndef(rule.selectorText) && rule.selectorText.match(/\.code(Cell|comment|key|string|char|number|compilerdirective)|textarea\.posting_body/))
           rule.style.fontFamily = "monospace";
       }
     }
@@ -883,6 +926,25 @@ Pagehacks.prototype = {
       style = document.createElement('style');
       style.type = 'text/css';
       style.innerHTML+= ' div.overlayWin { position: absolute; z-index: 1;}';
+
+      if(Settings.GetValue('ui', 'useFlatStyle')) {
+        style.innerHTML+=
+          "input, textarea, select {"+
+          "  background-color:#fff;"+
+          "  border-color: #000;"+
+          "  border-style: solid;"+
+          "  padding:1px;"+
+          "}";
+        style.innerHTML+=
+          "input:focus, textarea:focus, select:focus {"+
+          "  background-color: #f8f8f8;"+
+          "}";
+        style.innerHTML+=
+          "input:hover, textarea:hover, select:hover {"+
+          "  background-color: #f0f0f0;"+
+          "}";
+      }
+
       head.appendChild(style);
     }
   },
