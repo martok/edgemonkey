@@ -125,6 +125,18 @@ function isUndef(what)
   return (typeof what == "undefined");
 }
 
+function Point(x,y)
+{
+	this.x = x;
+	this.y = y;
+}
+
+Point.prototype.TranslateWindow = function()
+{
+	this.x += window.pageXOffset;
+	this.y += window.pageYOffset;
+}
+
 function addEvent(elementObject, eventName, functionObject, wantCapture)
 {
   var a = isUndef(wantCapture) ? false : wantCapture;
@@ -834,9 +846,9 @@ function Pagehacks() {
 Pagehacks.prototype = {
   checkPMs: function() {
     var lnk = document.getElementById('em_checkPM');
-    var lft = lnk.getBoundingClientRect().left;
-    var btm = lnk.getBoundingClientRect().bottom;
-    var w = OverlayWindow(lft,btm,400,225,'','em_pmcheck');
+    var coords = new Point(lnk.getBoundingClientRect().left, lnk.getBoundingClientRect().bottom);
+    coords.TranslateWindow();
+    var w = OverlayWindow(coords.x,coords.y,400,225,'','em_pmcheck');
     var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,w.cont,
       function(div) {
         var a=div.getElementsByTagName('a');
