@@ -21,6 +21,7 @@ const ScriptVersion = 0.18;
   -Flat Styles by BenBE
   -overlay window pos fix
   -Shoutbox Highlighting with profiles (BenBE)
+  -Shoutbox Post features
 
 0.17           09-02-14
   -better search.php for empty resultsets
@@ -197,8 +198,6 @@ function addEvent(elementObject, eventName, functionObject, wantCapture)
     elementObject.addEventListener(eventName,
       function (evt) {
         functionObject(elementObject, evt);
-        evt.preventDefault();
-        evt.stopPropagation();
       },
       a);
 }
@@ -718,8 +717,8 @@ UserManager.prototype = {
   getUID: function(name) {
     if (!name) return -1;
     if (isUndef(this.knownUIDs[name])) {
-      var prof = AJAXSyncRequest('user_'+name+'.html');
-      var id = prof.match(/vc\.php\?mode=new&amp;ref_type=1&amp;id=([0-9]*)\"/ );
+      var prof = AJAXSyncRequest('ajax_get_userid.php?username=Martok');
+      var id = prof.match(/<userid><!\[CDATA\[([0-9]*)\]\]><\/userid>/ );
       if (id) this.knownUIDs[name] = id[1];
       Settings.store_field('uidcache', this.knownUIDs);
     }
@@ -753,6 +752,12 @@ function ShoutboxControls() {
   }
 
   this.shout_url = this.get_iframe().src;
+  this.form_go = document.getElementById('shoutsubmit');
+  this.form_text = document.getElementById('shoutmessage');
+  this.form_chars = document.getElementById('shoutchars');
+  this.form = this.form_go.form;
+  //addEvent(this.form,'submit',function() {return false });
+  this.form.setAttribute('onsubmit', 'return em_shouts.ev_sb_post()');
 
   if (this.shout_obj) {
     this.btnUpdate = this.shout_obj.getElementsByTagName('input')[3];
@@ -833,6 +838,55 @@ ShoutboxControls.prototype = {
 
   ev_sb_update: function(evt) {
     this.goto_page(0);
+  },
+
+  ev_sb_post: function (evt) {
+    var s = unsafeWindow.em_shouts.form_text.value;
+    s = s.replace(/benbe/i, "BenBE");
+
+    //Check for references to the branch
+    if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
+      //Die Idee mit der Branch-Infektion habe ich bei TUFKAPL gesehen, BenBE.
+      if(!confirm("Dein Shout ist mit Branch infiziert.\nKlicke auf \"Abbrechen\", falls Du ihn heilen willst.")) {
+        return false;
+      }
+    }
+
+    //Wikipedia Link Support ...
+    s = s.replace(/\[\[(\w\w):(\w+)\|(.*?)\]\]/i, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]");
+    s = s.replace(/\[\[(\w+)\|(.*?)\]\]/i, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]");
+    s = s.replace(/\[\[(\w\w):(\w+)\]\]/i, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]");
+    s = s.replace(/\[\[(\w+)\]\]/i, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]");
+
+    //Check for brackets in the shout (possible BBCodes
+    if(/[\[\]]/i.test(s)) {
+      var uncleanBBCode = false;
+
+      //Search for inbalanced opening square brackets ...
+      uncleanBBCode |= /(?:\[(?:(?!\]|$).)*(?=\[|$))|\[\]/i.test(s);
+
+      //Search for inbalanced closing square brackets ...
+      uncleanBBCode |= /(?:\](?:(?!\[|$).)*(?=\]))/i.test(s);
+
+      //Search for improperly started tags ...
+      uncleanBBCode |= /\[(?!\w|\/)/i.test(s);
+
+      if(uncleanBBCode)
+      {
+        if(!confirm("Dein Shout scheint mit ungültigen oder falsch geschriebenen BBCodes infiziert zu sein. \"Abbrechen\" um dies zu korrigieren.")) {
+          return false;
+        }
+      }
+    }
+
+    //User-Tag-Verlinkung
+    s = s.replace(/^@(\w+):/, "[user]$1[/user]:");
+
+    //Implement /me-Tags (if present) ;-)
+    s = s.replace(/^\/me\s(.*)$/, "[i][user]" + unsafeWindow.em_user.loggedOnUser + "[/user] $1[/i]");
+
+    unsafeWindow.em_shouts.form_text.value = s;
+    return true;
   }
 }
 
@@ -842,8 +896,8 @@ function ShoutboxWindow() {
   var shoutclass_me = 'emctpl' + Settings.GetValue('sb','highlight_me');
   var shoutclass_mod = 'emctpl' + Settings.GetValue('sb','highlight_mod');
 
-  console.log('me: '+shoutclass_me);
-  console.log('mod: '+shoutclass_mod);
+//  console.log('me: '+shoutclass_me);
+//  console.log('mod: '+shoutclass_mod);
 
   this.shouts = new Array();
   for (var i=0; i<trs.length; i++) {
@@ -1035,14 +1089,14 @@ function upgradeSettings(){
 
   //0.18: Upgrade of boolean to number for Shout Highlighting related settings
   var chk = Settings.GetValue('sb','highlight_me');
-  console.log('sb.me:'+typeof chk);
+//  console.log('sb.me:'+typeof chk);
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
     Settings.SetValue('sb','highlight_me', chk?2:0);
   }
 
   chk = Settings.GetValue('sb','highlight_mod');
-  console.log('sb.mod:'+typeof chk);
+//  console.log('sb.mod:'+typeof chk);
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
     Settings.SetValue('sb','highlight_mod', chk?3:0);
@@ -1072,6 +1126,7 @@ function initEdgeApe() {
   }
   else
   {
+    unsafeWindow.em_user = UserMan;
     unsafeWindow.em_buttonbar = new ButtonBar();
 
     with(unsafeWindow.em_buttonbar) {
