@@ -3,16 +3,16 @@
 // @copyright      (c)2009, Martok
 // @namespace      entwickler-ecke.de
 // @description    Krams fuer die Entwickler-Ecke
-// @include        http://*.entwickler-ecke.de/*
-// @include        http://*.c-sharp-forum.de/*
-// @include        http://*.delphi-library.de/*
-// @include        http://*.delphi-forum.de/*
-// @include        http://*.delphiforum.de/*
-// @include        http://*.c-sharp-library/*
+// @include        *.entwickler-ecke.de/*
+// @include        *.c-sharp-forum.de/*
+// @include        *.delphi-library.de/*
+// @include        *.delphi-forum.de/*
+// @include        *.delphiforum.de/*
+// @include        *.c-sharp-library/*
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.17;
+const ScriptVersion = 0.18;
 
 // @changelog
 /*
@@ -20,6 +20,7 @@ const ScriptVersion = 0.17;
 0.18           09-02-**
   -Flat Styles by BenBE
   -overlay window pos fix
+  -Shoutbox Highlighting with profiles (BenBE)
 
 0.17           09-02-14
   -better search.php for empty resultsets
@@ -79,44 +80,92 @@ var colorTpl = new Array(
         friendlyname:'Keine Hervorhebung',
         style1:'',
         style2:'',
+        style3:'',
+        style4:'',
     },
     {
         name:'red',
         friendlyname:'Helles Rot',
-        style1:'',
-        style2:'',
+        style1:'background:#FEE8D4;',
+        style2:'background:#FEDBC4;',
+        style3:'background:#FED7C0;',
+        style4:'background:#FEDBC4;',
     },
     {
         name:'yellow',
         friendlyname:'Freundliches Gelb',
-        style1:'',
-        style2:'',
+        style1:'background:#FEF4E4;',
+        style2:'background:#FEEFD7;',
+        style3:'background:#FEE2C8;',
+        style4:'background:#FEEFD7;',
     },
     {
         name:'green',
         friendlyname:'Moderat(iv) Grün',
-        style1:'',
-        style2:'',
+        style1:'background:#E8FED4;',
+        style2:'background:#DBFEC4;',
+        style3:'background:#D7FEC0;',
+        style4:'background:#D7FEC0;',
     },
     {
         name:'blue',
         friendlyname:'Himmlisch Blau',
-        style1:'',
-        style2:'',
+        style1:'background:#D4E4FE;',
+        style2:'background:#B6D4FE;',
+        style3:'background:#A8CCFE;',
+        style4:'background:#A6C8FE;',
     },
     {
         name:'pink',
         friendlyname:'Schwules Pink',
-        style1:'',
-        style2:'',
+        style1:'background:#F8D4FE;',
+        style2:'background:#FBC4FE;',
+        style3:'background:#F0C0FE;',
+        style4:'background:#FBC4FE;',
     },
     {
         name:'grey',
         friendlyname:'Trist Grau',
-        style1:'',
-        style2:'',
+        style1:'background:#E8E8E8;',
+        style2:'background:#D0D0D0;',
+        style3:'background:#B0B0B0;',
+        style4:'background:#C0C0C0;',
     }
 );
+
+/*
+<select name="test">
+  <option value="0" style="background:#FFFFFF;">Keine Hervorhebung</option>
+  <option value="0" style="background:#FEE8D4;">Helles Rot</option>
+  <option value="0" style="background:#FEF4E4;">Freundliches Gelb</option>
+  <option value="0" style="background:#E8FED4;">Moderat(iv) GrÃ¼n</option>
+  <option value="0" style="background:D4E4FE;">Himmlisch Blau</option>
+  <option value="0" style="background:#F8D4FE;">Schwules Pink</option>
+  <option value="0" style="background:#E0E0E0;">Trist Grau</option>
+</select>
+*/
+
+/**
+ *
+ * @access public
+ * @return void
+ **/
+function createColorSelection(name,def,includeignore){
+  var s = '<select name=' + name + '>';
+  for(var i = 0; i<colorTpl.length; i++) {
+    var st = colorTpl[i].style1;
+    var t = colorTpl[i].friendlyname;
+    if(i==0) st = 'background:#FFFFFF;';
+
+    s+='<option value="'+i+'" style="'+st+'"'+(i==def?' selected':'')+'>'+t+'</option>';
+
+    if(i==0&&includeignore) {
+      s+='<option value="-1" style="'+st+'"'+(-1==def?' selected':'')+'>Standard</option>';
+    }
+  }
+  s += '</select>';
+  return s;
+}
 
 function last_child(node,kind)
 {
@@ -266,7 +315,7 @@ function UserWindow(title, name,options,previous,body_element) {
         'input.liteoption { background-color:#FAFAFC; font-weight:normal; }'+
         'td.cat,td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom {'+
         '    background-image: url(../templates/subSilver/images/cellpic1.gif);'+
-        '    background-color:#DBE4EB; border: #FFFFFF; border-style: solid; height: 28px;'+
+        '    background-color:DBE4EB; border: #FFFFFF; border-style: solid; height: 28px;'+
         '}'+
         'td.cat,td.catHead,td.catBottom {'+
         '    height: 29px;'+
@@ -479,11 +528,12 @@ SettingsStore.prototype = {
   RestoreDefaults: function() {
     this.Values = new Object();
     this.Values['pagehack.monospace']=true;
-    this.Values['sb.anek_reverse']=true;
-    this.Values['sb.highlight_me']=false;
-    this.Values['sb.highlight_mod']=false;
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
+
+    this.Values['sb.anek_reverse']=true;
+    this.Values['sb.highlight_me']=0;
+    this.Values['sb.highlight_mod']=0;
   },
 
   GetValue: function(sec,key) {
@@ -510,9 +560,11 @@ SettingsStore.prototype = {
     addSettingsRow(tbl, 'Anekdoten oben einfügen',
         '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="">':'>'));
     addSettingsRow(tbl,'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
-        '<input name="sb_highlight_me" type="checkbox" '+(this.GetValue('sb','highlight_me')?'checked="">':'>'));
+        createColorSelection('sb_highlight_me',this.GetValue('sb','highlight_me'), false)
+        );
     addSettingsRow(tbl,'Shouts von Moderatoren/Admins hervorheben',
-        '<input name="sb_highlight_mod" type="checkbox" '+(this.GetValue('sb','highlight_mod')?'checked="">':'>'));
+        createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
+        );
 
     this.Window.OptionsTable = tbl;
     this.Window.Body.appendChild(tbl);
@@ -524,8 +576,8 @@ SettingsStore.prototype = {
       Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
       Settings.SetValue('ui','useFlatStyle', getElementsByName('ui_flatstyle')[0].checked);
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
-      Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].checked);
-      Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].checked);
+      Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].value);
+      Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].value);
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -560,9 +612,9 @@ SettingsStore.prototype = {
       c.innerHTML = '&nbsp;';
       c.innerHTML += '<input type="button" class="mainoption" value="Speichern">';
       c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" class="mainoption" onclick="window.close()" value="Schließen">';
+      c.innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schließen">';
       c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" class="mainoption" value="Alles Zur&uuml;cksetzen">';
+      c.innerHTML += '<input type="button" value="Alles Zur&uuml;cksetzen" class="liteoption">';
       c.innerHTML += '&nbsp;';
       var i = c.getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_SaveDialog);
@@ -786,6 +838,13 @@ ShoutboxControls.prototype = {
 
 function ShoutboxWindow() {
   var trs = document.getElementsByTagName('tr');
+
+  var shoutclass_me = 'emctpl' + Settings.GetValue('sb','highlight_me');
+  var shoutclass_mod = 'emctpl' + Settings.GetValue('sb','highlight_mod');
+
+  console.log('me: '+shoutclass_me);
+  console.log('mod: '+shoutclass_mod);
+
   this.shouts = new Array();
   for (var i=0; i<trs.length; i++) {
     var shout = trs[i].firstChild;
@@ -802,13 +861,15 @@ function ShoutboxWindow() {
       }
     }
     div.className+='intbl';
-    if (Settings.GetValue('sb','highlight_me')) {
-      if (UserMan.usernameFromProfile(a.href)==UserMan.loggedOnUser)
-        shout.className+=' myshout';
-    }
+    //First detect Moderators ...
     if (Settings.GetValue('sb','highlight_mod')) {
       if (a.style.cssText.match(/color\:/))
-        shout.className+=' modshout';
+        shout.className+=' ' + shoutclass_mod;
+    }
+    // and after this the logged on user, to allow overriding the style properly
+    if (Settings.GetValue('sb','highlight_me')) {
+      if (UserMan.usernameFromProfile(a.href)==UserMan.loggedOnUser)
+        shout.className+=' ' + shoutclass_me;
     }
     std.className = 'incell left';
     div.appendChild(std);
@@ -844,9 +905,15 @@ ShoutboxWindow.prototype = {
       style.innerHTML+= ' .row2.myshout { background-color: #FEEFD7}';
       style.innerHTML+= ' .row1.modshout { background-color: #E8FED4}';
       style.innerHTML+= ' .row2.modshout { background-color: #DBFEC4}';
+      for(var i = 0; i < colorTpl.length; i++) {
+        var tpl = colorTpl[i];
+        style.innerHTML+= ' .row1.emctpl'+i+' { '+tpl.style1+' }';
+        style.innerHTML+= ' .row2.emctpl'+i+' { '+tpl.style2+' }';
+        style.innerHTML+= ' .row3.emctpl'+i+' { '+tpl.style3+' }';
+        style.innerHTML+= ' .row4.emctpl'+i+' { '+tpl.style4+' }';
+      }
       head.appendChild(style);
     }
-
   },
 
   Anekdote: function(item) {
@@ -880,10 +947,12 @@ ShoutboxWindow.prototype = {
 }
 
 function Pagehacks() {
-  if (Settings.GetValue('pagehack','monospace')) this.cssHacks();
+  if (Settings.GetValue('pagehack','monospace'))
+    this.cssHacks();
   unsafeWindow.em_buttonbar.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs prüfen','em_pagehacks.checkPMs()','em_checkPM');
   this.AddCustomStyles();
-  if (Location.indexOf('search.php?mode=results')>=0) this.FixEmptyResults();
+  if (Location.indexOf('search.php?mode=results')>=0)
+    this.FixEmptyResults();
 }
 
 Pagehacks.prototype = {
@@ -933,7 +1002,7 @@ Pagehacks.prototype = {
           "  background-color:#fff;"+
           "  border-color: #000;"+
           "  border-style: solid;"+
-          "  padding:1px;"+
+          "  margin:0.5px;"+
           "}";
         style.innerHTML+=
           "input:focus, textarea:focus, select:focus {"+
@@ -961,15 +1030,48 @@ Pagehacks.prototype = {
 
 }
 
-Settings = new SettingsStore();
-Ajax = new AJAXObject();
-UserMan = new UserManager();
-unsafeWindow.em_settings = Settings;
-Location = window.location.href;
-if (Location.match(/shoutbox_view.php/)) {
-  if (UserMan.loggedOnUser) unsafeWindow.em_shout_cnt = new ShoutboxWindow();
-} else
-{
+function upgradeSettings(){
+  var upgraded = false;
+
+  //0.18: Upgrade of boolean to number for Shout Highlighting related settings
+  var chk = Settings.GetValue('sb','highlight_me');
+  console.log('sb.me:'+typeof chk);
+  if(parseInt(chk, 10) == NaN) {
+    upgraded = true;
+    Settings.SetValue('sb','highlight_me', chk?2:0);
+  }
+
+  chk = Settings.GetValue('sb','highlight_mod');
+  console.log('sb.mod:'+typeof chk);
+  if(parseInt(chk, 10) == NaN) {
+    upgraded = true;
+    Settings.SetValue('sb','highlight_mod', chk?3:0);
+  }
+
+  if (upgraded) {
+    Settings_SaveToDisk();
+    window.alert(
+      'Die Einstellungen wurden auf ein aktualisiertes Datenformat konvertiert.\n' +
+      'Ein Downgrade von EdgeMonkey kann daher zu Fehlfunktionen oder Datenverlust führen.'
+    );
+    window.location.reload(false);
+  }
+}
+
+function initEdgeApe() {
+  //No upgrade from inside any popup
+  if(isUndef(window.opener) || null == window.opener)
+  {
+    upgradeSettings();
+  }
+
+  if (Location.match(/shoutbox_view.php/)) {
+    if (UserMan.loggedOnUser) {
+      unsafeWindow.em_shout_cnt = new ShoutboxWindow();
+    }
+  }
+  else
+  {
     unsafeWindow.em_buttonbar = new ButtonBar();
 
     with(unsafeWindow.em_buttonbar) {
@@ -977,4 +1079,13 @@ if (Location.match(/shoutbox_view.php/)) {
     }
     unsafeWindow.em_pagehacks = new Pagehacks();
     unsafeWindow.em_shouts = new ShoutboxControls();
+  }
 }
+
+Settings = new SettingsStore();
+Ajax = new AJAXObject();
+UserMan = new UserManager();
+unsafeWindow.em_settings = Settings;
+Location = window.location.href;
+
+initEdgeApe(); //Should go as soon as possible ...
