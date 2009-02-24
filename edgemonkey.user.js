@@ -22,6 +22,9 @@ const ScriptVersion = 0.18;
   -overlay window pos fix
   -Shoutbox Highlighting with profiles (BenBE)
   -Shoutbox Post features
+  -more options for PageHacks (BenBE)
+  -Link to unread posts after posting (BenBE)
+  -XPath-Interface for simplified DOM access (BenBE)
 
 0.17           09-02-14
   -better search.php for empty resultsets
@@ -134,23 +137,27 @@ var colorTpl = new Array(
     }
 );
 
-/*
-<select name="test">
-  <option value="0" style="background:#FFFFFF;">Keine Hervorhebung</option>
-  <option value="0" style="background:#FEE8D4;">Helles Rot</option>
-  <option value="0" style="background:#FEF4E4;">Freundliches Gelb</option>
-  <option value="0" style="background:#E8FED4;">Moderat(iv) GrÃ¼n</option>
-  <option value="0" style="background:D4E4FE;">Himmlisch Blau</option>
-  <option value="0" style="background:#F8D4FE;">Schwules Pink</option>
-  <option value="0" style="background:#E0E0E0;">Trist Grau</option>
-</select>
-*/
+function queryXPath(node,xpath){
+    //I hate having to always type this crap ...
+    return unsafeWindow.document.evaluate(xpath, node, null, XPathResult.ANY_TYPE, null);
+}
 
-/**
- *
- * @access public
- * @return void
- **/
+function queryXPathNode(node, xpath) {
+    //Get the result ...
+    var result = queryXPath(node,xpath);
+    return result.iterateNext();
+}
+
+function queryXPathNodeSet(node, xpath) {
+    //Get the result ...
+    var result = queryXPath(node,xpath);
+    var set = new Array();
+    while(n = result.iterateNext()) {
+      set.push(n);
+    }
+    return set;
+}
+
 function createColorSelection(name,def,includeignore){
   var s = '<select name=' + name + '>';
   for(var i = 0; i<colorTpl.length; i++) {
@@ -527,6 +534,9 @@ SettingsStore.prototype = {
   RestoreDefaults: function() {
     this.Values = new Object();
     this.Values['pagehack.monospace']=true;
+    this.Values['pagehack.extSearchPage']=true;
+    this.Values['pagehack.extPostSubmission']=true;
+
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
 
@@ -547,13 +557,19 @@ SettingsStore.prototype = {
     tbl.className = 'forumline';
     tbl.style.cssText = 'width:98%; align:center;';
 
-    addHeadrow(tbl,'Ansicht',2);
+    addHeadrow(tbl,'Design',2);
     addSettingsRow(tbl, 'Codeblöcke als monospace anzeigen',
         '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="">':'>'));
     addSettingsRow(tbl, 'Schlagschatten unter Popup-Fenstern',
         '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="">':'>'));
     addSettingsRow(tbl, 'Nutze ein flacheres Layout für Formulare',
         '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="">':'>'));
+
+    addHeadrow(tbl,'Ergonomie',2);
+    addSettingsRow(tbl, 'Zusätzliche Navigationslinks bei leeren Suchergebnissen',
+        '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="">':'>'));
+    addSettingsRow(tbl, 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen',
+        '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="">':'>'));
 
     addHeadrow(tbl,'Shoutbox',2);
     addSettingsRow(tbl, 'Anekdoten oben einfügen',
@@ -572,6 +588,8 @@ SettingsStore.prototype = {
   ev_SaveDialog: function(evt) {
     with (Settings.Window.Document) {
       Settings.SetValue('pagehack','monospace', getElementsByName('ph_mono')[0].checked);
+      Settings.SetValue('pagehack','extSearchPage', getElementsByName('ph_extsearch')[0].checked);
+      Settings.SetValue('pagehack','extPostSubmission', getElementsByName('ph_extpost')[0].checked);
       Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
       Settings.SetValue('ui','useFlatStyle', getElementsByName('ui_flatstyle')[0].checked);
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
@@ -586,7 +604,8 @@ SettingsStore.prototype = {
   },
 
   ev_ClearAll: function(evt) {
-  	if (!confirm("Sollen wirklich alle Einstellungen zurückgesetzt werden?")) return false;
+  	if (!confirm("Sollen wirklich alle Einstellungen zurückgesetzt werden?"))
+      return false;
     Settings.RestoreDefaults();
     Settings_SaveToDisk();
     if (confirm("Einstellugen auf Standard zurückgesetzt.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?")) {
@@ -717,7 +736,7 @@ UserManager.prototype = {
   getUID: function(name) {
     if (!name) return -1;
     if (isUndef(this.knownUIDs[name])) {
-      var prof = AJAXSyncRequest('ajax_get_userid.php?username=Martok');
+      var prof = AJAXSyncRequest('ajax_get_userid.php?username='+name);
       var id = prof.match(/<userid><!\[CDATA\[([0-9]*)\]\]><\/userid>/ );
       if (id) this.knownUIDs[name] = id[1];
       Settings.store_field('uidcache', this.knownUIDs);
@@ -1005,8 +1024,16 @@ function Pagehacks() {
     this.cssHacks();
   unsafeWindow.em_buttonbar.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs prüfen','em_pagehacks.checkPMs()','em_checkPM');
   this.AddCustomStyles();
-  if (Location.indexOf('search.php?mode=results')>=0)
+  if(Settings.GetValue('pagehack','extSearchPage') &&
+    /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
     this.FixEmptyResults();
+  if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Location)) {
+    this.HelpAJAXified();
+  }
+  if(Settings.GetValue('pagehack','extPostSubmission') &&
+    /\bposting\.php/i.test(Location)) {
+    this.FixPostingDialog();
+  }
 }
 
 Pagehacks.prototype = {
@@ -1075,13 +1102,57 @@ Pagehacks.prototype = {
   FixEmptyResults: function () {
     var sp = unsafeWindow.em_buttonbar.mainTable.getElementsByTagName('span');
     for (var i=0; i<sp.length; i++) {
-      if (sp[i].firstChild.textContent.match(/Keine Beiträge/)) {
-        sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zurück zum Suchformular</a>';
+      if (sp[i].firstChild.textContent.match( /Keine Beitr.*?ge entsprechen Deinen Kriterien./ )) {
+        sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zur&uuml;ck zum Suchformular</a>';
+        sp[i].innerHTML+='<br><br><a href="/index.php">Zur&uuml;ck zum Index</a>';
         break;
       }
     }
-  }
+  },
 
+  FixPostingDialog: function () {
+    //Get the Content Main Table
+    var sp = unsafeWindow.em_buttonbar.mainTable;
+    console.log(sp);
+
+    if(isUndef(sp) || null == sp) {
+      return;
+    }
+
+    //Get the Information Table
+    sp = queryXPathNode(sp, "tbody/tr[2]/td/div/table");
+    console.log(sp);
+
+    var t = queryXPathNode(sp, "tbody/tr[1]/th/b");
+    console.log(t);
+    if(isUndef(t) || null == t) {
+      return;
+    }
+
+    if(t.textContent != "Information") {
+      return;
+    }
+
+    //Get the Information Span with all those links ...
+    sp = queryXPathNode(sp, "tbody/tr[2]/td/table/tbody/tr[2]/td/span");
+    console.log(sp);
+
+    sp.innerHTML+='<br><br><a href="/search.php?search_id=unread">Hier klicken</a>, um die ungelesenen Themen anzuzeigen';
+  },
+
+  HelpAJAXified: function() {
+    console.log("F1!!! F1!!! F1!!!");
+    var tbl = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table/tbody/tr/td/table[1]");
+    console.log(tbl);
+    var td = queryXPathNodeSet(tbl, "tbody/tr/td/span");
+    console.log("Anzahl Zeilen: " + td.length);
+  },
+
+  QuickProfileMenu: function() {
+    var link = queryXPathNodeSet(unsafeWindow.document,
+      "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img]");
+
+  }
 }
 
 function upgradeSettings(){
