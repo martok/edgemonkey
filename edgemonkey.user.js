@@ -389,6 +389,12 @@ function bringToFront(obj)
 
 function OverlayWindow(x,y,w,h,content,id)
 {
+  //Fix Popups that open to much to the right ...
+  console.log("x:"+x+",y:"+y+",w:"+w+",h:"+h);
+  if (x+w+10 > unsafeWindow.innerWidth - 30){
+      x = unsafeWindow.innerWidth - 30 - w - 10;
+  }
+
   console.log('Overlay start');
   var wn = document.createElement('div');
   wn.className='overlayWin';
@@ -455,7 +461,7 @@ function OverlayWindow(x,y,w,h,content,id)
   if(Settings.GetValue('ui', 'showDropShadow')) {
     for(i=10; i>=0; i--) {
       var filterCSS = 'position:relative; overflow:visible; display:block;';
-      filterCSS += 'left:'+i+'px; top:-'+(swtop-i)+'px;';
+      filterCSS += 'left:'+i+'px; top:'+(-(swtop-i))+'px;';
       filterCSS += 'min-width:'+(w+i)+';min-height:'+(h+i)+';';
       swtop += h+i;
       filterCSS += 'z-index:-'+(100+i)+';';
@@ -492,14 +498,14 @@ function SettingsStore() {
   }
   function Deserialize(what) {
     if (what.indexOf("a:2:{")==0) {
-       keys = what.match(/(:[^:;]*);/g);
-       result = new Object();
-       for (i=0; i<keys.length; i+=2) {
+       var keys = what.match(/(:[^:;]*);/g);
+       var result = new Object();
+       for (var i=0; i<keys.length; i+=2) {
          result[Unpack(keys[i])] = Unpack(keys[i+1]);
        }
        return result;
     }
-    else return result;
+    else return what;
   }
 
   this.RestoreDefaults();
@@ -507,10 +513,11 @@ function SettingsStore() {
   var co = document.cookie.split(';');
   var re = /\s?(\w*)=(.*)\s?/;
   this.cookies = new Object();
-  for (i=0; i<co.length; i++) {
+  for (var i=0; i<co.length; i++) {
     c = co[i];
     if (res=re.exec(c)) {
-      this.cookies[res[1].replace(/(df|dl|csf|csf)/,'ee')] = Deserialize(unescape(res[2]));
+      var k=res[1].replace(/(df|dl|csf|csf)/,'ee');
+      this.cookies[k] = Deserialize(unescape(res[2]));
     }
   }
 }
@@ -719,6 +726,7 @@ ButtonBar.prototype = {
 function UserManager() {
   this.knownUIDs = Settings.load_field('uidcache',this.knownUIDs);
   this.loggedOnUserId = Settings.cookies['ee_data']['userid'];
+  this.loggedOnSessionId = "";
   this.loggedOnUser = this.knownUIDs[-1];
   var a=document.getElementsByTagName('a');
   for (var i=0;i<a.length;i++) {
@@ -726,6 +734,10 @@ function UserManager() {
       this.loggedOnUser = a[i].innerHTML.match(/\((.*)\)/)[1];
       this.knownUIDs[-1] = this.loggedOnUser;
       Settings.store_field('uidcache', this.knownUIDs);
+
+      //Get the Session ID
+      var sid = a[i].href.match(/sid=([a-f0-9]{32})/i);
+      this.loggedOnSessionId = sid[1];
       break;
     }
   }
@@ -861,7 +873,9 @@ ShoutboxControls.prototype = {
 
   ev_sb_post: function (evt) {
     var s = unsafeWindow.em_shouts.form_text.value;
-    s = s.replace(/benbe/i, "BenBE");
+    s = s.replace(/\bbenbe\b/i, "BenBE");
+    s = s.replace(/\bcih\b/, "ich");
+    s = s.replace(/\bnciht\b/, "nicht");
 
     //Check for references to the branch
     if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
@@ -895,6 +909,13 @@ ShoutboxControls.prototype = {
         if(!confirm("Dein Shout scheint mit ungültigen oder falsch geschriebenen BBCodes infiziert zu sein. \"Abbrechen\" um dies zu korrigieren.")) {
           return false;
         }
+      }
+    }
+
+    //Warn if 2 capital letters are found at the beginning of a word
+    if(/\b[A-Z]{2}[a-z]/.test(s)) {
+      if(!confirm("Dein Shout enthÃ¤lt ein Wort mit mehreren GroÃŸbuchstaben am Anfang. \"Abbrechen\" um dies zu korrigieren.")) {
+        return false;
       }
     }
 
