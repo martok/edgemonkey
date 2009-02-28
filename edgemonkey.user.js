@@ -433,67 +433,17 @@ function OverlayWindow(x,y,w,h,content,id)
   }
 
   console.log('Overlay start');
-  var wn = document.createElement('div');
-  wn.className='overlayWin';
-  wn.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h;
+  this.Outer = this.createElement('div');
+  this.Outer.className='overlayWin';
+  this.Outer.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h;
+  this.Outer.id = id;
 
   console.log('Overlay Frame Window');
-  wn.cwn = document.createElement('div');
-  wn.id=id;
-  wn.close = function() {
-    this.parentNode.removeChild(this);
-    this.style.cssText+=' display:none'
-    };
-
-  console.log('Overlay Caption Bar Window');
-  wn.ctrl=document.createElement('div');
-  wn.ctrl.window = wn;
-  wn.cwn.appendChild(wn.ctrl);
-  wn.ctrl.style.cssText='text-align:right;background:url(../templates/subSilver/images/cellpic3.gif);padding:3px;cursor:move;';
-
-  console.log('Overlay Caption Bar Close Button');
-  wn.ctrl.closebtn=document.createElement('span');
-  wn.moving = false;
-  addEvent(wn.ctrl,'mousedown',function(dv,event) {
-    var win = dv.window;
-    var x=event.clientX + window.scrollX;
-    var y=event.clientY + window.scrollY;
-    win.moving = true;
-    win.mov_pr_x = x;
-    win.mov_pr_y = y;
-    win.left = parseInt(win.style.left,10);
-    win.top = parseInt(win.style.top,10);
-    win.zSort = bringToFront(win);
-  });
-  addGlobalEvent(wn.ctrl,'mousemove',function(dv,event) {
-    var win = dv.window;
-    if (win.moving) {
-      var x=event.clientX + window.scrollX;
-      var y=event.clientY + window.scrollY;
-      win.left += x - win.mov_pr_x;
-      win.top  += y - win.mov_pr_y;
-      win.style.left = win.left + "px";
-      win.style.top = win.top + "px";
-
-      win.mov_pr_x = x;
-      win.mov_pr_y = y;
-    }
-  },true);
-  addEvent(wn.ctrl,'mouseup',function(dv,event) {
-    var win = dv.window;
-    if (win.moving) {
-      win.moving=false;
-      //win.style.zIndex = win.zSort;
-    }
-  });
-  wn.ctrl.closebtn.window = wn;
-  wn.ctrl.appendChild(wn.ctrl.closebtn);
-  wn.ctrl.closebtn.innerHTML='[Fenster schließen]';
-  wn.ctrl.closebtn.style.cssText='cursor:pointer;color:#FF9E00;font-weight:bold';
-  addEvent(wn.ctrl.closebtn,'click',function(ev) {  ev.window.close() } );
+  this.Frame = this.createElement('div');
 
   console.log('Overlay Drop Shadow');
-  var pwn = wn;
+  this.Shadows = [];
+  var pwn = this.Outer;
   var swtop = 0;
   if(Settings.GetValue('ui', 'showDropShadow')) {
     for(i=10; i>=0; i--) {
@@ -507,24 +457,125 @@ function OverlayWindow(x,y,w,h,content,id)
       var shadow = document.createElement('div');
       //shadow.className='overlay';
       shadow.style.cssText = filterCSS;
-      wn.appendChild(shadow);
+      this.Outer.appendChild(shadow);
+      this.Shadows.push(shadow);
     }
   }
 
-  wn.cwn.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
+  this.Frame.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);'+
+                                   'border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
 
   console.log('Overlay Content Area');
-  wn.cont=document.createElement('div');
-  wn.cont.window = wn;
-  wn.cwn.appendChild(wn.cont);
-  wn.cont.innerHTML=content;
-  wn.appendChild(wn.cwn);
+  this.ContentArea=this.createElement('div');
+  this.Frame.appendChild(this.ContentArea);
+  this.ContentArea.innerHTML=content;
+  this.Outer.appendChild(this.Frame);
 
-  bringToFront(wn);
+  this.BringToFront();
+  this.showing=true;
   console.log('Overlay finish');
-  document.getElementsByTagName('body')[0].appendChild(wn);
-  return wn;
+  document.getElementsByTagName('body')[0].appendChild(this.Outer);
 }
+
+OverlayWindow.prototype = {
+	createElement: function (tag) {
+		var e = document.createElement(tag);
+		e.window=this;
+		return e;
+	},
+
+	InitWindow: function() {
+    console.log('Overlay Caption Bar Window');
+    this.TitleBar=this.createElement('div');
+    this.Frame.insertBefore(this.TitleBar, this.ContentArea);
+    this.TitleBar.style.cssText='text-align:right;background:url(../templates/subSilver/images/cellpic3.gif);padding:3px;cursor:move;';
+  
+    console.log('Overlay Caption Bar Close Button');
+    this.moving = false;
+    addEvent(this.TitleBar,'mousedown',function(dv,event) {
+      var win = dv.window;
+      var x=event.clientX + window.scrollX;
+      var y=event.clientY + window.scrollY;
+      win.moving = true;
+      win.mov_pr_x = x;
+      win.mov_pr_y = y;
+      win.left = parseInt(win.Outer.style.left,10);
+      win.top = parseInt(win.Outer.style.top,10);
+      win.zSort = win.BringToFront();
+    });
+    addGlobalEvent(this.TitleBar,'mousemove',function(dv,event) {
+      var win = dv.window;
+      if (win.moving) {
+        var x=event.clientX + window.scrollX;
+        var y=event.clientY + window.scrollY;
+        win.left += x - win.mov_pr_x;
+        win.top  += y - win.mov_pr_y;
+        win.Outer.style.left = win.left + "px";
+        win.Outer.style.top = win.top + "px";
+  
+        win.mov_pr_x = x;
+        win.mov_pr_y = y;
+      }
+    },true);
+    addEvent(this.TitleBar,'mouseup',function(dv,event) {
+      var win = dv.window;
+      if (win.moving) {
+        win.moving=false;
+        //win.style.zIndex = win.zSort;
+      }
+    });
+    this.TitleBar.closebtn=this.createElement('span');
+    this.TitleBar.appendChild(this.TitleBar.closebtn);
+    this.TitleBar.closebtn.innerHTML='[Fenster schließen]';
+    this.TitleBar.closebtn.style.cssText='cursor:pointer;color:#FF9E00;font-weight:bold';
+    addEvent(this.TitleBar.closebtn,'click',function(sp, ev) {  sp.window.Close() } );
+	},
+
+	InitDropdown: function() {
+    console.log('Overlay Caption Bar Window');
+    this.Outer.style.zIndex=1000;
+
+    addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
+    	var clicked = event.target;
+    	
+      while(clicked != null) {
+        if(clicked == dv)
+          return;
+        clicked = clicked.offsetParent;
+      }
+      //if we get here, someone clicked outside
+
+      dv.window.Close();
+      event.preventDefault();
+    },true);
+	},
+	
+	CreateMenu: function() {
+		var tbl = this.createElement('table');
+    tbl.cellSpacing = 0;
+    tbl.height="100%";
+    tbl.width="100%";
+    this.ContentArea.appendChild(tbl);
+    tbl.addMenuItem = function (icon,link,text,extralinks) {
+    	addMenuItem(tbl,icon,link,text,extralinks);
+    };
+    return tbl;
+
+	},
+
+	Close: function () {
+		if (!this.showing) return;
+		this.showing=false;
+    this.Outer.style.cssText+=' display:none';
+    this.Outer.parentNode.removeChild(this.Outer);
+	},
+	BringToFront: function() {
+	  return bringToFront(this.Outer);
+	}
+}
+
+
+
 
 function SettingsStore() {
   function Unpack(s) {
@@ -1126,8 +1177,9 @@ Pagehacks.prototype = {
     var lnk = document.getElementById('em_checkPM');
     var coords = new Point(lnk.getBoundingClientRect().left, lnk.getBoundingClientRect().bottom);
     coords.TranslateWindow();
-    var w = OverlayWindow(coords.x,coords.y,400,225,'','em_pmcheck');
-    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,w.cont,
+    var w = new OverlayWindow(coords.x,coords.y,400,225,'','em_pmcheck');
+    w.InitWindow();
+    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,w.ContentArea,
       function(div) {
         var a=div.getElementsByTagName('a');
         for(i=0;i<a.length;i++) {
@@ -1269,14 +1321,12 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = OverlayWindow(coords.x,coords.y,320,210,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,320,187,'','em_QPM');
+    w.InitDropdown();
 
-    var tbl = unsafeWindow.document.createElement('table');
-    tbl.cellSpacing = 0;
-    tbl.height="100%";
-    tbl.width="100%";
+    var tbl = w.CreateMenu();
 
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Portal-PM.gif",
         "/privmsg.php?folder=inbox",
         "Private Nachrichten",
@@ -1286,22 +1336,22 @@ Pagehacks.prototype = {
         "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
         "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
         );
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Drafts.gif",
         "/drafts.php",
         "Entw&uuml;rfe",
         "");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/basket_light.gif",
         "/pdfbasket.php",
         "PDF-Korb",
         "");//"PDF erstellen");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Attachment.gif",
         "/uacp.php?u="+escape(UserMan.loggedOnUserId)+"&amp;sid="+escape(UserMan.loggedOnSessionId),
         "Dateianh&auml;nge",
         "");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Portal-Profil.gif",
         "/profile.php?mode=editprofile&page=portal",
         "Einstellungen",
@@ -1312,7 +1362,7 @@ Pagehacks.prototype = {
         "<a href=\"/profile.php?mode=editprofile&page=5\">Websites</a>"
         );
 
-    w.cont.appendChild(tbl);
+    w.ContentArea.appendChild(tbl);
 
     return false;
   },
@@ -1323,49 +1373,44 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = OverlayWindow(coords.x,coords.y,272,267,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,272,242,'','em_QSM');
+    w.InitDropdown();
+    var tbl = w.CreateMenu();
 
-    var tbl = unsafeWindow.document.createElement('table');
-    tbl.cellSpacing = 0;
-    tbl.height="100%";
-    tbl.width="100%";
-
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/templates/subSilver/images/folder_new_big.gif",
         "/search.php?search_id=newposts",
         "Beitr&auml;ge seit letztem Besuch");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Portal-PM.gif",
         "/search.php?search_id=unread",
         "Ungelesene Themen");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/templates/subSilver/images/folder_new.gif",
         "/search.php?search_id=unanswered",
         "Unbeantwortete Themen");
 
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Postings.gif",
         "/search.php?search_id=egosearch",
         "Eigene Beitr&auml;ge");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Topics.gif",
         "/search.php?search_id=startedtopics",
         "Eigene Themen");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Watched.gif",
         "/watched_topics.php",
         "Beobachtete Themen");
 
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/templates/subSilver/images/folder_open.gif",
         "/search.php?search_id=open",
         "Offene Fragen");
-    addMenuItem(tbl,
+    tbl.addMenuItem(
         "/graphics/Open.gif",
         "/search.php?search_id=myopen",
         "Meine offenen Fragen");
-
-    w.cont.appendChild(tbl);
 
     return false;
   },
