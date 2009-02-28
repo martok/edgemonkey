@@ -257,6 +257,35 @@ function addSettingsRow(tbl, caption, innerHTML) {
   return r;
 }
 
+function addMenuItem(tbl,icon,link,text,extralinks){
+  with (tbl.insertRow(-1)) {
+  	with (insertCell(-1)) {
+    	if (!isUndef(extralinks)) {
+    		rowSpan=2;
+    	}
+      className = 'row1';
+      width=32;
+      align="center";
+      innerHTML =
+         "<a class=\"genbig\" href=\""+link+"\">"+
+         "<img src=\""+icon+"\" style=\"border: 0px none; vertical-align: middle; margin-right: 4px;\" />"+
+         "</a>";
+  	}
+  	with (insertCell(-1)) {
+      className = 'row2';
+      innerHTML = "<a class=\"genbig\" href=\""+link+"\"><b>"+text+"</b></a>";
+  	}
+  }
+	if (!isUndef(extralinks)) {
+    with (tbl.insertRow(-1)) {
+    	with (insertCell(-1)) {
+        className = 'row2';
+        innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
+    	}
+  	}
+  }
+}
+
 function AJAXObject() {
 }
 
@@ -543,6 +572,8 @@ SettingsStore.prototype = {
     this.Values['pagehack.monospace']=true;
     this.Values['pagehack.extSearchPage']=true;
     this.Values['pagehack.extPostSubmission']=true;
+    this.Values['pagehack.quickProfMenu']=false;
+    this.Values['pagehack.quickSearhMenu']=false;
 
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
@@ -573,6 +604,10 @@ SettingsStore.prototype = {
         '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="">':'>'));
 
     addHeadrow(tbl,'Ergonomie',2);
+    addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r Meine Ecke',
+        '<input name="ph_ddmyedge" type="checkbox" '+(this.GetValue('pagehack','quickProfMenu')?'checked="">':'>'));
+    addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r die Suche',
+        '<input name="ph_ddsearch" type="checkbox" '+(this.GetValue('pagehack','quickSearchMenu')?'checked="">':'>'));
     addSettingsRow(tbl, 'Zusätzliche Navigationslinks bei leeren Suchergebnissen',
         '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="">':'>'));
     addSettingsRow(tbl, 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen',
@@ -595,6 +630,8 @@ SettingsStore.prototype = {
   ev_SaveDialog: function(evt) {
     with (Settings.Window.Document) {
       Settings.SetValue('pagehack','monospace', getElementsByName('ph_mono')[0].checked);
+      Settings.SetValue('pagehack','quickProfMenu', getElementsByName('ph_ddmyedge')[0].checked);
+      Settings.SetValue('pagehack','quickSearchMenu', getElementsByName('ph_ddsearch')[0].checked);
       Settings.SetValue('pagehack','extSearchPage', getElementsByName('ph_extsearch')[0].checked);
       Settings.SetValue('pagehack','extPostSubmission', getElementsByName('ph_extpost')[0].checked);
       Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
@@ -1055,6 +1092,12 @@ function Pagehacks() {
     /\bposting\.php/i.test(Location)) {
     this.FixPostingDialog();
   }
+  if(Settings.GetValue('pagehack','quickProfMenu')) {
+    this.AddQuickProfileMenu();
+  }
+  if(Settings.GetValue('pagehack','quickSearchMenu')) {
+    this.AddQuickSearchMenu();
+  }
 }
 
 Pagehacks.prototype = {
@@ -1167,13 +1210,137 @@ Pagehacks.prototype = {
     console.log(tbl);
     var td = queryXPathNodeSet(tbl, "tbody/tr/td/span");
     console.log("Anzahl Zeilen: " + td.length);
+    var tr = tbl.insertRow(1);
+    td = tr.insertCell(-1);
+    td.className='row1';
+    td.style.paddingLeft = '13px';
+    td.innerHTML='<span class="gensmall"><a href="#" class="gensmall" onclick="em_pagehacks.DisplayHelpAJAXified()">Edgemonkey-Hilfe</a></span>';
+  },
+
+  DisplayHelpAJAXified: function() {
+  	var post = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table/tbody/tr/td[2]/table/tbody");
+  	var header = queryXPathNode(post, "tr/th");
+    var content = queryXPathNode(post, "tr[2]/td/div");
+    header.innerHTML='EdgeMonkey-Hilfe';
+    content.innerHTML='Some cool words about EdgeMonkey that should help the user to get along with the Ape.';
+  },
+
+  AddQuickProfileMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
+    link.setAttribute('onclick','return em_pagehacks.QuickProfileMenu()');
+  },
+
+  AddQuickSearchMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
+    link.setAttribute('onclick','return em_pagehacks.QuickSearchMenu()');
   },
 
   QuickProfileMenu: function() {
-    var link = queryXPathNodeSet(unsafeWindow.document,
-      "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom+10);
+    coords.TranslateWindow();
 
-  }
+    var w = OverlayWindow(coords.x,coords.y,320,210,'','em_QPM');
+
+    var tbl = unsafeWindow.document.createElement('table');
+    tbl.cellSpacing = 0;
+    tbl.height="100%";
+    tbl.width="100%";
+
+    addMenuItem(tbl,
+        "/graphics/Portal-PM.gif",
+        "/privmsg.php?folder=inbox",
+        "Private Nachrichten",
+        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
+        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
+        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
+        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
+        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
+        );
+    addMenuItem(tbl,
+        "/graphics/Drafts.gif",
+        "/drafts.php",
+        "Entw&uuml;rfe",
+        "");
+    addMenuItem(tbl,
+        "/graphics/basket_light.gif",
+        "/pdfbasket.php",
+        "PDF-Korb",
+        "");//"PDF erstellen");
+    addMenuItem(tbl,
+        "/graphics/Attachment.gif",
+        "/uacp.php?u="+escape(UserMan.loggedOnUserId)+"&amp;sid="+escape(UserMan.loggedOnSessionId),
+        "Dateianh&auml;nge",
+        "");
+    addMenuItem(tbl,
+        "/graphics/Portal-Profil.gif",
+        "/profile.php?mode=editprofile&page=portal",
+        "Einstellungen",
+        "<a href=\"/profile.php?mode=editprofile&page=1\">Standard</a>, "+
+        "<a href=\"/profile.php?mode=editprofile&page=2\">Erweitert</a>, "+
+        "<a href=\"/profile.php?mode=editprofile&page=3\">Sidebar</a></a>, "+
+        "<a href=\"/profile.php?mode=editprofile&page=4\">Newsfeeds</a>, "+
+        "<a href=\"/profile.php?mode=editprofile&page=5\">Websites</a>"
+        );
+
+    w.cont.appendChild(tbl);
+
+    return false;
+  },
+
+  QuickSearchMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom+10);
+    coords.TranslateWindow();
+
+    var w = OverlayWindow(coords.x,coords.y,272,267,'','em_QPM');
+
+    var tbl = unsafeWindow.document.createElement('table');
+    tbl.cellSpacing = 0;
+    tbl.height="100%";
+    tbl.width="100%";
+
+    addMenuItem(tbl,
+        "/templates/subSilver/images/folder_new_big.gif",
+        "/search.php?search_id=newposts",
+        "Beitr&auml;ge seit letztem Besuch");
+    addMenuItem(tbl,
+        "/graphics/Portal-PM.gif",
+        "/search.php?search_id=unread",
+        "Ungelesene Themen");
+    addMenuItem(tbl,
+        "/templates/subSilver/images/folder_new.gif",
+        "/search.php?search_id=unanswered",
+        "Unbeantwortete Themen");
+
+    addMenuItem(tbl,
+        "/graphics/Postings.gif",
+        "/search.php?search_id=egosearch",
+        "Eigene Beitr&auml;ge");
+    addMenuItem(tbl,
+        "/graphics/Topics.gif",
+        "/search.php?search_id=startedtopics",
+        "Eigene Themen");
+    addMenuItem(tbl,
+        "/graphics/Watched.gif",
+        "/watched_topics.php",
+        "Beobachtete Themen");
+
+    addMenuItem(tbl,
+        "/templates/subSilver/images/folder_open.gif",
+        "/search.php?search_id=open",
+        "Offene Fragen");
+    addMenuItem(tbl,
+        "/graphics/Open.gif",
+        "/search.php?search_id=myopen",
+        "Meine offenen Fragen");
+
+    w.cont.appendChild(tbl);
+
+    return false;
+  },
 }
 
 function upgradeSettings(){
