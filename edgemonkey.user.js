@@ -12,10 +12,15 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.18;
+const ScriptVersion = 0.19;
 
 // @changelog
 /*
+
+0.18           09-03-**
+  -setting for anekdoter (BenBE)
+  -ph: max-width for images (BenBE)
+  -better user-tag-linking
 
 0.18           09-02-28
   -Flat Styles by BenBE
@@ -573,6 +578,7 @@ SettingsStore.prototype = {
   RestoreDefaults: function() {
     this.Values = new Object();
     this.Values['pagehack.monospace']=true;
+    this.Values['pagehack.imgMaxWidth']=false;
     this.Values['pagehack.extSearchPage']=true;
     this.Values['pagehack.extPostSubmission']=true;
     this.Values['pagehack.quickProfMenu']=false;
@@ -581,6 +587,7 @@ SettingsStore.prototype = {
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
 
+    this.Values['sb.anek_active']=true;
     this.Values['sb.anek_reverse']=true;
     this.Values['sb.highlight_me']=0;
     this.Values['sb.highlight_mod']=0;
@@ -605,6 +612,8 @@ SettingsStore.prototype = {
         '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="">':'>'));
     addSettingsRow(tbl, 'Nutze ein flacheres Layout für Formulare',
         '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="">':'>'));
+    addSettingsRow(tbl, 'Maximalbreite von Bildern erzwingen',
+        '<input name="ph_imgmaxwidth" type="checkbox" '+(this.GetValue('pagehack','imgMaxWidth')?'checked="">':'>'));
 
     addHeadrow(tbl,'Ergonomie',2);
     addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r Meine Ecke',
@@ -617,6 +626,8 @@ SettingsStore.prototype = {
         '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="">':'>'));
 
     addHeadrow(tbl,'Shoutbox',2);
+    addSettingsRow(tbl, 'Shoutbox-Anekdoter aktivieren',
+        '<input name="sb_anek_start" type="checkbox" '+(this.GetValue('sb','anek_active')?'checked="">':'>'));
     addSettingsRow(tbl, 'Anekdoten oben einfügen',
         '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="">':'>'));
     addSettingsRow(tbl,'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
@@ -637,8 +648,12 @@ SettingsStore.prototype = {
       Settings.SetValue('pagehack','quickSearchMenu', getElementsByName('ph_ddsearch')[0].checked);
       Settings.SetValue('pagehack','extSearchPage', getElementsByName('ph_extsearch')[0].checked);
       Settings.SetValue('pagehack','extPostSubmission', getElementsByName('ph_extpost')[0].checked);
+      Settings.SetValue('pagehack','imgMaxWidth', getElementsByName('ph_imgmaxwidth')[0].checked);
+
       Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
       Settings.SetValue('ui','useFlatStyle', getElementsByName('ui_flatstyle')[0].checked);
+
+      Settings.SetValue('sb','anek_active', getElementsByName('sb_anek_start')[0].checked);
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
       Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].value);
       Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].value);
@@ -960,7 +975,7 @@ ShoutboxControls.prototype = {
     }
 
     //User-Tag-Verlinkung
-    s = s.replace(/^@(\w+):/, "[user]$1[/user]:");
+    s = s.replace(/^@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:");
 
     //Implement /me-Tags (if present) ;-)
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + unsafeWindow.em_user.loggedOnUser + "[/user] $1[/i]");
@@ -976,6 +991,7 @@ function ShoutboxWindow() {
   var shoutclass_me = 'emctpl' + Settings.GetValue('sb','highlight_me');
   var shoutclass_mod = 'emctpl' + Settings.GetValue('sb','highlight_mod');
 
+  var anek_active = Settings.GetValue('sb','anek_active');
 //  console.log('me: '+shoutclass_me);
 //  console.log('mod: '+shoutclass_mod);
 
@@ -1013,10 +1029,12 @@ function ShoutboxWindow() {
     shout.insertBefore(cnt, shout.firstChild);
     shout.insertBefore(div, shout.firstChild);
 
-    var tools = document.createElement('span');
-    tools.className+=' incell right';
-    tools.innerHTML+='<a href="javascript:em_shout_cnt.ev_anekdote('+i+')>A</a>';
-    div.appendChild(tools);
+    if(anek_active) {
+      var tools = document.createElement('span');
+      tools.className+=' incell right';
+      tools.innerHTML+='<a href="javascript:em_shout_cnt.ev_anekdote('+i+')>A</a>';
+      div.appendChild(tools);
+    }
   };
   this.AddCustomStyles();
 }
@@ -1159,6 +1177,13 @@ Pagehacks.prototype = {
         style.innerHTML+=
           "input:hover, textarea:hover, select:hover {"+
           "  background-color: #f0f0f0;"+
+          "}";
+      }
+
+      if(Settings.GetValue('ph', 'imgMaxWidth')) {
+        style.innerHTML+=
+          ".postbody img {"+
+          "  max-width: 80%;"+
           "}";
       }
 
