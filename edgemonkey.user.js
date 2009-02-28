@@ -17,7 +17,7 @@ const ScriptVersion = 0.18;
 // @changelog
 /*
 
-0.18           09-02-**
+0.18           09-02-28
   -Flat Styles by BenBE
   -overlay window pos fix
   -Shoutbox Highlighting with profiles (BenBE)
@@ -25,6 +25,9 @@ const ScriptVersion = 0.18;
   -more options for PageHacks (BenBE)
   -Link to unread posts after posting (BenBE)
   -XPath-Interface for simplified DOM access (BenBE)
+  -dropdown menus (BenBE)
+  -even better empty search page (BenBE)
+  -some fixes
 
 0.17           09-02-14
   -better search.php for empty resultsets
@@ -1085,9 +1088,9 @@ function Pagehacks() {
   if(Settings.GetValue('pagehack','extSearchPage') &&
     /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
     this.FixEmptyResults();
-  if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Location)) {
-    this.HelpAJAXified();
-  }
+//  if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Location)) {
+//    this.HelpAJAXified();
+//  }
   if(Settings.GetValue('pagehack','extPostSubmission') &&
     /\bposting\.php/i.test(Location)) {
     this.FixPostingDialog();
