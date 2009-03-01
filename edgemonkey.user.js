@@ -489,7 +489,7 @@ OverlayWindow.prototype = {
     this.TitleBar=this.createElement('div');
     this.Frame.insertBefore(this.TitleBar, this.ContentArea);
     this.TitleBar.style.cssText='text-align:right;background:url(../templates/subSilver/images/cellpic3.gif);padding:3px;cursor:move;';
-  
+
     console.log('Overlay Caption Bar Close Button');
     this.moving = false;
     addEvent(this.TitleBar,'mousedown',function(dv,event) {
@@ -512,7 +512,7 @@ OverlayWindow.prototype = {
         win.top  += y - win.mov_pr_y;
         win.Outer.style.left = win.left + "px";
         win.Outer.style.top = win.top + "px";
-  
+
         win.mov_pr_x = x;
         win.mov_pr_y = y;
       }
@@ -537,7 +537,7 @@ OverlayWindow.prototype = {
 
     addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
     	var clicked = event.target;
-    	
+
       while(clicked != null) {
         if(clicked == dv)
           return;
@@ -549,7 +549,7 @@ OverlayWindow.prototype = {
       event.preventDefault();
     },true);
 	},
-	
+
 	CreateMenu: function() {
 		var tbl = this.createElement('table');
     tbl.cellSpacing = 0;
@@ -604,7 +604,7 @@ function SettingsStore() {
   for (var i=0; i<co.length; i++) {
     c = co[i];
     if (res=re.exec(c)) {
-      var k=res[1].replace(/(df|dl|csf|csf)/,'ee');
+      var k=res[1].replace(/(df|dl|csf|csl)/,'ee');
       this.cookies[k] = Deserialize(unescape(res[2]));
     }
   }
@@ -1156,10 +1156,12 @@ function Pagehacks() {
   this.AddCustomStyles();
   if(Settings.GetValue('pagehack','extSearchPage') &&
     /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
+  {
     this.FixEmptyResults();
-//  if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Location)) {
-//    this.HelpAJAXified();
-//  }
+  }
+  if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Location)) {
+    this.HelpAJAXified();
+  }
   if(Settings.GetValue('pagehack','extPostSubmission') &&
     /\bposting\.php/i.test(Location)) {
     this.FixPostingDialog();
@@ -1292,7 +1294,7 @@ Pagehacks.prototype = {
     console.log("Anzahl Zeilen: " + td.length);
     var tr = tbl.insertRow(1);
     td = tr.insertCell(-1);
-    td.className='row1';
+    td.className='row2';
     td.style.paddingLeft = '13px';
     td.innerHTML='<span class="gensmall"><a href="#" class="gensmall" onclick="em_pagehacks.DisplayHelpAJAXified()">Edgemonkey-Hilfe</a></span>';
   },
@@ -1302,7 +1304,25 @@ Pagehacks.prototype = {
   	var header = queryXPathNode(post, "tr/th");
     var content = queryXPathNode(post, "tr[2]/td/div");
     header.innerHTML='EdgeMonkey-Hilfe';
-    content.innerHTML='Some cool words about EdgeMonkey that should help the user to get along with the Ape.';
+    content.innerHTML=
+        '<div style="text-align: center;">'+
+        '    <span style="font-size: 18px; line-height: normal;">Hilfe</span>'+
+        '    <br/>'+
+        '    <br/>Willkommen in der Online Hilfe zum EdgeMonkey ' + ScriptVersion + '!' +
+        '</div>'+
+        '<p class="postbody">'+
+        '    Der EdgeMonkey biete eine ganze Reihe zus&auml;tzlicher Funktionen gegen&uuml;ber der Forensoftware, die das Leben stark vereinfachen<br/>'+
+        '    <br/>'+
+        '    Foo foo bar baz foo quo cuz lorem ipsum est foo baz bar quo ...<br/>'+
+        '    <br/>'+
+        '    Foo foo bar baz foo quo cuz lorem ipsum est foo baz bar quo ...<br/>'+
+        '    <br/>'+
+        '    Foo foo bar baz foo quo cuz lorem ipsum est foo baz bar quo ...<br/>'+
+        '    <br/>'+
+        '    Foo foo bar baz foo quo cuz lorem ipsum est foo baz bar quo ...<br/>'+
+        '    <br/>'+
+        '    Foo foo bar baz foo quo cuz lorem ipsum est foo baz bar quo ...<br/>'+
+        '</p>';
   },
 
   AddQuickProfileMenu: function() {
