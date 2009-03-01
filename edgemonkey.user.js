@@ -22,6 +22,7 @@ const ScriptVersion = 0.19;
   -ph: max-width for images (BenBE)
   -better user-tag-linking
   -improved loading the configuration (BenBE)
+  -Branch-Switch-Links
 
 0.18           09-02-28
   -Flat Styles by BenBE
@@ -644,6 +645,7 @@ SettingsStore.prototype = {
 
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
+    this.Values['ui.betaFeatures']=false;
 
     this.Values['sb.anek_active']=true;
     this.Values['sb.anek_reverse']=true;
@@ -682,6 +684,8 @@ SettingsStore.prototype = {
         '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="">':'>'));
     addSettingsRow(tbl, 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen',
         '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="">':'>'));
+    addSettingsRow(tbl, 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester',
+        '<input name="ui_betaFeatures" type="checkbox" '+(this.GetValue('ui','betaFeatures')?'checked="">':'>'));
 
     addHeadrow(tbl,'Shoutbox',2);
     addSettingsRow(tbl, 'Shoutbox-Anekdoter aktivieren',
@@ -710,6 +714,7 @@ SettingsStore.prototype = {
 
       Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
       Settings.SetValue('ui','useFlatStyle', getElementsByName('ui_flatstyle')[0].checked);
+      Settings.SetValue('ui','betaFeatures', getElementsByName('ui_betaFeatures')[0].checked);
 
       Settings.SetValue('sb','anek_active', getElementsByName('sb_anek_start')[0].checked);
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
@@ -1027,7 +1032,7 @@ ShoutboxControls.prototype = {
 
     //Warn if 2 capital letters are found at the beginning of a word
     if(/\b[A-Z]{2}[a-z]/.test(s)) {
-      if(!confirm("Dein Shout enthÃ¤lt ein Wort mit mehreren GroÃŸbuchstaben am Anfang. \"Abbrechen\" um dies zu korrigieren.")) {
+      if(!confirm("Dein Shout enthält ein Wort mit mehreren Großbuchstaben am Anfang. \"Abbrechen\" um dies zu korrigieren.")) {
         return false;
       }
     }
@@ -1179,6 +1184,10 @@ function Pagehacks() {
   if(Settings.GetValue('pagehack','quickSearchMenu')) {
     this.AddQuickSearchMenu();
   }
+  if(Settings.GetValue('ui','betaFeatures')) {
+    this.AddBetaLinks();
+  }
+
 }
 
 Pagehacks.prototype = {
@@ -1441,6 +1450,57 @@ Pagehacks.prototype = {
 
     return false;
   },
+  
+  AddBetaLinks: function() {
+    var table = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr/td[4]/table");
+    table.style.cssText = '';
+    RegExp.prototype.replace = function(str,rep) {
+    	return str.replace(this,rep);
+    }
+    var Lks = [];
+    with (/http\:\/\/(branch|trunk)\./i) {
+    	if (test(Location))
+    		var loc = replace(Location, 'http://www.');
+    		if (! /[\?\&]sid=/.test(loc)) {
+    			var p=loc.indexOf('?');
+    			if (p<0) loc+='?sid='+UserMan.loggedOnSessionId;
+    			else loc = loc.substring(0,p+1)+'sid='+UserMan.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
+    			
+    		}
+    		Lks.push(['Echt-Forum', loc]);
+    }
+    with (/http\:\/\/(www|trunk)\./i) {
+    	if (test(Location)) {
+    		var loc = replace(Location, 'http://branch.');
+    		if (! /[\?\&]sid=/.test(loc)) {
+    			var p=loc.indexOf('?');
+    			if (p<0) loc+='?sid='+UserMan.loggedOnSessionId;
+    			else loc = loc.substring(0,p+1)+'sid='+UserMan.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
+    			
+    		}
+    		Lks.push(['Branch', loc]);
+    	}
+    }
+    with (/http\:\/\/(www|branch)\./i) {
+    	if (test(Location))
+    		Lks.push(['Trunk', replace(Location, 'http://trunk.')]);
+    }    
+    console.log(Lks);
+    with (table.insertRow(-1)) {
+    	insertCell(-1).style.cssText='width: 100%;';
+    	with (insertCell(-1)) {
+    		innerHTML='<a href="'+Lks[0][1]+'" class="gensmall" title="Zum '+Lks[0][0]+' wechseln"><b>'+
+    		           Lks[0][0]+'</b><img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
+    		           ' style="margin-left: 1px; width: 12px; height: 9px;"/></a>';
+    		style.cssText='text-align: right; white-space: nowrap;';
+    	}
+    	insertCell(-1).style.cssText='text-align: center; padding-left: 7px; padding-right: 7px;';
+    	insertCell(-1).innerHTML='<a href="'+Lks[1][1]+'" class="gensmall" title="Zum '+Lks[1][0]+' wechseln">'+
+    	                         '<img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
+    	                         ' style="margin-left: 1px; width: 12px; height: 9px;"/><b>'+Lks[1][0]+'</b></a>';
+    	insertCell(-1);
+    }
+  }
 }
 
 function upgradeSettings(){
