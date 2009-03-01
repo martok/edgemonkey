@@ -17,10 +17,11 @@ const ScriptVersion = 0.19;
 // @changelog
 /*
 
-0.18           09-03-**
+0.19           09-03-**
   -setting for anekdoter (BenBE)
   -ph: max-width for images (BenBE)
   -better user-tag-linking
+  -improved loading the configuration (BenBE)
 
 0.18           09-02-28
   -Flat Styles by BenBE
@@ -623,7 +624,13 @@ SettingsStore.prototype = {
   },
 
   LoadFromDisk: function () {
-    this.Values = this.load_field('settings', this.Values);
+//    this.Values = this.load_field('settings', this.Values);
+    //Fix to only "import" not "override" settings from the browser configuration.
+    //Based on http://www.thespanner.co.uk/2008/04/10/javascript-cloning-objects/
+    var tmp = this.load_field('settings', this.Values);
+    for(var f in tmp){
+        this.Values[f] = tmp[f];
+    }
   },
 
   RestoreDefaults: function() {
