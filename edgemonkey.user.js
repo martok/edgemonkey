@@ -115,7 +115,7 @@ var colorTpl = new Array(
     },
     {
         name:'green',
-        friendlyname:'Moderat(iv) Grün',
+        friendlyname:'Moderat(iv) Gr&uuml;n',
         style1:'background:#E8FED4;',
         style2:'background:#DBFEC4;',
         style3:'background:#D7FEC0;',
@@ -270,28 +270,28 @@ function addSettingsRow(tbl, caption, innerHTML) {
 function addMenuItem(tbl,icon,link,text,extralinks){
   with (tbl.insertRow(-1)) {
   	with (insertCell(-1)) {
-    	if (!isUndef(extralinks)) {
-    		rowSpan=2;
-    	}
+      if (!isUndef(extralinks)) {
+        rowSpan=2;
+      }
       className = 'row1';
       width=32;
       align="center";
       innerHTML =
-         "<a class=\"genbig\" href=\""+link+"\">"+
-         "<img src=\""+icon+"\" style=\"border: 0px none; vertical-align: middle; margin-right: 4px;\" />"+
-         "</a>";
+        "<a class=\"genbig\" href=\""+link+"\">"+
+        "<img src=\""+icon+"\" style=\"border: 0px none; vertical-align: middle; margin-right: 4px;\" />"+
+        "</a>";
   	}
   	with (insertCell(-1)) {
       className = 'row2';
       innerHTML = "<a class=\"genbig\" href=\""+link+"\"><b>"+text+"</b></a>";
   	}
   }
-	if (!isUndef(extralinks)) {
+  if (!isUndef(extralinks)) {
     with (tbl.insertRow(-1)) {
-    	with (insertCell(-1)) {
+      with (insertCell(-1)) {
         className = 'row2';
         innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
-    	}
+      }
   	}
   }
 }
@@ -347,27 +347,29 @@ function UserWindow(title, name,options,previous,body_element) {
   var wnd = window.open('',name,options);
   wnd.document.open();
   wnd.document.write(
-        '<html><head><script>Settings=opener.em_settings</script>'+
-//        '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">'+
-        '<meta http-equiv="Content-Style-Type" content="text/css">'+
-        '<link rel="stylesheet" type="text/css" href="styles/common.css">'+
-        '<link rel="stylesheet" type="text/css" href="styles/simple_main.css">'+
-        '<link rel="stylesheet" type="text/css" href="styles/styles_others.css">'+
-        '<style type="text/css">'+"\n"+
-        '<!--'+"\n"+
-        'body { padding: 5px; }'+
-        'input.mainoption { background-color:#FAFAFC; font-weight:bold; }'+
-        'input.liteoption { background-color:#FAFAFC; font-weight:normal; }'+
-        'td.cat,td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom {'+
-        '    background-image: url(../templates/subSilver/images/cellpic1.gif);'+
-        '    background-color:DBE4EB; border: #FFFFFF; border-style: solid; height: 28px;'+
-        '}'+
-        'td.cat,td.catHead,td.catBottom {'+
-        '    height: 29px;'+
-        '    border-width: 0px 0px 0px 0px;'+
-        '}'+
-        '-->'+"\n"+
-        '</style>'+
+    '<?xml version="1.0" encoding="UTF-8"?>'+
+    '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'+
+    '<html><head><script type="text/javascript">Settings=opener.em_settings</script>'+
+    '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />'+
+    '<meta http-equiv="Content-Style-Type" content="text/css" />'+
+    '<link rel="stylesheet" type="text/css" href="styles/common.css" />'+
+    '<link rel="stylesheet" type="text/css" href="styles/simple_main.css" />'+
+    '<link rel="stylesheet" type="text/css" href="styles/styles_others.css" />'+
+    '<style type="text/css">'+"\n"+
+    '<!--'+"\n"+
+    'body { padding: 5px; }'+
+    'input.mainoption { background-color:#FAFAFC; font-weight:bold; }'+
+    'input.liteoption { background-color:#FAFAFC; font-weight:normal; }'+
+    'td.cat,td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom {'+
+    '    background-image: url(../templates/subSilver/images/cellpic1.gif);'+
+    '    background-color:DBE4EB; border: #FFFFFF; border-style: solid; height: 28px;'+
+    '}'+
+    'td.cat,td.catHead,td.catBottom {'+
+    '    height: 29px;'+
+    '    border-width: 0px 0px 0px 0px;'+
+    '}'+
+    '-->'+"\n"+
+    '</style>'+
     '<title>'+title+'</title></head>');
   var bd = '<body bgcolor="#E5E5E5" text="#000000" link="#006699" vlink="#5493B4">';
   switch (typeof body_element) {
@@ -528,7 +530,7 @@ OverlayWindow.prototype = {
     });
     this.TitleBar.closebtn=this.createElement('span');
     this.TitleBar.appendChild(this.TitleBar.closebtn);
-    this.TitleBar.closebtn.innerHTML='[Fenster schließen]';
+    this.TitleBar.closebtn.innerHTML='[Fenster schlie&szlig;en]';
     this.TitleBar.closebtn.style.cssText='cursor:pointer;color:#FF9E00;font-weight:bold';
     addEvent(this.TitleBar.closebtn,'click',function(sp, ev) {  sp.window.Close() } );
 	},
@@ -666,11 +668,11 @@ SettingsStore.prototype = {
     tbl.style.cssText = 'width:98%; align:center;';
 
     addHeadrow(tbl,'Design',2);
-    addSettingsRow(tbl, 'Codeblöcke als monospace anzeigen',
+    addSettingsRow(tbl, 'Codebl&ouml;cke als monospace anzeigen',
         '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="">':'>'));
     addSettingsRow(tbl, 'Schlagschatten unter Popup-Fenstern',
         '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="">':'>'));
-    addSettingsRow(tbl, 'Nutze ein flacheres Layout für Formulare',
+    addSettingsRow(tbl, 'Nutze ein flacheres Layout f&uuml;r Formulare',
         '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="">':'>'));
     addSettingsRow(tbl, 'Maximalbreite von Bildern erzwingen',
         '<input name="ph_imgmaxwidth" type="checkbox" '+(this.GetValue('pagehack','imgMaxWidth')?'checked="">':'>'));
@@ -680,7 +682,7 @@ SettingsStore.prototype = {
         '<input name="ph_ddmyedge" type="checkbox" '+(this.GetValue('pagehack','quickProfMenu')?'checked="">':'>'));
     addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r die Suche',
         '<input name="ph_ddsearch" type="checkbox" '+(this.GetValue('pagehack','quickSearchMenu')?'checked="">':'>'));
-    addSettingsRow(tbl, 'Zusätzliche Navigationslinks bei leeren Suchergebnissen',
+    addSettingsRow(tbl, 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen',
         '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="">':'>'));
     addSettingsRow(tbl, 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen',
         '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="">':'>'));
@@ -690,7 +692,7 @@ SettingsStore.prototype = {
     addHeadrow(tbl,'Shoutbox',2);
     addSettingsRow(tbl, 'Shoutbox-Anekdoter aktivieren',
         '<input name="sb_anek_start" type="checkbox" '+(this.GetValue('sb','anek_active')?'checked="">':'>'));
-    addSettingsRow(tbl, 'Anekdoten oben einfügen',
+    addSettingsRow(tbl, 'Anekdoten oben einf&uuml;gen',
         '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="">':'>'));
     addSettingsRow(tbl,'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
         createColorSelection('sb_highlight_me',this.GetValue('sb','highlight_me'), false)
@@ -755,9 +757,9 @@ SettingsStore.prototype = {
       c.innerHTML = '&nbsp;';
       c.innerHTML += '<input type="button" class="mainoption" value="Speichern">';
       c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schließen">';
+      c.innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schlie&szlig;en">';
       c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" value="Alles Zur&uuml;cksetzen" class="liteoption">';
+      c.innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
       c.innerHTML += '&nbsp;';
       var i = c.getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_SaveDialog);
@@ -1038,6 +1040,9 @@ ShoutboxControls.prototype = {
     }
 
     //User-Tag-Verlinkung
+    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:");
+    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:");
+    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:");
     s = s.replace(/^@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:");
 
     //Implement /me-Tags (if present) ;-)
@@ -1164,7 +1169,7 @@ ShoutboxWindow.prototype = {
 function Pagehacks() {
   if (Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
-  unsafeWindow.em_buttonbar.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs prüfen','em_pagehacks.checkPMs()','em_checkPM');
+  unsafeWindow.em_buttonbar.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','em_pagehacks.checkPMs()','em_checkPM');
   this.AddCustomStyles();
   if(Settings.GetValue('pagehack','extSearchPage') &&
     /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
@@ -1450,7 +1455,7 @@ Pagehacks.prototype = {
 
     return false;
   },
-  
+
   AddBetaLinks: function() {
     var table = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr/td[4]/table");
     table.style.cssText = '';
@@ -1460,14 +1465,7 @@ Pagehacks.prototype = {
     var Lks = [];
     with (/http\:\/\/(branch|trunk)\./i) {
     	if (test(Location))
-    		var loc = replace(Location, 'http://www.');
-    		if (! /[\?\&]sid=/.test(loc)) {
-    			var p=loc.indexOf('?');
-    			if (p<0) loc+='?sid='+UserMan.loggedOnSessionId;
-    			else loc = loc.substring(0,p+1)+'sid='+UserMan.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
-    			
-    		}
-    		Lks.push(['Echt-Forum', loc]);
+    		Lks.push(['Echt-Forum',replace(Location, 'http://www.')]);
     }
     with (/http\:\/\/(www|trunk)\./i) {
     	if (test(Location)) {
@@ -1476,7 +1474,7 @@ Pagehacks.prototype = {
     			var p=loc.indexOf('?');
     			if (p<0) loc+='?sid='+UserMan.loggedOnSessionId;
     			else loc = loc.substring(0,p+1)+'sid='+UserMan.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
-    			
+
     		}
     		Lks.push(['Branch', loc]);
     	}
@@ -1484,7 +1482,7 @@ Pagehacks.prototype = {
     with (/http\:\/\/(www|branch)\./i) {
     	if (test(Location))
     		Lks.push(['Trunk', replace(Location, 'http://trunk.')]);
-    }    
+    }
     console.log(Lks);
     with (table.insertRow(-1)) {
     	insertCell(-1).style.cssText='width: 100%;';
