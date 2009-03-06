@@ -198,14 +198,20 @@ function isUndef(what)
 
 function Point(x,y)
 {
-	this.x = x;
-	this.y = y;
+  this.x = x;
+  this.y = y;
+}
+
+Point.prototype.CenterInWindow = function(cx,cy)
+{
+  this.x = window.pageXOffset + (window.innerWidth-cx) / 2;
+  this.y = window.pageYOffset + (window.innerHeight-cy) / 2;
 }
 
 Point.prototype.TranslateWindow = function()
 {
-	this.x += window.pageXOffset;
-	this.y += window.pageYOffset;
+  this.x += window.pageXOffset;
+  this.y += window.pageYOffset;
 }
 
 function addEvent(elementObject, eventName, functionObject, wantCapture)
@@ -269,7 +275,7 @@ function addSettingsRow(tbl, caption, innerHTML) {
 
 function addMenuItem(tbl,icon,link,text,extralinks){
   with (tbl.insertRow(-1)) {
-  	with (insertCell(-1)) {
+    with (insertCell(-1)) {
       if (!isUndef(extralinks)) {
         rowSpan=2;
       }
@@ -280,11 +286,11 @@ function addMenuItem(tbl,icon,link,text,extralinks){
         "<a class=\"genbig\" href=\""+link+"\">"+
         "<img src=\""+icon+"\" style=\"border: 0px none; vertical-align: middle; margin-right: 4px;\" />"+
         "</a>";
-  	}
-  	with (insertCell(-1)) {
+    }
+    with (insertCell(-1)) {
       className = 'row2';
       innerHTML = "<a class=\"genbig\" href=\""+link+"\"><b>"+text+"</b></a>";
-  	}
+    }
   }
   if (!isUndef(extralinks)) {
     with (tbl.insertRow(-1)) {
@@ -292,7 +298,7 @@ function addMenuItem(tbl,icon,link,text,extralinks){
         className = 'row2';
         innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
       }
-  	}
+    }
   }
 }
 
@@ -482,13 +488,13 @@ function OverlayWindow(x,y,w,h,content,id)
 }
 
 OverlayWindow.prototype = {
-	createElement: function (tag) {
-		var e = document.createElement(tag);
-		e.window=this;
-		return e;
-	},
+  createElement: function (tag) {
+    var e = document.createElement(tag);
+    e.window=this;
+    return e;
+  },
 
-	InitWindow: function() {
+  InitWindow: function() {
     console.log('Overlay Caption Bar Window');
     this.TitleBar=this.createElement('div');
     this.Frame.insertBefore(this.TitleBar, this.ContentArea);
@@ -533,14 +539,14 @@ OverlayWindow.prototype = {
     this.TitleBar.closebtn.innerHTML='[Fenster schlie&szlig;en]';
     this.TitleBar.closebtn.style.cssText='cursor:pointer;color:#FF9E00;font-weight:bold';
     addEvent(this.TitleBar.closebtn,'click',function(sp, ev) {  sp.window.Close() } );
-	},
+  },
 
-	InitDropdown: function() {
+  InitDropdown: function() {
     console.log('Overlay Caption Bar Window');
     this.Outer.style.zIndex=1000;
 
     addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
-    	var clicked = event.target;
+      var clicked = event.target;
 
       while(clicked != null) {
         if(clicked == dv)
@@ -552,30 +558,30 @@ OverlayWindow.prototype = {
       dv.window.Close();
       event.preventDefault();
     },true);
-	},
+  },
 
-	CreateMenu: function() {
-		var tbl = this.createElement('table');
+  CreateMenu: function() {
+    var tbl = this.createElement('table');
     tbl.cellSpacing = 0;
     tbl.height="100%";
     tbl.width="100%";
     this.ContentArea.appendChild(tbl);
     tbl.addMenuItem = function (icon,link,text,extralinks) {
-    	addMenuItem(tbl,icon,link,text,extralinks);
+      addMenuItem(tbl,icon,link,text,extralinks);
     };
     return tbl;
 
-	},
+  },
 
-	Close: function () {
-		if (!this.showing) return;
-		this.showing=false;
+  Close: function () {
+    if (!this.showing) return;
+    this.showing=false;
     this.Outer.style.cssText+=' display:none';
     this.Outer.parentNode.removeChild(this.Outer);
-	},
-	BringToFront: function() {
-	  return bringToFront(this.Outer);
-	}
+  },
+  BringToFront: function() {
+    return bringToFront(this.Outer);
+  }
 }
 
 
@@ -731,7 +737,7 @@ SettingsStore.prototype = {
   },
 
   ev_ClearAll: function(evt) {
-  	if (!confirm("Sollen wirklich alle Einstellungen zurückgesetzt werden?"))
+    if (!confirm("Sollen wirklich alle Einstellungen zurückgesetzt werden?"))
       return false;
     Settings.RestoreDefaults();
     Settings_SaveToDisk();
@@ -909,6 +915,9 @@ function ShoutboxControls() {
   this.form = this.form_go.form;
   //addEvent(this.form,'submit',function() {return false });
   this.form.setAttribute('onsubmit', 'return em_shouts.ev_sb_post()');
+
+  var a = this.form.getElementsByTagName('a')[0];
+  a.setAttribute('onclick','em_pagehacks.SmileyWin("shoutmessage"); return false;');
 
   if (this.shout_obj) {
     this.btnUpdate = this.shout_obj.getElementsByTagName('input')[3];
@@ -1166,6 +1175,129 @@ ShoutboxWindow.prototype = {
   }
 }
 
+function SmileyWindow(target) {
+  if (typeof target != "object") {
+    target = document.getElementById(target);
+  }
+
+  this.Target = target;
+  var pt = new Point(0,0);
+  pt.CenterInWindow(430,270);
+  console.log(pt);
+  this.win = new OverlayWindow(pt.x,pt.y,430,270,'','em_SmileyWin');
+  this.win.InitWindow();
+  this.tab = this.win.createElement('table');
+  this.win.ContentArea.appendChild(this.tab);
+  this.tab.width="100%";
+  this.tab.cellSpacing=0;
+  this.tab.cellPadding=5;
+  this.tab.border=0;
+  this.addLine([
+    {cmd:':D', hint:'Very Happy', ico:'biggrin'},
+    {cmd:':)', hint:'Smile', ico:'smile'},
+    {cmd:':(', hint:'Sad', ico:'sad'},
+    {cmd:':o', hint:'Surprised', ico:'surprised'},
+    {cmd:':shock:', hint:'Shocked', ico:'eek'},
+    {cmd:':?', hint:'Confused', ico:'confused'},
+    {cmd:'8)', hint:'Cool', ico:'cool'},
+    {cmd:':lol:', hint:'Laughing', ico:'lol'},
+  ]);
+  this.addLine([
+    {cmd:':x', hint:'Mad', ico:'mad'},
+    {cmd:':P', hint:'Razz', ico:'razz'},
+    {cmd:':oops:', hint:'Embarassed', ico:'redface'},
+    {cmd:':cry:', hint:'Crying or Very sad', ico:'cry'},
+    {cmd:':evil:', hint:'Evil or Very Mad', ico:'evil'},
+    {cmd:':twisted:', hint:'Twisted Evil', ico:'twisted'},
+    {cmd:':roll:', hint:'Rolling Eyes', ico:'rolleyes'},
+    {cmd:':wink:', hint:'Wink', ico:'wink'},
+  ]);
+  this.addLine([
+    {cmd:':!:', hint:'Exclamation', ico:'exclaim'},
+    {cmd:':?:', hint:'Question', ico:'question'},
+    {cmd:':idea:', hint:'Idea', ico:'idea'},
+    {cmd:':arrow:', hint:'Arrow', ico:'arrow'},
+    {cmd:':|', hint:'Neutral', ico:'neutral'},
+    {cmd:':mrgreen:', hint:'Mr. Green', ico:'mrgreen'},
+    {cmd:':angel:', hint:'Angel', ico:'angel'},
+    {cmd:':bawling:', hint:'Bawling', ico:'bawling'},
+  ]);
+  this.addLine([
+    {cmd:':beer:', hint:'Beer chug', ico:'beerchug'},
+    {cmd:':?!?:', hint:'Confused', ico:'confused2'},
+    {cmd:':crying:', hint:'Crying', ico:'crying'},
+    {cmd:':dance:', hint:'Dance', ico:'dance2'},
+    {cmd:':dance2:', hint:'Dance', ico:'dance'},
+    {cmd:':dunce:', hint:'Dunce', ico:'dunce'},
+    {cmd:':eyecrazy:', hint:'Eyecrazy', ico:'eyecrazy'},
+    {cmd:':eyes:', hint:'Eyes', ico:'eyes'},
+  ]);
+  this.addLine([
+    {cmd:':hair:', hint:'Hair', ico:'hair'},
+    {cmd:':nixweiss:', hint:'Nix weiss', ico:'nixweiss'},
+    {cmd:':nut:', hint:'Nuß', ico:'nut'},
+    {cmd:':party:', hint:'Party', ico:'party'},
+    {cmd:':puke:', hint:'Puke', ico:'puke'},
+    {cmd:':rofl:', hint:'Rofl mao', ico:'roflmao'},
+    {cmd:':schmoll:', hint:'Schmoll', ico:'schmoll'},
+    {cmd:':think:', hint:'Think', ico:'think'},
+  ]);
+  this.addLine([
+    {cmd:':tongue:', hint:'Tongue', ico:'tongue'},
+    {cmd:':wave:', hint:'Wave', ico:'wave'},
+    {cmd:':welcome:', hint:'Willkommen', ico:'welcome'},
+    {cmd:':wink2:', hint:'Wink 2', ico:'wink2'},
+    {cmd:':mahn:', hint:'Mahn', ico:'znaika'},
+    {cmd:':autsch:', hint:'Autsch', ico:'autsch'},
+    {cmd:':flehan:', hint:'Fleh an', ico:'flehan'},
+    {cmd:':gruebel:', hint:'Grübel', ico:'gruebel'},
+  ]);
+  this.addLine([
+    {cmd:':les:', hint:'Les', ico:'les'},
+    {cmd:':lupe:', hint:'Lupe', ico:'lupe'},
+    {cmd:':motz:', hint:'Motz', ico:'motz'},
+    {cmd:':gaehn:', hint:'Gähn', ico:'gaehn'},
+    {cmd:':zustimm:', hint:'Zustimmen', ico:'zustimm'},
+    {cmd:':zwinker:', hint:'Zwinkern', ico:'zwinkern'},
+  ]);
+}
+
+SmileyWindow.prototype = {
+  addLine: function(smileys) {
+    var tr = this.tab.insertRow(-1);
+    tr.valign='middle';
+    tr.align='center';
+    for each (var sm in smileys) {
+      with (tr.insertCell(-1)) {
+        var a = this.win.createElement('a');
+        a.innerHTML='<img border="0" title="'+sm.hint+' '+sm.cmd+'" alt="'+sm.hint+' '+sm.cmd+'" src="images/smiles/icon_'+sm.ico+'.gif"/>';
+        a.style.cursor='pointer';
+        //carry over variables
+        a.Target = this.Target;
+        a.cmd = ' '+sm.cmd+' ';
+        // c will be the link
+        addEvent(a,'click',function(c,e) {
+          var edit = c.Target;
+          var text = c.cmd;
+          var oldStart = edit.selectionStart;
+          var oldEnd = edit.selectionEnd;
+          var theSelection = edit.value.substring(oldStart, oldEnd);
+          edit.value = edit.value.substring(0, oldStart) + theSelection + text + edit.value.substring(oldEnd, edit.value.length);
+          if (oldStart == oldEnd)
+          {
+            edit.selectionStart = oldStart + text.length;
+            edit.selectionEnd = oldStart + text.length;
+          } else {
+            edit.selectionStart = oldStart + theSelection.length + text.length;
+            edit.selectionEnd = oldStart + theSelection.length + text.length;
+          }
+        });
+        appendChild(a);
+      }
+    }
+  }
+}
+
 function Pagehacks() {
   if (Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
@@ -1213,6 +1345,10 @@ Pagehacks.prototype = {
           } else a[i].removeAttribute('target');
         }
       });
+  },
+
+  SmileyWin: function(target) {
+    new SmileyWindow(target);
   },
 
   cssHacks: function() {
@@ -1321,8 +1457,8 @@ Pagehacks.prototype = {
   },
 
   DisplayHelpAJAXified: function() {
-  	var post = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table/tbody/tr/td[2]/table/tbody");
-  	var header = queryXPathNode(post, "tr/th");
+    var post = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table/tbody/tr/td[2]/table/tbody");
+    var header = queryXPathNode(post, "tr/th");
     var content = queryXPathNode(post, "tr[2]/td/div");
     header.innerHTML='EdgeMonkey-Hilfe';
     content.innerHTML=
@@ -1460,43 +1596,43 @@ Pagehacks.prototype = {
     var table = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr/td[4]/table");
     table.style.cssText = '';
     RegExp.prototype.replace = function(str,rep) {
-    	return str.replace(this,rep);
+      return str.replace(this,rep);
     }
     var Lks = [];
     with (/http\:\/\/(branch|trunk)\./i) {
-    	if (test(Location))
-    		Lks.push(['Echt-Forum',replace(Location, 'http://www.')]);
+      if (test(Location))
+        Lks.push(['Echt-Forum',replace(Location, 'http://www.')]);
     }
     with (/http\:\/\/(www|trunk)\./i) {
-    	if (test(Location)) {
-    		var loc = replace(Location, 'http://branch.');
-    		if (! /[\?\&]sid=/.test(loc)) {
-    			var p=loc.indexOf('?');
-    			if (p<0) loc+='?sid='+UserMan.loggedOnSessionId;
-    			else loc = loc.substring(0,p+1)+'sid='+UserMan.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
+      if (test(Location)) {
+        var loc = replace(Location, 'http://branch.');
+        if (! /[\?\&]sid=/.test(loc)) {
+          var p=loc.indexOf('?');
+          if (p<0) loc+='?sid='+UserMan.loggedOnSessionId;
+          else loc = loc.substring(0,p+1)+'sid='+UserMan.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
 
-    		}
-    		Lks.push(['Branch', loc]);
-    	}
+        }
+        Lks.push(['Branch', loc]);
+      }
     }
     with (/http\:\/\/(www|branch)\./i) {
-    	if (test(Location))
-    		Lks.push(['Trunk', replace(Location, 'http://trunk.')]);
+      if (test(Location))
+        Lks.push(['Trunk', replace(Location, 'http://trunk.')]);
     }
     console.log(Lks);
     with (table.insertRow(-1)) {
-    	insertCell(-1).style.cssText='width: 100%;';
-    	with (insertCell(-1)) {
-    		innerHTML='<a href="'+Lks[0][1]+'" class="gensmall" title="Zum '+Lks[0][0]+' wechseln"><b>'+
-    		           Lks[0][0]+'</b><img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
-    		           ' style="margin-left: 1px; width: 12px; height: 9px;"/></a>';
-    		style.cssText='text-align: right; white-space: nowrap;';
-    	}
-    	insertCell(-1).style.cssText='text-align: center; padding-left: 7px; padding-right: 7px;';
-    	insertCell(-1).innerHTML='<a href="'+Lks[1][1]+'" class="gensmall" title="Zum '+Lks[1][0]+' wechseln">'+
-    	                         '<img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
-    	                         ' style="margin-left: 1px; width: 12px; height: 9px;"/><b>'+Lks[1][0]+'</b></a>';
-    	insertCell(-1);
+      insertCell(-1).style.cssText='width: 100%;';
+      with (insertCell(-1)) {
+        innerHTML='<a href="'+Lks[0][1]+'" class="gensmall" title="Zum '+Lks[0][0]+' wechseln"><b>'+
+                   Lks[0][0]+'</b><img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
+                   ' style="margin-left: 1px; width: 12px; height: 9px;"/></a>';
+        style.cssText='text-align: right; white-space: nowrap;';
+      }
+      insertCell(-1).style.cssText='text-align: center; padding-left: 7px; padding-right: 7px;';
+      insertCell(-1).innerHTML='<a href="'+Lks[1][1]+'" class="gensmall" title="Zum '+Lks[1][0]+' wechseln">'+
+                               '<img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
+                               ' style="margin-left: 1px; width: 12px; height: 9px;"/><b>'+Lks[1][0]+'</b></a>';
+      insertCell(-1);
     }
   }
 }
