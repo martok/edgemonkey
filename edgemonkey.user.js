@@ -357,7 +357,6 @@ function UserWindow(title, name,options,previous,body_element) {
     '<link rel="stylesheet" type="text/css" href="styles/styles_others.css" />'+
     '<style type="text/css">'+"\n"+
     '<!--'+"\n"+
-    'body { padding: 5px; }'+
     'input.mainoption { background-color:#FAFAFC; font-weight:bold; }'+
     'input.liteoption { background-color:#FAFAFC; font-weight:normal; }'+
     'td.cat,td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom {'+
@@ -665,7 +664,7 @@ SettingsStore.prototype = {
   FillDialog: function() {
     var tbl = this.Window.Document.createElement('table');
     tbl.className = 'forumline';
-    tbl.style.cssText = 'width:98%; align:center;';
+    tbl.style.cssText = 'width:98%; align:center; margin:5px;';
 
     addHeadrow(tbl,'Design',2);
     addSettingsRow(tbl, 'Codebl&ouml;cke als monospace anzeigen',
@@ -743,7 +742,7 @@ SettingsStore.prototype = {
 
   ShowSettingsDialog: function() {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
-            'HEIGHT=400,WIDTH=500,resizable=yes', this.Window);
+            'HEIGHT=400,WIDTH=500,resizable=yes,scrollbars=yes', this.Window);
     this.FillDialog();
 //    var tbl = this.Window.Document.createElement('table');
     var tbl = this.Window.OptionsTable;
