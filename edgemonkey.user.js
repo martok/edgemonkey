@@ -655,6 +655,7 @@ SettingsStore.prototype = {
     this.Values['ui.useFlatStyle']=false;
     this.Values['ui.betaFeatures']=false;
 
+    this.Values['sb.longInput']=false;
     this.Values['sb.anek_active']=true;
     this.Values['sb.anek_reverse']=true;
     this.Values['sb.highlight_me']=0;
@@ -696,6 +697,8 @@ SettingsStore.prototype = {
         '<input name="ui_betaFeatures" type="checkbox" '+(this.GetValue('ui','betaFeatures')?'checked="">':'>'));
 
     addHeadrow(tbl,'Shoutbox',2);
+    addSettingsRow(tbl, 'Eingabefeld vergr&ouml;&szlig;ern',
+        '<input name="sb_longinput" type="checkbox" '+(this.GetValue('sb','longInput')?'checked="">':'>'));
     addSettingsRow(tbl, 'Shoutbox-Anekdoter aktivieren',
         '<input name="sb_anek_start" type="checkbox" '+(this.GetValue('sb','anek_active')?'checked="">':'>'));
     addSettingsRow(tbl, 'Anekdoten oben einf&uuml;gen',
@@ -728,6 +731,7 @@ SettingsStore.prototype = {
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
       Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].value);
       Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].value);
+      Settings.SetValue('sb','longInput', getElementsByName('sb_longinput')[0].value);
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -910,9 +914,43 @@ function ShoutboxControls() {
 
   this.shout_url = this.get_iframe().src;
   this.form_go = document.getElementById('shoutsubmit');
+  this.form = this.form_go.form;
+  if (Settings.GetValue('sb','longInput')) {
+    this.form.innerHTML='';
+    var tab = document.createElement('table');
+    this.form.appendChild(tab);
+    tab.width='100%';
+    tab.cellSpacing=0;
+    with (tab.insertRow(-1)) {
+    	with (insertCell(-1)) {
+    		align='left';
+    		innerHTML='<span class="gensmall">Dein Text:</span>';
+    	}
+    	with (insertCell(-1)) {
+    		align='right';
+    		innerHTML='<span class="gensmall"><a onclick="em_pagehacks.SmileyWin(\'shoutmessage\'); return false;" href="posting.php?mode=smilies" class="gensmall">Smilies</a>';
+    	}
+    }
+    with (tab.insertRow(-1)) {
+    	with (insertCell(-1)) {
+    		align='left';
+    		colSpan=2;
+    		innerHTML='<textarea class="gensmall" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
+    	}
+    }
+    with (tab.insertRow(-1)) {
+    	with (insertCell(-1)) {
+    		align='left';
+    		innerHTML='<span class="gensmall"><input style="color: green;" value="150" readonly="readonly" name="shoutchars" class="charcount" id="shoutchars" type="text"> Zeichen übrig</span>';
+    	}
+    	with (insertCell(-1)) {
+    		align='right';
+    		innerHTML='<input value="Go!" name="shoutgo" class="sidebarbutton" id="shoutsubmit" type="submit" style="width: 40px">';
+    	}
+    }
+  }
   this.form_text = document.getElementById('shoutmessage');
   this.form_chars = document.getElementById('shoutchars');
-  this.form = this.form_go.form;
   //addEvent(this.form,'submit',function() {return false });
   this.form.setAttribute('onsubmit', 'return em_shouts.ev_sb_post()');
 
