@@ -1182,9 +1182,9 @@ function SmileyWindow(target) {
 
   this.Target = target;
   var pt = new Point(0,0);
-  pt.CenterInWindow(430,270);
+  pt.CenterInWindow(440,290);
   console.log(pt);
-  this.win = new OverlayWindow(pt.x,pt.y,430,270,'','em_SmileyWin');
+  this.win = new OverlayWindow(pt.x,pt.y,440,290,'','em_SmileyWin');
   this.win.InitWindow();
   this.tab = this.win.createElement('table');
   this.win.ContentArea.appendChild(this.tab);
