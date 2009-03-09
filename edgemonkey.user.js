@@ -731,7 +731,7 @@ SettingsStore.prototype = {
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
       Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].value);
       Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].value);
-      Settings.SetValue('sb','longInput', getElementsByName('sb_longinput')[0].value);
+      Settings.SetValue('sb','longInput', getElementsByName('sb_longinput')[0].checked);
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -935,7 +935,7 @@ function ShoutboxControls() {
     	with (insertCell(-1)) {
     		align='left';
     		colSpan=2;
-    		innerHTML='<textarea class="gensmall" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
+    		innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="shoutBoxKey()" onkeyup="shoutBoxKey()" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
     	}
     }
     with (tab.insertRow(-1)) {
@@ -958,7 +958,7 @@ function ShoutboxControls() {
   a.setAttribute('onclick','em_pagehacks.SmileyWin("shoutmessage"); return false;');
 
   if (this.shout_obj) {
-    this.btnUpdate = this.shout_obj.getElementsByTagName('input')[3];
+    this.btnUpdate = document.getElementsByName('shoutrefresh')[0];
     this.btnUpdate.style.cssText+='width: 152px !important';
     this.btnUpdate.value='Aktuellste zeigen';
     this.btnUpdate.setAttribute('onclick', 'em_shouts.ev_sb_update()');
@@ -973,7 +973,8 @@ function ShoutboxControls() {
     this.btnNewer.title='Neuere Shouts';
     this.contButtons.appendChild(this.btnNewer);
 
-    this.edtDirect = this.shout_obj.getElementsByTagName('input')[0].cloneNode(false);
+    this.edtDirect = document.createElement('input');
+    this.edtDirect.className = 'post'
     this.edtDirect.style.cssText='width: 50px;margin:0 1px 0 1px; text-align:center;';
     this.edtDirect.value = 0;
     this.edtDirect.setAttribute('onchange', '');
