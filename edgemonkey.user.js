@@ -1031,7 +1031,7 @@ ShoutboxControls.prototype = {
       uncleanBBCode |= /(?:\](?:(?!\[|$).)*(?=\]))/i.test(s);
 
       //Search for improperly started tags ...
-      uncleanBBCode |= /\[(?!\w|\/)/i.test(s);
+      uncleanBBCode |= /\[(?!\w|\/\w|\.{3})/i.test(s);
 
       if(uncleanBBCode)
       {
@@ -1049,10 +1049,11 @@ ShoutboxControls.prototype = {
     }
 
     //User-Tag-Verlinkung
-    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:");
-    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:");
-    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:");
-    s = s.replace(/^@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:");
+    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:"); 
+    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:"); 
+    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:"); 
+    s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:"); 
+    s = s.replace(/^@@/, "@"); 
 
     //Implement /me-Tags (if present) ;-)
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + unsafeWindow.em_user.loggedOnUser + "[/user] $1[/i]");
