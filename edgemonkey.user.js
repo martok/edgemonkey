@@ -489,7 +489,7 @@ function OverlayWindow(x,y,w,h,content,id)
 OverlayWindow.prototype = {
   createElement: function (tag) {
     var e = document.createElement(tag);
-    e.window=this;
+    e.Window=this;
     return e;
   },
 
@@ -537,7 +537,7 @@ OverlayWindow.prototype = {
     this.TitleBar.appendChild(this.TitleBar.closebtn);
     this.TitleBar.closebtn.innerHTML='[Fenster schlie&szlig;en]';
     this.TitleBar.closebtn.style.cssText='cursor:pointer;color:#FF9E00;font-weight:bold';
-    addEvent(this.TitleBar.closebtn,'click',function(sp, ev) {  sp.window.Close() } );
+    addEvent(this.TitleBar.closebtn,'click',function(sp, ev) {  sp.Window.Close() } );
   },
 
   InitDropdown: function() {
@@ -554,7 +554,7 @@ OverlayWindow.prototype = {
       }
       //if we get here, someone clicked outside
 
-      dv.window.Close();
+      dv.Window.Close();
       event.preventDefault();
     },true);
   },
@@ -1075,7 +1075,7 @@ ShoutboxControls.prototype = {
       uncleanBBCode |= /(?:\](?:(?!\[|$).)*(?=\]))/i.test(s);
 
       //Search for improperly started tags ...
-      uncleanBBCode |= /\[(?!\w|\/)/i.test(s);
+      uncleanBBCode |= /\[(?!\w|\/\w|\.{3})/i.test(s);
 
       if(uncleanBBCode)
       {
@@ -1093,10 +1093,11 @@ ShoutboxControls.prototype = {
     }
 
     //User-Tag-Verlinkung
-    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:");
-    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:");
-    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:");
-    s = s.replace(/^@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:");
+    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:"); 
+    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:"); 
+    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:"); 
+    s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:"); 
+    s = s.replace(/^@@/, "@"); 
 
     //Implement /me-Tags (if present) ;-)
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + unsafeWindow.em_user.loggedOnUser + "[/user] $1[/i]");
@@ -1346,6 +1347,7 @@ function Pagehacks() {
   if (Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
   unsafeWindow.em_buttonbar.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','em_pagehacks.checkPMs()','em_checkPM');
+  unsafeWindow.em_buttonbar.addButton('/graphics/sitemap/search.gif','Schnellsuche','em_pagehacks.fastSearch()','em_fastSearch');
   this.AddCustomStyles();
   if(Settings.GetValue('pagehack','extSearchPage') &&
     /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
@@ -1387,10 +1389,51 @@ Pagehacks.prototype = {
           if (a[i].href.match(/window\.close/)) {
             a[i].removeAttribute('href');
             a[i].style.cssText+=' cursor:pointer';
-            addEvent(a[i],'click',function() {div.window.close(); return false;});
+            addEvent(a[i],'click',function() {div.Window.Close(); return false;});
           } else a[i].removeAttribute('target');
         }
       });
+  },
+
+  fastSearch: function() {
+    var lnk = document.getElementById('em_fastSearch');
+    var coords = new Point(lnk.getBoundingClientRect().left, lnk.getBoundingClientRect().bottom);
+    coords.TranslateWindow();
+    var w = new OverlayWindow(coords.x,coords.y,183,125,'','em_searchbox');
+    w.InitWindow();
+    var ee_forum = null;
+    var ee_topic = null;
+    var bc = queryXPathNode(unsafeWindow.em_buttonbar.navTable,'tbody/tr[2]/td[2]/div');
+    if (bc) {
+      var as = bc.getElementsByTagName('a');
+      for(var i = 0;i<as.length; i++) {
+        var m;
+        if (m=as[i].href.match(/forum_(\d+)\.html/)) ee_forum = m[1];
+        if (m=as[i].href.match(/t=(\d+)\D/)) ee_topic = m[1];
+      }
+    }
+    w.ContentArea.innerHTML = '<form action="search.php" method="post" name="sb_searchform">'+
+      '<input name="search_fields" value="all" checked="checked" type="hidden">'+
+      '<input name="show_results" value="topics" checked="checked" type="hidden">'+
+      '<input name="synonym_search" value="1" checked="checked" type="hidden">'+
+      '<div style="padding-top: 4px; text-align: left;">'+
+      '<div style="white-space: nowrap; margin-left: 4px;">'+
+      '<span class="gensmall">Suchwörter:</span><br><input class="post" style="width: 74%;" name="search_keywords" type="text">'+
+      '<input class="sidebarbutton" value="Go!" type="submit"></div>'+
+      '<div style="white-space: nowrap; margin-left: 4px; margin-top: 5px;">'+
+      '<span class="gensmall">Wo soll gesucht werden?</span><br>'+
+      '<select name="website">'+
+      (ee_topic?'<option value="'+ee_topic+'__">nur in diesem Thema</option>':'')+
+      (ee_forum?'<option value="__'+ee_forum+'">nur in dieser Sparte</option>':'')+
+      '<option value="">Entwickler-Ecke</option>'+
+      '<optgroup label="Delphi"><option id="intsearch_df" value="df">Forum</option><option id="intsearch_dl" value="dl">Library</option><option id="intsearch_dfdl" value="df,dl">Forum &amp; Library</option></optgroup>'+
+      '<optgroup label="C#"><option id="intsearch_csf" value="csf">Forum</option><option id="intsearch_csl" value="csl">Library</option><option id="intsearch_csfcsl" value="csf,csl">Forum &amp; Library</option></optgroup>'+
+			'</select></div><table style="margin-top: 5px;" cellpadding="0" cellspacing="0">'+
+			'<tr><td><input id="sidebar_search_terms_any" name="search_terms" value="any" type="radio"></td>'+
+			'<td><span class="gensmall"><label for="sidebar_search_terms_any">ein Wort</label></span></td>'+
+			'<td>&nbsp;&nbsp;<input id="sidebar_search_terms_all" name="search_terms" value="all" checked="checked" type="radio"></td>'+
+			'<td><span class="gensmall"><label for="sidebar_search_terms_all">alle Wörter</label></span></td>'+
+			'</tr></table></div></form>';
   },
 
   SmileyWin: function(target) {
