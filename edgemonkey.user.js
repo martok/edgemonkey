@@ -355,7 +355,7 @@ function UserWindow(title, name,options,previous,body_element) {
   wnd.document.write(
     '<?xml version="1.0" encoding="UTF-8"?>'+
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'+
-    '<html><head><script type="text/javascript">Settings=opener.em_settings</script>'+
+    '<html><head><script type="text/javascript">Settings=opener.EM.Settings</script>'+
     '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />'+
     '<meta http-equiv="Content-Style-Type" content="text/css" />'+
     '<link rel="stylesheet" type="text/css" href="styles/common.css" />'+
@@ -502,7 +502,7 @@ OverlayWindow.prototype = {
     console.log('Overlay Caption Bar Close Button');
     this.moving = false;
     addEvent(this.TitleBar,'mousedown',function(dv,event) {
-      var win = dv.window;
+      var win = dv.Window;
       var x=event.clientX + window.scrollX;
       var y=event.clientY + window.scrollY;
       win.moving = true;
@@ -513,7 +513,7 @@ OverlayWindow.prototype = {
       win.zSort = win.BringToFront();
     });
     addGlobalEvent(this.TitleBar,'mousemove',function(dv,event) {
-      var win = dv.window;
+      var win = dv.Window;
       if (win.moving) {
         var x=event.clientX + window.scrollX;
         var y=event.clientY + window.scrollY;
@@ -527,7 +527,7 @@ OverlayWindow.prototype = {
       }
     },true);
     addEvent(this.TitleBar,'mouseup',function(dv,event) {
-      var win = dv.window;
+      var win = dv.Window;
       if (win.moving) {
         win.moving=false;
         //win.style.zIndex = win.zSort;
@@ -929,9 +929,10 @@ function ShoutboxControls() {
     		align='left';
     		innerHTML='<span class="gensmall">Dein Text:</span>';
     	}
+    	var ev = Settings.GetValue('pagehack','smileyOverlay')?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
     	with (insertCell(-1)) {
     		align='right';
-    		innerHTML='<span class="gensmall"><a onclick="em_pagehacks.SmileyWin(\'shoutmessage\'); return false;" href="posting.php?mode=smilies" class="gensmall">Smilies</a>';
+    		innerHTML='<span class="gensmall"><a onclick="'+ev+'; return false;" href="posting.php?mode=smilies" class="gensmall">Smilies</a>';
     	}
     }
     with (tab.insertRow(-1)) {
@@ -951,22 +952,21 @@ function ShoutboxControls() {
     		innerHTML='<input value="Go!" name="shoutgo" class="sidebarbutton" id="shoutsubmit" type="submit" style="width: 40px">';
     	}
     }
+  } else {
+    if(Settings.GetValue('pagehack','smileyOverlay')) {
+      this.form.getElementsByTagName('a')[0].setAttribute('onclick','EM.Pagehacks.SmileyWin("shoutmessage"); return false;');
+    }
   }
   this.form_text = document.getElementById('shoutmessage');
   this.form_chars = document.getElementById('shoutchars');
   //addEvent(this.form,'submit',function() {return false });
-  this.form.setAttribute('onsubmit', 'return em_shouts.ev_sb_post()');
-
-  var a = this.form.getElementsByTagName('a')[0];
-  if(Settings.GetValue('pagehack','smileyOverlay')) {
-    a.setAttribute('onclick','em_pagehacks.SmileyWin("shoutmessage"); return false;');
-  }
+  this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
   if (this.shout_obj) {
     this.btnUpdate = document.getElementsByName('shoutrefresh')[0];
     this.btnUpdate.style.cssText+='width: 152px !important';
     this.btnUpdate.value='Aktuellste zeigen';
-    this.btnUpdate.setAttribute('onclick', 'em_shouts.ev_sb_update()');
+    this.btnUpdate.setAttribute('onclick', 'EM.Shouts.ev_sb_update()');
 
     this.contButtons = document.createElement('<div>');
     this.btnUpdate.parentNode.appendChild(this.contButtons);
@@ -974,7 +974,7 @@ function ShoutboxControls() {
     this.btnNewer = this.btnUpdate.cloneNode(false);
     this.btnNewer.value='<<';
     this.btnNewer.style.cssText='width: 50px';
-    this.btnNewer.setAttribute('onclick', 'em_shouts.newer_page()');
+    this.btnNewer.setAttribute('onclick', 'EM.Shouts.newer_page()');
     this.btnNewer.title='Neuere Shouts';
     this.contButtons.appendChild(this.btnNewer);
 
@@ -984,14 +984,14 @@ function ShoutboxControls() {
     this.edtDirect.value = 0;
     this.edtDirect.setAttribute('onchange', '');
     this.edtDirect.setAttribute('onkeydown', '');
-    this.edtDirect.setAttribute('onkeyup', 'em_shouts.ev_sb_goto(event)');
+    this.edtDirect.setAttribute('onkeyup', 'EM.Shouts.ev_sb_goto(event)');
     this.edtDirect.title='Start-Shout, Enter zum aufrufen';
     this.contButtons.appendChild(this.edtDirect);
 
     this.btnOlder = this.btnNewer.cloneNode(false);
     this.btnOlder.value='>>';
     this.btnOlder.title='Ältere Shouts';
-    this.btnOlder.setAttribute('onclick', 'em_shouts.older_page()');
+    this.btnOlder.setAttribute('onclick', 'EM.Shouts.older_page()');
     this.contButtons.appendChild(this.btnOlder);
   }
 }
@@ -1045,7 +1045,7 @@ ShoutboxControls.prototype = {
   },
 
   ev_sb_post: function (evt) {
-    var s = unsafeWindow.em_shouts.form_text.value;
+    var s = EM.Shouts.form_text.value;
     s = s.replace(/\bbenbe\b/i, "BenBE");
     s = s.replace(/\bcih\b/, "ich");
     s = s.replace(/\bnciht\b/, "nicht");
@@ -1100,9 +1100,9 @@ ShoutboxControls.prototype = {
     s = s.replace(/^@@/, "@"); 
 
     //Implement /me-Tags (if present) ;-)
-    s = s.replace(/^\/me\s(.*)$/, "[i][user]" + unsafeWindow.em_user.loggedOnUser + "[/user] $1[/i]");
+    s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
 
-    unsafeWindow.em_shouts.form_text.value = s;
+    EM.Shouts.form_text.value = s;
     return true;
   }
 }
@@ -1154,7 +1154,7 @@ function ShoutboxWindow() {
     if(anek_active) {
       var tools = document.createElement('span');
       tools.className+=' incell right';
-      tools.innerHTML+='<a href="javascript:em_shout_cnt.ev_anekdote('+i+')>A</a>';
+      tools.innerHTML+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')>A</a>';
       div.appendChild(tools);
     }
   };
@@ -1346,8 +1346,8 @@ SmileyWindow.prototype = {
 function Pagehacks() {
   if (Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
-  unsafeWindow.em_buttonbar.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','em_pagehacks.checkPMs()','em_checkPM');
-  unsafeWindow.em_buttonbar.addButton('/graphics/sitemap/search.gif','Schnellsuche','em_pagehacks.fastSearch()','em_fastSearch');
+  EM.Buttons.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
+  EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
   this.AddCustomStyles();
   if(Settings.GetValue('pagehack','extSearchPage') &&
     /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
@@ -1403,7 +1403,7 @@ Pagehacks.prototype = {
     w.InitWindow();
     var ee_forum = null;
     var ee_topic = null;
-    var bc = queryXPathNode(unsafeWindow.em_buttonbar.navTable,'tbody/tr[2]/td[2]/div');
+    var bc = queryXPathNode(EM.Buttons.navTable,'tbody/tr[2]/td[2]/div');
     if (bc) {
       var as = bc.getElementsByTagName('a');
       for(var i = 0;i<as.length; i++) {
@@ -1492,7 +1492,7 @@ Pagehacks.prototype = {
   },
 
   FixEmptyResults: function () {
-    var sp = unsafeWindow.em_buttonbar.mainTable.getElementsByTagName('span');
+    var sp = EM.Buttons.mainTable.getElementsByTagName('span');
     for (var i=0; i<sp.length; i++) {
       if (sp[i].firstChild.textContent.match( /Keine Beitr.*?ge entsprechen Deinen Kriterien./ )) {
         sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zur&uuml;ck zum Suchformular</a>';
@@ -1504,7 +1504,7 @@ Pagehacks.prototype = {
 
   FixPostingDialog: function () {
     //Get the Content Main Table
-    var sp = unsafeWindow.em_buttonbar.mainTable;
+    var sp = EM.Buttons.mainTable;
     console.log(sp);
 
     if(isUndef(sp) || null == sp) {
@@ -1542,7 +1542,7 @@ Pagehacks.prototype = {
     td = tr.insertCell(-1);
     td.className='row2';
     td.style.paddingLeft = '13px';
-    td.innerHTML='<span class="gensmall"><a href="#" class="gensmall" onclick="em_pagehacks.DisplayHelpAJAXified()">Edgemonkey-Hilfe</a></span>';
+    td.innerHTML='<span class="gensmall"><a href="#" class="gensmall" onclick="EM.Pagehacks.DisplayHelpAJAXified()">Edgemonkey-Hilfe</a></span>';
   },
 
   DisplayHelpAJAXified: function() {
@@ -1573,12 +1573,12 @@ Pagehacks.prototype = {
 
   AddQuickProfileMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
-    link.setAttribute('onclick','return em_pagehacks.QuickProfileMenu()');
+    link.setAttribute('onclick','return EM.Pagehacks.QuickProfileMenu()');
   },
 
   AddQuickSearchMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
-    link.setAttribute('onclick','return em_pagehacks.QuickSearchMenu()');
+    link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
   },
 
   QuickProfileMenu: function() {
@@ -1731,7 +1731,7 @@ Pagehacks.prototype = {
       var links = f.getElementsByTagName('a');
       for (var i=0; i<links.length; i++) {
       	if (links[i].href.match(/posting\.php\?mode=smilies/)) {
-      		links[i].setAttribute('onclick','em_pagehacks.SmileyWin("message"); return false;');
+      		links[i].setAttribute('onclick','EM.Pagehacks.SmileyWin("message"); return false;');
       	}
       }
     }
@@ -1775,26 +1775,28 @@ function initEdgeApe() {
 
   if (Location.match(/shoutbox_view.php/)) {
     if (UserMan.loggedOnUser) {
-      unsafeWindow.em_shout_cnt = new ShoutboxWindow();
+      EM.ShoutWin = new ShoutboxWindow();
     }
   }
   else
   {
-    unsafeWindow.em_user = UserMan;
-    unsafeWindow.em_buttonbar = new ButtonBar();
+    EM.User = UserMan;
+    EM.Buttons = new ButtonBar();
 
-    with(unsafeWindow.em_buttonbar) {
-      addButton('/graphics/Profil-Sidebar.gif','Einstellungen','em_settings.ShowSettingsDialog()');
+    with(EM.Buttons) {
+      addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ShowSettingsDialog()');
     }
-    unsafeWindow.em_pagehacks = new Pagehacks();
-    unsafeWindow.em_shouts = new ShoutboxControls();
+    EM.Pagehacks = new Pagehacks();
+    EM.Shouts = new ShoutboxControls();
   }
 }
 
+window.EM = {};
+unsafeWindow.EM = EM;
 Settings = new SettingsStore();
 Ajax = new AJAXObject();
 UserMan = new UserManager();
-unsafeWindow.em_settings = Settings;
+EM.Settings = Settings;
 Location = window.location.href;
 
 initEdgeApe(); //Should go as soon as possible ...
