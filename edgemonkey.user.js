@@ -649,6 +649,7 @@ SettingsStore.prototype = {
     this.Values['pagehack.extPostSubmission']=true;
     this.Values['pagehack.quickProfMenu']=false;
     this.Values['pagehack.quickSearhMenu']=false;
+    this.Values['pagehack.smileyOverlay']=true;
 
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
@@ -692,6 +693,8 @@ SettingsStore.prototype = {
         '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="">':'>'));
     addSettingsRow(tbl, 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen',
         '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="">':'>'));
+    addSettingsRow(tbl, 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
+        '<input name="ph_smileyOverlay" type="checkbox" '+(this.GetValue('pagehack','smileyOverlay')?'checked="">':'>'));
     addSettingsRow(tbl, 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester',
         '<input name="ui_betaFeatures" type="checkbox" '+(this.GetValue('ui','betaFeatures')?'checked="">':'>'));
 
@@ -721,6 +724,7 @@ SettingsStore.prototype = {
       Settings.SetValue('pagehack','extSearchPage', getElementsByName('ph_extsearch')[0].checked);
       Settings.SetValue('pagehack','extPostSubmission', getElementsByName('ph_extpost')[0].checked);
       Settings.SetValue('pagehack','imgMaxWidth', getElementsByName('ph_imgmaxwidth')[0].checked);
+      Settings.SetValue('pagehack','smileyOverlay', getElementsByName('ph_smileyOverlay')[0].checked);
 
       Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
       Settings.SetValue('ui','useFlatStyle', getElementsByName('ui_flatstyle')[0].checked);
@@ -954,7 +958,9 @@ function ShoutboxControls() {
   this.form.setAttribute('onsubmit', 'return em_shouts.ev_sb_post()');
 
   var a = this.form.getElementsByTagName('a')[0];
-  a.setAttribute('onclick','em_pagehacks.SmileyWin("shoutmessage"); return false;');
+  if(Settings.GetValue('pagehack','smileyOverlay')) {
+    a.setAttribute('onclick','em_pagehacks.SmileyWin("shoutmessage"); return false;');
+  }
 
   if (this.shout_obj) {
     this.btnUpdate = document.getElementsByName('shoutrefresh')[0];
@@ -1220,9 +1226,9 @@ function SmileyWindow(target) {
 
   this.Target = target;
   var pt = new Point(0,0);
-  pt.CenterInWindow(430,270);
+  pt.CenterInWindow(440,290);
   console.log(pt);
-  this.win = new OverlayWindow(pt.x,pt.y,430,270,'','em_SmileyWin');
+  this.win = new OverlayWindow(pt.x,pt.y,440,290,'','em_SmileyWin');
   this.win.InitWindow();
   this.tab = this.win.createElement('table');
   this.win.ContentArea.appendChild(this.tab);
@@ -1362,7 +1368,9 @@ function Pagehacks() {
   if(Settings.GetValue('ui','betaFeatures')) {
     this.AddBetaLinks();
   }
-
+  if(Settings.GetValue('pagehack','smileyOverlay')) {
+    this.AddSmileyOverlay();
+  }
 }
 
 Pagehacks.prototype = {
@@ -1671,6 +1679,18 @@ Pagehacks.prototype = {
                                '<img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
                                ' style="margin-left: 1px; width: 12px; height: 9px;"/><b>'+Lks[1][0]+'</b></a>';
       insertCell(-1);
+    }
+  },
+  
+  AddSmileyOverlay: function() {
+  	var f = document.forms.namedItem('post');
+  	if (f) {
+      var links = f.getElementsByTagName('a');
+      for (var i=0; i<links.length; i++) {
+      	if (links[i].href.match(/posting\.php\?mode=smilies/)) {
+      		links[i].setAttribute('onclick','em_pagehacks.SmileyWin("message"); return false;');
+      	}
+      }
     }
   }
 }
