@@ -206,6 +206,7 @@ Point.prototype.CenterInWindow = function(cx,cy)
 {
   this.x = window.pageXOffset + (window.innerWidth-cx) / 2;
   this.y = window.pageYOffset + (window.innerHeight-cy) / 2;
+  if (this.y<0) this.y = 0;
 }
 
 Point.prototype.TranslateWindow = function()
@@ -316,9 +317,12 @@ AJAXObject.prototype = {
     }
     else
     {
-      request.postBody = "";
-      for (name in postData)
-        request.postBody += name+"="+escape(postData[name])+"&";
+      if (typeof postData=='object') {
+        request.postBody = "";
+        for (name in postData)
+          request.postBody += name+"="+escape(postData[name])+"&";
+      } else
+        request.postBody = postData;
 
       request.open("POST", url, async);
       request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=iso-8859-1');
@@ -341,7 +345,7 @@ AJAXObject.prototype = {
       }
     }
     var request = this.prepareRequest(url,postData,true);
-    request.onreadystatechange = readyEvent;
+    request.addEventListener('load',readyEvent,false);
     return request.send(request.postBody);
   }
 }
@@ -407,6 +411,24 @@ if (!document.getElementsByClassName) {
   }
 }
 
+document.overlayWindows = {
+	_list: [],
+	add: function(win) {this._list.push(win); },
+	remove: function(win) {
+		var oldList = this._list;
+		this._list = oldList.filter(function(el) {
+			return el != win;
+		});
+	},
+	getWindowById: function(id) {
+		for (var i=0; i<this._list.length; i++) {
+			if (this._list[i].id==id)
+				return this._list[i];
+		}
+		return null;
+	}
+}
+
 function bringToFront(obj)
 {
     var divs = document.getElementsByClassName('overlayWin','div');
@@ -444,8 +466,8 @@ function OverlayWindow(x,y,w,h,content,id)
   console.log('Overlay start');
   this.Outer = this.createElement('div');
   this.Outer.className='overlayWin';
-  this.Outer.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h;
-  this.Outer.id = id;
+  this.Outer.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h+';width:'+w+';height:'+h;
+  this.id = id;
 
   console.log('Overlay Frame Window');
   this.Frame = this.createElement('div');
@@ -484,6 +506,7 @@ function OverlayWindow(x,y,w,h,content,id)
   this.showing=true;
   console.log('Overlay finish');
   document.getElementsByTagName('body')[0].appendChild(this.Outer);
+  document.overlayWindows.add(this);
 }
 
 OverlayWindow.prototype = {
@@ -577,6 +600,7 @@ OverlayWindow.prototype = {
     this.showing=false;
     this.Outer.style.cssText+=' display:none';
     this.Outer.parentNode.removeChild(this.Outer);
+    document.overlayWindows.remove(this);
   },
   BringToFront: function() {
     return bringToFront(this.Outer);
@@ -1411,7 +1435,7 @@ Pagehacks.prototype = {
     var lnk = document.getElementById('em_fastSearch');
     var coords = new Point(lnk.getBoundingClientRect().left, lnk.getBoundingClientRect().bottom);
     coords.TranslateWindow();
-    var w = new OverlayWindow(coords.x,coords.y,183,125,'','em_searchbox');
+    var w = new OverlayWindow(coords.x,coords.y,220,145,'','em_searchbox');
     w.InitWindow();
     var ee_forum = null;
     var ee_topic = null;
@@ -1428,25 +1452,77 @@ Pagehacks.prototype = {
       '<input name="search_fields" value="all" checked="checked" type="hidden">'+
       '<input name="show_results" value="topics" checked="checked" type="hidden">'+
       '<input name="synonym_search" value="1" checked="checked" type="hidden">'+
-      '<div style="padding-top: 4px; text-align: left;">'+
-      '<div style="white-space: nowrap; margin-left: 4px;">'+
-      '<span class="gensmall">Suchwörter:</span><br><input class="post" style="width: 74%;" name="search_keywords" type="text">'+
-      '<input class="sidebarbutton" value="Go!" type="submit"></div>'+
-      '<div style="white-space: nowrap; margin-left: 4px; margin-top: 5px;">'+
-      '<span class="gensmall">Wo soll gesucht werden?</span><br>'+
-      '<select name="website">'+
+      '<div style="white-space: nowrap; margin-left: 4px;"><span class="gen" style="font-family:Verdana,Arial,Helvetica,sans-serif">Suchw&ouml;rter:</span><br><input class="post" style="width: 98%;" name="search_keywords" type="text"></div>'+
+      '<div style="white-space: nowrap; margin-left: 4px; margin-top: 5px;"><span class="gen" style="font-family:Verdana,Arial,Helvetica,sans-serif">Wo soll gesucht werden?</span><br>'+
+      '<select name="website" style="width: 98%;">'+
       (ee_topic?'<option value="'+ee_topic+'__">nur in diesem Thema</option>':'')+
       (ee_forum?'<option value="__'+ee_forum+'">nur in dieser Sparte</option>':'')+
       '<option value="">Entwickler-Ecke</option>'+
       '<optgroup label="Delphi"><option id="intsearch_df" value="df">Forum</option><option id="intsearch_dl" value="dl">Library</option><option id="intsearch_dfdl" value="df,dl">Forum &amp; Library</option></optgroup>'+
       '<optgroup label="C#"><option id="intsearch_csf" value="csf">Forum</option><option id="intsearch_csl" value="csl">Library</option><option id="intsearch_csfcsl" value="csf,csl">Forum &amp; Library</option></optgroup>'+
-			'</select></div><table style="margin-top: 5px;" cellpadding="0" cellspacing="0">'+
-			'<tr><td><input id="sidebar_search_terms_any" name="search_terms" value="any" type="radio"></td>'+
-			'<td><span class="gensmall"><label for="sidebar_search_terms_any">ein Wort</label></span></td>'+
-			'<td>&nbsp;&nbsp;<input id="sidebar_search_terms_all" name="search_terms" value="all" checked="checked" type="radio"></td>'+
-			'<td><span class="gensmall"><label for="sidebar_search_terms_all">alle Wörter</label></span></td>'+
-			'</tr></table></div></form>';
+      '</select></div>'+
+      '<table style="margin-top: 5px; width: 98%;" cellpadding="0" cellspacing="0">'+
+      '<tr><td><input id="sidebar_search_terms_any" name="search_terms" value="any" type="radio"></td>'+
+      '<td><span class="gen"><label for="sidebar_search_terms_any">ein Wort</label></span></td>'+
+      '<td>&nbsp;&nbsp;<input id="sidebar_search_terms_all" name="search_terms" value="all" checked="checked" type="radio"></td>'+
+      '<td><span class="gen"><label for="sidebar_search_terms_all">alle W&ouml;rter</label></span></td>'+
+      '</tr></table>'+
+      '<div style="white-space: nowrap; margin-left: 4px; text-align:center;">'+
+      '<input class="mainoption" style="width: 40%;" value="Go!" type="submit">&nbsp;<input class="liteoption" style="width: 40%;" value="Inline!" type="button" onclick="EM.Pagehacks.ev_fastSearch(this)"></div>'+
+      
+      '</form>';
   },
+
+  ev_fastSearch: function(inp) {
+    var el =inp.form.elements;
+    var post = [];
+    for (var i=0; i<el.length; i++) {
+      with (el[i]) {
+        if (disabled) continue;
+       if (tagName=='SELECT') {
+          post.push(name+'='+encodeURIComponent(value)); break;
+        } else
+          switch(type) {
+            case 'hidden':
+            case 'text': post.push(name+'='+encodeURIComponent(value)); break;
+            case 'radio':
+            case 'check': if (checked) post.push(name+'='+encodeURIComponent(value)); break;
+            case 'submit': if (isSameNode(inp)) post.push(name+'='+encodeURIComponent(value)); break;
+          }
+      }
+    }
+    post=post.join('&');
+
+    var coo = new Point(0,0);
+    coo.CenterInWindow(640,320);
+    var w = new OverlayWindow(coo.x,coo.y,640,320,'','em_searchresults');
+    w.InitWindow();
+    w.ContentArea.innerHTML = '<table width="100%" cellspacing="0" cellpadding="1" border="0"><tr><td>&nbsp;</td></tr>'+
+        '<tr><td align="center"><span class="gen">Suche l&auml;uft...</span></td></tr><tr><td>&nbsp;</td></tr></table>';
+    w.Frame.style.height = w.Frame.style.minHeight;
+    var s = Ajax.AsyncRequest(inp.form.action,post,w.ContentArea,
+      function(div) {
+      	div.style.height=(parseInt(w.Frame.style.height)-30)+'px';
+      	div.style.overflow='scroll';
+      	var tab = queryXPathNode(div,'table[2]');
+      	var err = queryXPathNode(tab,"./tbody/tr[2]/td/div/table[@class='forumline']/tbody/tr[2]/td[@class='row1']");
+      	if (err && err.innerHTML.match(/Keine Beitr.*?ge entsprechen Deinen Kriterien./)) {
+      		div.innerHTML=err.innerHTML;
+      	} else {
+          var h = queryXPathNode(tab,"./tbody/tr[1]/td/center/a[@class='maintitle' and @id='maintitle']");
+          var cc = queryXPathNode(tab,"./tbody/tr[2]/td[1]/div");
+          div.innerHTML = '';
+          var d = document.createElement('div');
+          d.style.textAlign='center';
+          d.appendChild(h);
+          d.appendChild(document.createElement('br'));
+          d.appendChild(document.createTextNode('Nur die erste Seite wird angezeigt.'));
+          div.appendChild(d);
+          div.appendChild(cc);
+      	}
+      });
+      document.overlayWindows.getWindowById('em_searchbox').Close();
+   },
 
   SmileyWin: function(target) {
     new SmileyWindow(target);
@@ -1599,7 +1675,7 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,320,187,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,320,192,'','em_QPM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
@@ -1651,7 +1727,7 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,272,242,'','em_QSM');
+    var w = new OverlayWindow(coords.x,coords.y,272,250,'','em_QSM');
     w.InitDropdown();
     var tbl = w.CreateMenu();
 
