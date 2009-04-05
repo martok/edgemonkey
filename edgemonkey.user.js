@@ -345,7 +345,7 @@ AJAXObject.prototype = {
       }
     }
     var request = this.prepareRequest(url,postData,true);
-    request.onreadystatechange = readyEvent;
+    request.addEventListener('load',readyEvent,false);
     return request.send(request.postBody);
   }
 }
@@ -411,6 +411,24 @@ if (!document.getElementsByClassName) {
   }
 }
 
+document.overlayWindows = {
+	_list: [],
+	add: function(win) {this._list.push(win); },
+	remove: function(win) {
+		var oldList = this._list;
+		this._list = oldList.filter(function(el) {
+			return el != win;
+		});
+	},
+	getWindowById: function(id) {
+		for (var i=0; i<this._list.length; i++) {
+			if (this._list[i].id==id)
+				return this._list[i];
+		}
+		return null;
+	}
+}
+
 function bringToFront(obj)
 {
     var divs = document.getElementsByClassName('overlayWin','div');
@@ -449,7 +467,7 @@ function OverlayWindow(x,y,w,h,content,id)
   this.Outer = this.createElement('div');
   this.Outer.className='overlayWin';
   this.Outer.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h+';width:'+w+';height:'+h;
-  this.Outer.id = id;
+  this.id = id;
 
   console.log('Overlay Frame Window');
   this.Frame = this.createElement('div');
@@ -488,6 +506,7 @@ function OverlayWindow(x,y,w,h,content,id)
   this.showing=true;
   console.log('Overlay finish');
   document.getElementsByTagName('body')[0].appendChild(this.Outer);
+  document.overlayWindows.add(this);
 }
 
 OverlayWindow.prototype = {
@@ -581,6 +600,7 @@ OverlayWindow.prototype = {
     this.showing=false;
     this.Outer.style.cssText+=' display:none';
     this.Outer.parentNode.removeChild(this.Outer);
+    document.overlayWindows.remove(this);
   },
   BringToFront: function() {
     return bringToFront(this.Outer);
@@ -1480,11 +1500,16 @@ Pagehacks.prototype = {
           var h = queryXPathNode(tab,"./tbody/tr[1]/td/center/a[@class='maintitle' and @id='maintitle']");
           var cc = queryXPathNode(tab,"./tbody/tr[2]/td[1]/div");
           div.innerHTML = '';
-          div.appendChild(h);
-          div.appendChild(document.createTextNode('Nur die erste Seite wird angezeigt.'));
+          var d = document.createElement('div');
+          d.style.textAlign='center';
+          d.appendChild(h);
+          d.appendChild(document.createElement('br'));
+          d.appendChild(document.createTextNode('Nur die erste Seite wird angezeigt.'));
+          div.appendChild(d);
           div.appendChild(cc);
       	}
       });
+      document.overlayWindows.getWindowById('em_searchbox').Close();
    },
 
   SmileyWin: function(target) {
