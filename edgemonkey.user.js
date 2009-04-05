@@ -939,7 +939,7 @@ function ShoutboxControls() {
     	with (insertCell(-1)) {
     		align='left';
     		colSpan=2;
-    		innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="shoutBoxKey()" onkeyup="shoutBoxKey()" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
+    	  innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
     	}
     }
     with (tab.insertRow(-1)) {
@@ -1104,6 +1104,18 @@ ShoutboxControls.prototype = {
 
     EM.Shouts.form_text.value = s;
     return true;
+  },
+
+  ev_shoutkeys: function(evt) {
+    evt = (evt) ? evt : ((event) ? event : null);
+    if (evt && evt.keyCode==13) {
+      evt.preventDefault();
+      evt.cancelBubble = true;
+      if (EM.Shouts.ev_sb_post()) {
+        EM.Shouts.form.submit();
+      }
+    }
+    unsafeWindow.shoutBoxKey.apply(window,arguments);
   }
 }
 
