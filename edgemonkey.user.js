@@ -1403,7 +1403,7 @@ Pagehacks.prototype = {
     var lnk = document.getElementById('em_fastSearch');
     var coords = new Point(lnk.getBoundingClientRect().left, lnk.getBoundingClientRect().bottom);
     coords.TranslateWindow();
-    var w = new OverlayWindow(coords.x,coords.y,220,125,'','em_searchbox');
+    var w = new OverlayWindow(coords.x,coords.y,220,145,'','em_searchbox');
     w.InitWindow();
     var ee_forum = null;
     var ee_topic = null;
@@ -1420,28 +1420,28 @@ Pagehacks.prototype = {
       '<input name="search_fields" value="all" checked="checked" type="hidden">'+
       '<input name="show_results" value="topics" checked="checked" type="hidden">'+
       '<input name="synonym_search" value="1" checked="checked" type="hidden">'+
-      '<div style="padding-top: 4px; text-align: left;">'+
-      '<div style="white-space: nowrap; margin-left: 4px;">'+
-      '<span class="gensmall">Suchw&ouml;rter:</span><br><input class="post" style="width: 59%;" name="search_keywords" type="text">'+
-      '<input class="sidebarbutton" value="Go!" type="submit"><input class="sidebarbutton" value="Inline!" type="button" onclick="EM.Pagehacks.ev_fastSearch(this)"></div>'+
-      '<div style="white-space: nowrap; margin-left: 4px; margin-top: 5px;">'+
-      '<span class="gensmall">Wo soll gesucht werden?</span><br>'+
-      '<select name="website">'+
+      '<div style="white-space: nowrap; margin-left: 4px;"><span class="gen" style="font-family:Verdana,Arial,Helvetica,sans-serif">Suchw&ouml;rter:</span><br><input class="post" style="width: 98%;" name="search_keywords" type="text"></div>'+
+      '<div style="white-space: nowrap; margin-left: 4px; margin-top: 5px;"><span class="gen" style="font-family:Verdana,Arial,Helvetica,sans-serif">Wo soll gesucht werden?</span><br>'+
+      '<select name="website" style="width: 98%;">'+
       (ee_topic?'<option value="'+ee_topic+'__">nur in diesem Thema</option>':'')+
       (ee_forum?'<option value="__'+ee_forum+'">nur in dieser Sparte</option>':'')+
       '<option value="">Entwickler-Ecke</option>'+
       '<optgroup label="Delphi"><option id="intsearch_df" value="df">Forum</option><option id="intsearch_dl" value="dl">Library</option><option id="intsearch_dfdl" value="df,dl">Forum &amp; Library</option></optgroup>'+
       '<optgroup label="C#"><option id="intsearch_csf" value="csf">Forum</option><option id="intsearch_csl" value="csl">Library</option><option id="intsearch_csfcsl" value="csf,csl">Forum &amp; Library</option></optgroup>'+
-      '</select></div><table style="margin-top: 5px;" cellpadding="0" cellspacing="0">'+
+      '</select></div>'+
+      '<table style="margin-top: 5px; width: 98%;" cellpadding="0" cellspacing="0">'+
       '<tr><td><input id="sidebar_search_terms_any" name="search_terms" value="any" type="radio"></td>'+
-      '<td><span class="gensmall"><label for="sidebar_search_terms_any">ein Wort</label></span></td>'+
+      '<td><span class="gen"><label for="sidebar_search_terms_any">ein Wort</label></span></td>'+
       '<td>&nbsp;&nbsp;<input id="sidebar_search_terms_all" name="search_terms" value="all" checked="checked" type="radio"></td>'+
-      '<td><span class="gensmall"><label for="sidebar_search_terms_all">alle W&ouml;rter</label></span></td>'+
-      '</tr></table></form>';
+      '<td><span class="gen"><label for="sidebar_search_terms_all">alle W&ouml;rter</label></span></td>'+
+      '</tr></table>'+
+      '<div style="white-space: nowrap; margin-left: 4px; text-align:center;">'+
+      '<input class="mainoption" style="width: 40%;" value="Go!" type="submit">&nbsp;<input class="liteoption" style="width: 40%;" value="Inline!" type="button" onclick="EM.Pagehacks.ev_fastSearch(this)"></div>'+
+      
+      '</form>';
   },
 
   ev_fastSearch: function(inp) {
-    console.log(inp.form);
     var el =inp.form.elements;
     var post = [];
     for (var i=0; i<el.length; i++) {
@@ -1477,10 +1477,8 @@ Pagehacks.prototype = {
       	if (err && err.innerHTML.match(/Keine Beitr.*?ge entsprechen Deinen Kriterien./)) {
       		div.innerHTML=err.innerHTML;
       	} else {
-          console.log(tab);
           var h = queryXPathNode(tab,"./tbody/tr[1]/td/center/a[@class='maintitle' and @id='maintitle']");
           var cc = queryXPathNode(tab,"./tbody/tr[2]/td[1]/div");
-          console.log(h,cc);
           div.innerHTML = '';
           div.appendChild(h);
           div.appendChild(document.createTextNode('Nur die erste Seite wird angezeigt.'));
