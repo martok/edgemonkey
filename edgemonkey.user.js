@@ -196,6 +196,35 @@ function isUndef(what)
   return (typeof what == "undefined");
 }
 
+//http://www.infocamp.de/javascript_htmlspecialchars.php
+String.prototype.escapeHTML = function (typ) {
+  if(typeof typ!="number")
+    typ=2;
+  typ = Math.max(0,Math.min(3,parseInt(typ)));
+
+  var from = new Array(/&/g,/</g,/>/g);
+  var to = new Array("&amp;","&lt;","&gt;");
+
+  if(typ==1 || typ==3) {
+    from.push(/'/g); to.push("&#039;");
+  }
+  if(typ==2 || typ==3) {
+    from.push(/"/g); to.push("&quot;");
+  }
+
+  var str = this;
+  for(var i in from)
+    str=str.replace(from[i],to[i]);
+
+  return str;
+};
+
+
+// FF 3.1+ has it native (JS 1.8.1)
+if (!String.prototype.trim) String.prototype.trim = function() {
+  return this.replace(/^\s*/,'').replace(/\s*$/,'');
+};
+
 function Point(x,y)
 {
   this.x = x;
@@ -684,6 +713,8 @@ SettingsStore.prototype = {
     this.Values['sb.anek_reverse']=true;
     this.Values['sb.highlight_me']=0;
     this.Values['sb.highlight_mod']=0;
+    this.Values['sb.highlight_stalk']=0;
+    this.Values['sb.user_stalk']="";
   },
 
   GetValue: function(sec,key) {
@@ -700,41 +731,46 @@ SettingsStore.prototype = {
 
     addHeadrow(tbl,'Design',2);
     addSettingsRow(tbl, 'Codebl&ouml;cke als monospace anzeigen',
-        '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="">':'>'));
+        '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Schlagschatten unter Popup-Fenstern',
-        '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="">':'>'));
+        '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Nutze ein flacheres Layout f&uuml;r Formulare',
-        '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="">':'>'));
+        '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Maximalbreite von Bildern erzwingen',
-        '<input name="ph_imgmaxwidth" type="checkbox" '+(this.GetValue('pagehack','imgMaxWidth')?'checked="">':'>'));
+        '<input name="ph_imgmaxwidth" type="checkbox" '+(this.GetValue('pagehack','imgMaxWidth')?'checked="" />':' />'));
 
     addHeadrow(tbl,'Ergonomie',2);
     addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r Meine Ecke',
-        '<input name="ph_ddmyedge" type="checkbox" '+(this.GetValue('pagehack','quickProfMenu')?'checked="">':'>'));
+        '<input name="ph_ddmyedge" type="checkbox" '+(this.GetValue('pagehack','quickProfMenu')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r die Suche',
-        '<input name="ph_ddsearch" type="checkbox" '+(this.GetValue('pagehack','quickSearchMenu')?'checked="">':'>'));
+        '<input name="ph_ddsearch" type="checkbox" '+(this.GetValue('pagehack','quickSearchMenu')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen',
-        '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="">':'>'));
+        '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen',
-        '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="">':'>'));
+        '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
-        '<input name="ph_smileyOverlay" type="checkbox" '+(this.GetValue('pagehack','smileyOverlay')?'checked="">':'>'));
+        '<input name="ph_smileyOverlay" type="checkbox" '+(this.GetValue('pagehack','smileyOverlay')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester',
-        '<input name="ui_betaFeatures" type="checkbox" '+(this.GetValue('ui','betaFeatures')?'checked="">':'>'));
+        '<input name="ui_betaFeatures" type="checkbox" '+(this.GetValue('ui','betaFeatures')?'checked="" />':' />'));
 
     addHeadrow(tbl,'Shoutbox',2);
     addSettingsRow(tbl, 'Eingabefeld vergr&ouml;&szlig;ern',
-        '<input name="sb_longinput" type="checkbox" '+(this.GetValue('sb','longInput')?'checked="">':'>'));
+        '<input name="sb_longinput" type="checkbox" '+(this.GetValue('sb','longInput')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Shoutbox-Anekdoter aktivieren',
-        '<input name="sb_anek_start" type="checkbox" '+(this.GetValue('sb','anek_active')?'checked="">':'>'));
+        '<input name="sb_anek_start" type="checkbox" '+(this.GetValue('sb','anek_active')?'checked="" />':' />'));
     addSettingsRow(tbl, 'Anekdoten oben einf&uuml;gen',
-        '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="">':'>'));
-    addSettingsRow(tbl,'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
+        '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="" />':' />'));
+    addSettingsRow(tbl, 'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
         createColorSelection('sb_highlight_me',this.GetValue('sb','highlight_me'), false)
         );
-    addSettingsRow(tbl,'Shouts von Moderatoren/Admins hervorheben',
+    addSettingsRow(tbl, 'Shouts von ausgew&auml;hlten Nutzern hervorheben<br />',
+        createColorSelection('sb_highlight_stalk',this.GetValue('sb','highlight_stalk'), false)
+        );
+    addSettingsRow(tbl, 'Shouts von Moderatoren/Admins hervorheben',
         createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
         );
+    addSettingsRow(tbl, 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',
+        '<input name="sb_user_stalk" type="text" value="' + new String(this.GetValue('sb','user_stalk')).escapeHTML(3) + '" />');
 
     this.Window.OptionsTable = tbl;
     this.Window.Body.appendChild(tbl);
@@ -758,7 +794,9 @@ SettingsStore.prototype = {
       Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
       Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].value);
       Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].value);
+      Settings.SetValue('sb','highlight_stalk', getElementsByName('sb_highlight_stalk')[0].value);
       Settings.SetValue('sb','longInput', getElementsByName('sb_longinput')[0].checked);
+      Settings.SetValue('sb','user_stalk', getElementsByName('sb_user_stalk')[0].value);
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -1110,18 +1148,18 @@ ShoutboxControls.prototype = {
     }
 
     //Warn if 2 capital letters are found at the beginning of a word
-    if(/\b[A-Z]{2}[a-z]/.test(s)) {
+    if(/\b(?!(?:IPv6|CAcert)\b)[A-Z]{2}[a-z]/.test(s)) {
       if(!confirm("Dein Shout enthält ein Wort mit mehreren Großbuchstaben am Anfang. \"Abbrechen\" um dies zu korrigieren.")) {
         return false;
       }
     }
 
     //User-Tag-Verlinkung
-    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:"); 
-    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:"); 
-    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:"); 
-    s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:"); 
-    s = s.replace(/^@@/, "@"); 
+    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:");
+    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:");
+    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:");
+    s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:");
+    s = s.replace(/^@@/, "@");
 
     //Implement /me-Tags (if present) ;-)
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
@@ -1148,6 +1186,9 @@ function ShoutboxWindow() {
 
   var shoutclass_me = 'emctpl' + Settings.GetValue('sb','highlight_me');
   var shoutclass_mod = 'emctpl' + Settings.GetValue('sb','highlight_mod');
+  var shoutclass_stalk = 'emctpl' + Settings.GetValue('sb','highlight_stalk');
+
+  var user_stalk = Settings.GetValue('sb','user_stalk').trim().split(/\s*,\s*/);
 
   var anek_active = Settings.GetValue('sb','anek_active');
 //  console.log('me: '+shoutclass_me);
@@ -1174,7 +1215,15 @@ function ShoutboxWindow() {
       if (a.style.cssText.match(/color\:/))
         shout.className+=' ' + shoutclass_mod;
     }
-    // and after this the logged on user, to allow overriding the style properly
+    // and after this the followed\stalked users, to allow overriding the style properly
+    if (Settings.GetValue('sb','highlight_stalk')) {
+      if (user_stalk.some(
+        function (e){
+          return e == UserMan.usernameFromProfile(a.href);
+        }))
+        shout.className+=' ' + shoutclass_stalk;
+    }
+    // at last the logged on user, to allow overriding the style properly
     if (Settings.GetValue('sb','highlight_me')) {
       if (UserMan.usernameFromProfile(a.href)==UserMan.loggedOnUser)
         shout.className+=' ' + shoutclass_me;
@@ -1580,6 +1629,7 @@ Pagehacks.prototype = {
   },
 
   FixEmptyResults: function () {
+    if (!EM.Buttons.mainTable) return;
     var sp = EM.Buttons.mainTable.getElementsByTagName('span');
     for (var i=0; i<sp.length; i++) {
       if (sp[i].firstChild.textContent.match( /Keine Beitr.*?ge entsprechen Deinen Kriterien./ )) {
