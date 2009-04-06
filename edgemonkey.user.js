@@ -1416,8 +1416,8 @@ Pagehacks.prototype = {
     var lnk = document.getElementById('em_checkPM');
     var coords = new Point(lnk.getBoundingClientRect().left, lnk.getBoundingClientRect().bottom);
     coords.TranslateWindow();
-    var w = new OverlayWindow(coords.x,coords.y,400,225,'','em_pmcheck');
-    w.InitWindow();
+    var w = new OverlayWindow(coords.x,coords.y,400,225-30,'','em_pmcheck');
+    w.InitDropdown();
     var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,w.ContentArea,
       function(div) {
         var a=div.getElementsByTagName('a');
@@ -1435,8 +1435,8 @@ Pagehacks.prototype = {
     var lnk = document.getElementById('em_fastSearch');
     var coords = new Point(lnk.getBoundingClientRect().left, lnk.getBoundingClientRect().bottom);
     coords.TranslateWindow();
-    var w = new OverlayWindow(coords.x,coords.y,220,145,'','em_searchbox');
-    w.InitWindow();
+    var w = new OverlayWindow(coords.x,coords.y,220,145-30,'','em_searchbox');
+    w.InitDropdown();
     var ee_forum = null;
     var ee_topic = null;
     var bc = queryXPathNode(EM.Buttons.navTable,'tbody/tr[2]/td[2]/div');
@@ -1675,7 +1675,7 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,320,192,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
@@ -1727,7 +1727,7 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,272,250,'','em_QSM');
+    var w = new OverlayWindow(coords.x,coords.y,275,241,'','em_QSM');
     w.InitDropdown();
     var tbl = w.CreateMenu();
 
