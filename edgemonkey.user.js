@@ -168,23 +168,6 @@ function queryXPathNodeSet(node, xpath) {
     return set;
 }
 
-function createColorSelection(name,def,includeignore){
-  var s = '<select name=' + name + '>';
-  for(var i = 0; i<colorTpl.length; i++) {
-    var st = colorTpl[i].style1;
-    var t = colorTpl[i].friendlyname;
-    if(i==0) st = 'background:#FFFFFF;';
-
-    s+='<option value="'+i+'" style="'+st+'"'+(i==def?' selected':'')+'>'+t+'</option>';
-
-    if(i==0&&includeignore) {
-      s+='<option value="-1" style="'+st+'"'+(-1==def?' selected':'')+'>Standard</option>';
-    }
-  }
-  s += '</select>';
-  return s;
-}
-
 function last_child(node,kind)
 {
   var c = node.getElementsByTagName(kind);
@@ -266,41 +249,77 @@ function addGlobalEvent(elementObject, eventName, functionObject, wantCapture)
       a);
 }
 
-function addHeadrow(tbl, content, colspan)
+
+function SettingsGenerator(table, doc)
 {
-  var r = tbl.insertRow(-1);
-  var th = document.createElement('th');
-  th.colSpan = colspan;
-  th.innerHTML = content;
-  r.appendChild(th);
-  tbl.zebra = false;
+	this.tbl = table;
+	this.Document = doc;
 }
 
-function addSettingsRow(tbl, caption, innerHTML) {
-  var rowClass = tbl.zebra ? 'row1' : 'row2';
-  tbl.zebra = !tbl.zebra;
-
-  var r = tbl.insertRow(-1);
-
-  var td_left = r.insertCell(-1);
-  var td_right = r.insertCell(-1);
-
-  td_left.className = rowClass;
-  td_right.className = rowClass;
-
-  var ot = r.optionText = document.createElement('span');
-  var oc = r.optionControl = document.createElement('div');
-
-  ot.className = 'gensmall';
-  ot.innerHTML = caption;
-
-  oc.className = 'gensmall';
-  oc.innerHTML = innerHTML;
-
-  td_left.appendChild(ot);
-  td_right.appendChild(oc);
-
-  return r;
+SettingsGenerator.prototype = {
+	addHeadrow: function (content, colspan)
+  {
+    var r = this.tbl.insertRow(-1);
+    var th = document.createElement('th');
+    th.colSpan = colspan;
+    th.innerHTML = content;
+    r.appendChild(th);
+    this.tbl.zebra = false;
+  },
+  addSettingsRow: function (caption, innerHTML) {
+    var rowClass = this.tbl.zebra ? 'row1' : 'row2';
+    this.tbl.zebra = !this.tbl.zebra;
+  
+    var r = this.tbl.insertRow(-1);
+  
+    var td_left = r.insertCell(-1);
+    var td_right = r.insertCell(-1);
+  
+    td_left.className = rowClass;
+    td_right.className = rowClass;
+  
+    var ot = r.optionText = document.createElement('span');
+    var oc = r.optionControl = document.createElement('div');
+  
+    ot.className = 'gensmall';
+    ot.innerHTML = caption;
+  
+    oc.className = 'gensmall';
+    oc.innerHTML = innerHTML;
+  
+    td_left.appendChild(ot);
+    td_right.appendChild(oc);
+  
+    return r;
+  },
+  createColorSelection: function (name,def,includeignore){
+    var s = '<select name=' + name + '>';
+    for(var i = 0; i<colorTpl.length; i++) {
+      var st = colorTpl[i].style1;
+      var t = colorTpl[i].friendlyname;
+      if(i==0) st = 'background:#FFFFFF;';
+  
+      s+='<option value="'+i+'" style="'+st+'"'+(i==def?' selected':'')+'>'+t+'</option>';
+  
+      if(i==0&&includeignore) {
+        s+='<option value="-1" style="'+st+'"'+(-1==def?' selected':'')+'>Standard</option>';
+      }
+    }
+    s += '</select>';
+    return s;
+  },
+  createTextInput: function (name,value){
+    return '<input name="'+name+'" type="text" value="' + new String(value).escapeHTML(3) + '" />';
+  },
+  createCheckbox: function (name,checked) {
+  	return '<input name="'+name+'" type="checkbox"'+(checked?' checked="checked"':'')+' />';
+  },
+  getBool: function(name) {
+  	return this.Document.getElementsByName(name)[0].checked;
+  },
+  getValue: function(name) {
+  	return this.Document.getElementsByName(name)[0].value;
+  }
 }
 
 function addMenuItem(tbl,icon,link,text,extralinks){
@@ -728,75 +747,63 @@ SettingsStore.prototype = {
     var tbl = this.Window.Document.createElement('table');
     tbl.className = 'forumline';
     tbl.style.cssText = 'width:98%; align:center; margin:5px;';
-
-    addHeadrow(tbl,'Design',2);
-    addSettingsRow(tbl, 'Codebl&ouml;cke als monospace anzeigen',
-        '<input name="ph_mono" type="checkbox" '+(this.GetValue('pagehack','monospace')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Schlagschatten unter Popup-Fenstern',
-        '<input name="ui_dropshadow" type="checkbox" '+(this.GetValue('ui','showDropShadow')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Nutze ein flacheres Layout f&uuml;r Formulare',
-        '<input name="ui_flatstyle" type="checkbox" '+(this.GetValue('ui', 'useFlatStyle')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Maximalbreite von Bildern erzwingen',
-        '<input name="ph_imgmaxwidth" type="checkbox" '+(this.GetValue('pagehack','imgMaxWidth')?'checked="" />':' />'));
-
-    addHeadrow(tbl,'Ergonomie',2);
-    addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r Meine Ecke',
-        '<input name="ph_ddmyedge" type="checkbox" '+(this.GetValue('pagehack','quickProfMenu')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Dropdown-Men&uuml; f&uuml;r die Suche',
-        '<input name="ph_ddsearch" type="checkbox" '+(this.GetValue('pagehack','quickSearchMenu')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen',
-        '<input name="ph_extsearch" type="checkbox" '+(this.GetValue('pagehack','extSearchPage')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen',
-        '<input name="ph_extpost" type="checkbox" '+(this.GetValue('pagehack','extPostSubmission')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
-        '<input name="ph_smileyOverlay" type="checkbox" '+(this.GetValue('pagehack','smileyOverlay')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester',
-        '<input name="ui_betaFeatures" type="checkbox" '+(this.GetValue('ui','betaFeatures')?'checked="" />':' />'));
-
-    addHeadrow(tbl,'Shoutbox',2);
-    addSettingsRow(tbl, 'Eingabefeld vergr&ouml;&szlig;ern',
-        '<input name="sb_longinput" type="checkbox" '+(this.GetValue('sb','longInput')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Shoutbox-Anekdoter aktivieren',
-        '<input name="sb_anek_start" type="checkbox" '+(this.GetValue('sb','anek_active')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Anekdoten oben einf&uuml;gen',
-        '<input name="sb_anek_rev" type="checkbox" '+(this.GetValue('sb','anek_reverse')?'checked="" />':' />'));
-    addSettingsRow(tbl, 'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
-        createColorSelection('sb_highlight_me',this.GetValue('sb','highlight_me'), false)
-        );
-    addSettingsRow(tbl, 'Shouts von ausgew&auml;hlten Nutzern hervorheben<br />',
-        createColorSelection('sb_highlight_stalk',this.GetValue('sb','highlight_stalk'), false)
-        );
-    addSettingsRow(tbl, 'Shouts von Moderatoren/Admins hervorheben',
-        createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
-        );
-    addSettingsRow(tbl, 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',
-        '<input name="sb_user_stalk" type="text" value="' + new String(this.GetValue('sb','user_stalk')).escapeHTML(3) + '" />');
-
+    var sg = new SettingsGenerator(tbl, this.Window.Document);
+    with (sg) {
+      addHeadrow('Design',2);
+      addSettingsRow('Codebl&ouml;cke als monospace anzeigen', createCheckbox('ph_mono', this.GetValue('pagehack','monospace')));
+      addSettingsRow( 'Schlagschatten unter Popup-Fenstern', createCheckbox('ui_dropshadow', this.GetValue('ui','showDropShadow')?'checked="" />':' />'));
+      addSettingsRow( 'Nutze ein flacheres Layout f&uuml;r Formulare', createCheckbox('ui_flatstyle', this.GetValue('ui', 'useFlatStyle')?'checked="" />':' />'));
+      addSettingsRow( 'Maximalbreite von Bildern erzwingen', createCheckbox('ph_imgmaxwidth', this.GetValue('pagehack','imgMaxWidth')?'checked="" />':' />'));
+  
+      addHeadrow('Ergonomie',2);
+      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
+      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
+      addSettingsRow( 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen', createCheckbox('ph_extsearch', this.GetValue('pagehack','extSearchPage')));
+      addSettingsRow( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', createCheckbox('ph_extpost', this.GetValue('pagehack','extPostSubmission')));
+      addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen', createCheckbox('ph_smileyOverlay', this.GetValue('pagehack','smileyOverlay')));
+      addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
+  
+      addHeadrow('Shoutbox',2);
+      addSettingsRow( 'Eingabefeld vergr&ouml;&szlig;ern', createCheckbox('sb_longinput', this.GetValue('sb','longInput')));
+      addSettingsRow( 'Shoutbox-Anekdoter aktivieren', createCheckbox('sb_anek_start', this.GetValue('sb','anek_active')));
+      addSettingsRow( 'Anekdoten oben einf&uuml;gen', createCheckbox('sb_anek_rev', this.GetValue('sb','anek_reverse')));
+      addSettingsRow( 'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
+          createColorSelection('sb_highlight_me',this.GetValue('sb','highlight_me'), false)
+          );
+      addSettingsRow( 'Shouts von ausgew&auml;hlten Nutzern hervorheben<br />',
+          createColorSelection('sb_highlight_stalk',this.GetValue('sb','highlight_stalk'), false)
+          );
+      addSettingsRow( 'Shouts von Moderatoren/Admins hervorheben',
+          createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
+          );
+      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',createTextInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
+    }
     this.Window.OptionsTable = tbl;
+    this.Window.OptionsGenerator = sg;
     this.Window.Body.appendChild(tbl);
   },
 
   ev_SaveDialog: function(evt) {
-    with (Settings.Window.Document) {
-      Settings.SetValue('pagehack','monospace', getElementsByName('ph_mono')[0].checked);
-      Settings.SetValue('pagehack','quickProfMenu', getElementsByName('ph_ddmyedge')[0].checked);
-      Settings.SetValue('pagehack','quickSearchMenu', getElementsByName('ph_ddsearch')[0].checked);
-      Settings.SetValue('pagehack','extSearchPage', getElementsByName('ph_extsearch')[0].checked);
-      Settings.SetValue('pagehack','extPostSubmission', getElementsByName('ph_extpost')[0].checked);
-      Settings.SetValue('pagehack','imgMaxWidth', getElementsByName('ph_imgmaxwidth')[0].checked);
-      Settings.SetValue('pagehack','smileyOverlay', getElementsByName('ph_smileyOverlay')[0].checked);
+    with (Settings.Window.OptionsGenerator) {
+      Settings.SetValue('pagehack','monospace', getBool('ph_mono'));
+      Settings.SetValue('pagehack','quickProfMenu', getBool('ph_ddmyedge'));
+      Settings.SetValue('pagehack','quickSearchMenu', getBool('ph_ddsearch'));
+      Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
+      Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
+      Settings.SetValue('pagehack','imgMaxWidth', getBool('ph_imgmaxwidth'));
+      Settings.SetValue('pagehack','smileyOverlay', getBool('ph_smileyOverlay'));
 
-      Settings.SetValue('ui','showDropShadow', getElementsByName('ui_dropshadow')[0].checked);
-      Settings.SetValue('ui','useFlatStyle', getElementsByName('ui_flatstyle')[0].checked);
-      Settings.SetValue('ui','betaFeatures', getElementsByName('ui_betaFeatures')[0].checked);
+      Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
+      Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
+      Settings.SetValue('ui','betaFeatures', getBool('ui_betaFeatures'));
 
-      Settings.SetValue('sb','anek_active', getElementsByName('sb_anek_start')[0].checked);
-      Settings.SetValue('sb','anek_reverse', getElementsByName('sb_anek_rev')[0].checked);
-      Settings.SetValue('sb','highlight_me', getElementsByName('sb_highlight_me')[0].value);
-      Settings.SetValue('sb','highlight_mod', getElementsByName('sb_highlight_mod')[0].value);
-      Settings.SetValue('sb','highlight_stalk', getElementsByName('sb_highlight_stalk')[0].value);
-      Settings.SetValue('sb','longInput', getElementsByName('sb_longinput')[0].checked);
-      Settings.SetValue('sb','user_stalk', getElementsByName('sb_user_stalk')[0].value);
+      Settings.SetValue('sb','anek_active', getBool('sb_anek_start'));
+      Settings.SetValue('sb','anek_reverse', getBool('sb_anek_rev'));
+      Settings.SetValue('sb','highlight_me', getValue('sb_highlight_me'));
+      Settings.SetValue('sb','highlight_mod', getValue('sb_highlight_mod'));
+      Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
+      Settings.SetValue('sb','longInput', getBool('sb_longinput'));
+      Settings.SetValue('sb','user_stalk', getValue('sb_user_stalk'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
