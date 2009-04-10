@@ -325,6 +325,13 @@ SettingsGenerator.prototype = {
   createCheckbox: function (name,checked) {
   	return '<input name="'+name+'" type="checkbox"'+(checked?' checked="checked"':'')+' />';
   },
+  createSelect: function (name, selected, options) {
+  	var op='';
+  	options.forEach(function(o) {
+  		op+='<option value="'+o[1]+'"'+(selected==o[1]?' selected="selected"':'')+'>'+o[0]+'</option>';
+  	});
+  	return '<select name="'+name+'">'+op+'</select>';
+  },
   getBool: function(name) {
   	return this.Document.getElementsByName(name)[0].checked;
   },
@@ -734,7 +741,7 @@ SettingsStore.prototype = {
     this.Values['pagehack.extPostSubmission']=true;
     this.Values['pagehack.quickProfMenu']=false;
     this.Values['pagehack.quickSearchMenu']=false;
-    this.Values['pagehack.smileyOverlay']=true;
+    this.Values['pagehack.smileyOverlay']=1;
 
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
@@ -773,7 +780,13 @@ SettingsStore.prototype = {
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
       addSettingsRow( 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen', createCheckbox('ph_extsearch', this.GetValue('pagehack','extSearchPage')));
       addSettingsRow( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', createCheckbox('ph_extpost', this.GetValue('pagehack','extPostSubmission')));
-      addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen', createCheckbox('ph_smileyOverlay', this.GetValue('pagehack','smileyOverlay')));
+      addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
+          createSelect('ph_smileyOverlay', this.GetValue('pagehack','smileyOverlay'), [
+            ['Nein', 0],
+            ['Ja, verschiebbar', 1],
+            ['Ja, fest', 2],
+          ])
+          );
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
   
       addHeadrow('Shoutbox',2);
@@ -804,7 +817,7 @@ SettingsStore.prototype = {
       Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
       Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
       Settings.SetValue('pagehack','imgMaxWidth', getBool('ph_imgmaxwidth'));
-      Settings.SetValue('pagehack','smileyOverlay', getBool('ph_smileyOverlay'));
+      Settings.SetValue('pagehack','smileyOverlay', getValue('ph_smileyOverlay'));
 
       Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
       Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
@@ -1012,7 +1025,7 @@ function ShoutboxControls() {
     		align='left';
     		innerHTML='<span class="gensmall">Dein Text:</span>';
     	}
-    	var ev = Settings.GetValue('pagehack','smileyOverlay')?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
+    	var ev = Settings.GetValue('pagehack','smileyOverlay')>0?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
     	with (insertCell(-1)) {
     		align='right';
     		innerHTML='<span class="gensmall"><a onclick="'+ev+'; return false;" href="posting.php?mode=smilies" class="gensmall">Smilies</a>';
@@ -1036,7 +1049,7 @@ function ShoutboxControls() {
     	}
     }
   } else {
-    if(Settings.GetValue('pagehack','smileyOverlay')) {
+    if(Settings.GetValue('pagehack','smileyOverlay')>0) {
       this.form.getElementsByTagName('a')[0].setAttribute('onclick','EM.Pagehacks.SmileyWin("shoutmessage"); return false;');
     }
   }
@@ -1337,7 +1350,11 @@ function SmileyWindow(target) {
   pt.CenterInWindow(440,290);
   console.log(pt);
   this.win = new OverlayWindow(pt.x,pt.y,440,290,'','em_SmileyWin');
-  this.win.InitWindow();
+  if(Settings.GetValue('pagehack','smileyOverlay')==1) {
+    this.win.InitWindow();
+  } else {
+    this.win.InitDropdown();
+  }
   this.tab = this.win.createElement('table');
   this.win.ContentArea.appendChild(this.tab);
   this.tab.width="100%";
@@ -1477,7 +1494,7 @@ function Pagehacks() {
   if(Settings.GetValue('ui','betaFeatures')) {
     this.AddBetaLinks();
   }
-  if(Settings.GetValue('pagehack','smileyOverlay')) {
+  if(Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
 }
@@ -1914,6 +1931,13 @@ function upgradeSettings(){
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
     Settings.SetValue('sb','highlight_mod', chk?3:0);
+  }
+
+  //0.19: Upgrade of boolean to number for 
+  var chk = Settings.GetValue('pagehack','smileyOverlay');
+  if(parseInt(chk, 10) == NaN) {
+    upgraded = true;
+    Settings.SetValue('pagehack','smileyOverlay', chk?1:0);
   }
 
   //0.19: remove that typo quickSearhMenu
