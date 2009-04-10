@@ -722,7 +722,7 @@ SettingsStore.prototype = {
     //Based on http://www.thespanner.co.uk/2008/04/10/javascript-cloning-objects/
     var tmp = this.load_field('settings', this.Values);
     for(var f in tmp){
-        this.Values[f] = tmp[f];
+      this.Values[f] = tmp[f];
     }
   },
 
@@ -747,6 +747,7 @@ SettingsStore.prototype = {
     this.Values['sb.highlight_mod']=0;
     this.Values['sb.highlight_stalk']=0;
     this.Values['sb.user_stalk']="";
+    this.Values['sb.pnlink_active']=true;
   },
 
   GetValue: function(sec,key) {
@@ -790,6 +791,8 @@ SettingsStore.prototype = {
           createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
           );
       addSettingsRow( 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',createTextInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
+      addSettingsRow( 'Zeige Link zum Schreiben einer PN an Benutzer',createCheckbox('sb_pnlink', this.GetValue('sb','pnlink_active')));
+
     }
     this.Window.OptionsTable = tbl;
     this.Window.OptionsGenerator = sg;
@@ -817,6 +820,7 @@ SettingsStore.prototype = {
       Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
       Settings.SetValue('sb','longInput', getBool('sb_longinput'));
       Settings.SetValue('sb','user_stalk', getValue('sb_user_stalk'));
+      Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -834,6 +838,14 @@ SettingsStore.prototype = {
       window.location.reload(false);
     }
     Settings.Window.close();
+  },
+
+  ev_EditSettings: function(evt) {
+    var _save = this;
+    window.setTimeout(function() {
+      _save.LoadFromDisk();
+      _save.ShowSettingsDialog();
+    },0);
   },
 
   ShowSettingsDialog: function() {
@@ -1212,6 +1224,7 @@ function ShoutboxWindow() {
   var user_stalk = Settings.GetValue('sb','user_stalk').trim().split(/\s*,\s*/);
 
   var anek_active = Settings.GetValue('sb','anek_active');
+  var pn_link = Settings.GetValue('sb','pnlink_active');
 //  console.log('me: '+shoutclass_me);
 //  console.log('mod: '+shoutclass_mod);
 
@@ -1258,10 +1271,21 @@ function ShoutboxWindow() {
     shout.insertBefore(cnt, shout.firstChild);
     shout.insertBefore(div, shout.firstChild);
 
+    var tools = null;
+    var tool_html = '';
     if(anek_active) {
-      var tools = document.createElement('span');
+      tool_html+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')">A</a>';
+    }
+    if(pn_link) {
+      tool_html+='<a href="privmsg.php?mode=post&u=' + UserMan.getUID(shout_user) + '" target="_parent">P</a>';
+    }
+    if(Settings.GetValue('sb','highlight_stalk')>0) {
+      tool_html+='<a href="javascript:EM.ShoutWin.ev_stalk(\''+escape(shout_user)+'\')">E</a>';
+    }
+    if(tool_html!='') {
+      tools = document.createElement('span');
       tools.className+=' incell right';
-      tools.innerHTML+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')>A</a>';
+      tools.innerHTML = tool_html;
       div.appendChild(tools);
     }
   };
@@ -1324,6 +1348,22 @@ ShoutboxWindow.prototype = {
     else
        this.Anekdoter.Body.firstChild.innerHTML = ih + this.Anekdote(this.shouts[idx]);
     this.Anekdoter.Window.focus();
+  },
+
+  ev_stalk: function(user) {
+    user = unescape(user);
+
+    var user_list = Settings.GetValue('sb','user_stalk').trim().split(/\s*,\s*/);
+
+    if (user_list.some(function (item) { return item == user; })) {
+      user_list = user_list.filter(function(el) { return el != user; });
+    } else {
+      user_list.push(user);
+    }
+
+    Settings.SetValue('sb','user_stalk',user_list.join(',').replace(/^,*|,*$/, ''));
+    Settings_SaveToDisk();
+    window.location.reload();
   }
 }
 
@@ -1944,7 +1984,7 @@ function initEdgeApe() {
     EM.Buttons = new ButtonBar();
 
     with(EM.Buttons) {
-      addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ShowSettingsDialog()');
+      addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
     }
     EM.Pagehacks = new Pagehacks();
     EM.Shouts = new ShoutboxControls();
