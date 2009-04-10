@@ -733,7 +733,7 @@ SettingsStore.prototype = {
     this.Values['pagehack.extSearchPage']=true;
     this.Values['pagehack.extPostSubmission']=true;
     this.Values['pagehack.quickProfMenu']=false;
-    this.Values['pagehack.quickSearhMenu']=false;
+    this.Values['pagehack.quickSearchMenu']=false;
     this.Values['pagehack.smileyOverlay']=true;
 
     this.Values['ui.showDropShadow']=true;
@@ -1916,6 +1916,13 @@ function upgradeSettings(){
     Settings.SetValue('sb','highlight_mod', chk?3:0);
   }
 
+  //0.19: remove that typo quickSearhMenu
+  if (Settings.GetValue('pagehack','quickSearhMenu')!=null) {
+    upgraded = true;
+    Settings.Values['pagehack.quickSearhMenu'] = undefined;
+    delete Settings.Values['pagehack.quickSearhMenu'];
+  }
+
   if (upgraded) {
     Settings_SaveToDisk();
     window.alert(
@@ -1940,7 +1947,6 @@ function initEdgeApe() {
   }
   else
   {
-    EM.User = UserMan;
     EM.Buttons = new ButtonBar();
 
     with(EM.Buttons) {
@@ -1956,6 +1962,7 @@ unsafeWindow.EM = EM;
 Settings = new SettingsStore();
 Ajax = new AJAXObject();
 UserMan = new UserManager();
+EM.User = UserMan;
 EM.Settings = Settings;
 Location = window.location.href;
 
