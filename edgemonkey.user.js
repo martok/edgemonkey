@@ -23,6 +23,12 @@ const ScriptVersion = 0.19;
   -better user-tag-linking
   -improved loading the configuration (BenBE)
   -Branch-Switch-Links
+  -Shout Following (BenBE)
+  -Inline Window for Smileys in SB (Martok)
+  -Quick Search from navigation bar (Martok)
+  -Multiline Textarea for Shoutbox (Martok)
+  -improved autoshout features (BenBE)
+  -Opera Compatibility (BenBE)
 
 0.18           09-02-28
   -Flat Styles by BenBE
@@ -79,6 +85,11 @@ const ScriptVersion = 0.19;
 const sburl = '/shoutbox_view.php?';
 const sb_per_page = 30;
 const RELEASE = 0;
+
+//Opera compatibility (BenBE)
+if(typeof unsafeWindow == "undefined") {
+  unsafeWindow = window;
+}
 
 var console = unsafeWindow.console;
 // just in case s/o does not have Firebug
@@ -419,7 +430,7 @@ function UserWindow(title, name,options,previous,body_element) {
     'input.liteoption { background-color:#FAFAFC; font-weight:normal; }'+
     'td.cat,td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom {'+
     '    background-image: url(../templates/subSilver/images/cellpic1.gif);'+
-    '    background-color:DBE4EB; border: #FFFFFF; border-style: solid; height: 28px;'+
+    '    background-color:#DBE4EB; border: #FFFFFF; border-style: solid; height: 28px;'+
     '}'+
     'td.cat,td.catHead,td.catBottom {'+
     '    height: 29px;'+
@@ -697,7 +708,9 @@ var Settings_SaveToDisk = function () { // global deklarieren
 
 SettingsStore.prototype = {
   store_field: function (key, data) {
-    GM_setValue(key, uneval(data));
+    window.setTimeout(function() {
+      GM_setValue(key, uneval(data));
+    }, 0);
   },
   load_field: function (key, data) {
     return eval(GM_getValue(key, (uneval(data) || '({})')));
@@ -950,7 +963,8 @@ UserManager.prototype = {
   getUID: function(name) {
     if (!name) return -1;
     if (isUndef(this.knownUIDs[name])) {
-      var prof = AJAXSyncRequest('ajax_get_userid.php?username='+name);
+      var prof = new AJAXObject();
+      prof = prof.SyncRequest('ajax_get_userid.php?username='+name, null);
       var id = prof.match(/<userid><!\[CDATA\[([0-9]*)\]\]><\/userid>/ );
       if (id) this.knownUIDs[name] = id[1];
       Settings.store_field('uidcache', this.knownUIDs);
@@ -1208,6 +1222,7 @@ function ShoutboxWindow() {
     var a = shout.firstChild;
     var div = document.createElement('div');
     var std = document.createElement('span');
+    var shout_user = UserMan.usernameFromProfile(a.href);
     for (var j=0;j<shout.childNodes.length+5;j++) {
       var nd = shout.removeChild(shout.firstChild);
       if (nd.nodeName=='BR') {
@@ -1226,13 +1241,13 @@ function ShoutboxWindow() {
     if (Settings.GetValue('sb','highlight_stalk')) {
       if (user_stalk.some(
         function (e){
-          return e == UserMan.usernameFromProfile(a.href);
+          return e == shout_user;
         }))
         shout.className+=' ' + shoutclass_stalk;
     }
     // at last the logged on user, to allow overriding the style properly
     if (Settings.GetValue('sb','highlight_me')) {
-      if (UserMan.usernameFromProfile(a.href)==UserMan.loggedOnUser)
+      if (shout_user==UserMan.loggedOnUser)
         shout.className+=' ' + shoutclass_me;
     }
     std.className = 'incell left';
@@ -1525,7 +1540,7 @@ Pagehacks.prototype = {
       '</tr></table>'+
       '<div style="white-space: nowrap; margin-left: 4px; text-align:center;">'+
       '<input class="mainoption" style="width: 40%;" value="Go!" type="submit">&nbsp;<input class="liteoption" style="width: 40%;" value="Inline!" type="button" onclick="EM.Pagehacks.ev_fastSearch(this)"></div>'+
-      
+
       '</form>';
   },
 
@@ -1869,7 +1884,7 @@ Pagehacks.prototype = {
       insertCell(-1);
     }
   },
-  
+
   AddSmileyOverlay: function() {
   	var f = document.forms.namedItem('post');
   	if (f) {
