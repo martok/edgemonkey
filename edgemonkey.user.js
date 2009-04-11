@@ -215,6 +215,9 @@ String.prototype.escapeHTML = function (typ) {
   return str;
 };
 
+String.prototype.equals = function (what) {
+  return this.toLowerCase()==what.toLowerCase();
+};
 
 // FF 3.1+ has it native (JS 1.8.1)
 if (!String.prototype.trim) String.prototype.trim = function() {
@@ -1262,7 +1265,7 @@ function ShoutboxWindow() {
     if (shoutclass_stalk) {
       if (user_stalk.some(
         function (e){
-          return e == shout_user;
+          return e.equals(shout_user);
         }))
         shout.className+=' ' + shoutclass_stalk;
     }
@@ -1363,8 +1366,8 @@ ShoutboxWindow.prototype = {
 
     var user_list = Settings.GetValue('sb','user_stalk');
 
-    if (user_list.some(function (item) { return item == user; })) {
-      user_list = user_list.filter(function(el) { return el != user; });
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
     } else {
       user_list.push(user);
     }
