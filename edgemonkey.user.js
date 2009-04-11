@@ -29,6 +29,8 @@ const ScriptVersion = 0.19;
   -Multiline Textarea for Shoutbox (Martok)
   -improved autoshout features (BenBE)
   -Opera Compatibility (BenBE)
+  -User Highlighting in Shoutbox (BenBE, Martok)
+  -improved Shoutbox tools (BenBE, Martok)
 
 0.18           09-02-28
   -Flat Styles by BenBE
@@ -325,11 +327,17 @@ SettingsGenerator.prototype = {
   createCheckbox: function (name,checked) {
   	return '<input name="'+name+'" type="checkbox"'+(checked?' checked="checked"':'')+' />';
   },
+  createArrayInput: function (name, arr) {
+    return '<textarea name="'+name+'">'+arr.map(function(e) {return new String(e).escapeHTML(3)}).join("\n")+'</textarea>';
+  },
   getBool: function(name) {
   	return this.Document.getElementsByName(name)[0].checked;
   },
   getValue: function(name) {
   	return this.Document.getElementsByName(name)[0].value;
+  },
+  getArray: function(name) {
+    return this.Document.getElementsByName(name)[0].value.split("\n").map(function(e) { return e.trim() });
   }
 }
 
@@ -746,7 +754,7 @@ SettingsStore.prototype = {
     this.Values['sb.highlight_me']=0;
     this.Values['sb.highlight_mod']=0;
     this.Values['sb.highlight_stalk']=0;
-    this.Values['sb.user_stalk']="";
+    this.Values['sb.user_stalk']=new Array();
     this.Values['sb.pnlink_active']=true;
   },
 
@@ -790,7 +798,7 @@ SettingsStore.prototype = {
       addSettingsRow( 'Shouts von Moderatoren/Admins hervorheben',
           createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
           );
-      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',createTextInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
+      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',createArrayInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
       addSettingsRow( 'Zeige Link zum Schreiben einer PN an Benutzer',createCheckbox('sb_pnlink', this.GetValue('sb','pnlink_active')));
 
     }
@@ -819,7 +827,7 @@ SettingsStore.prototype = {
       Settings.SetValue('sb','highlight_mod', getValue('sb_highlight_mod'));
       Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
       Settings.SetValue('sb','longInput', getBool('sb_longinput'));
-      Settings.SetValue('sb','user_stalk', getValue('sb_user_stalk'));
+      Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
       Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
     }
     Settings_SaveToDisk();
@@ -1221,7 +1229,7 @@ function ShoutboxWindow() {
   var shoutclass_mod = 'emctpl' + Settings.GetValue('sb','highlight_mod');
   var shoutclass_stalk = 'emctpl' + Settings.GetValue('sb','highlight_stalk');
 
-  var user_stalk = Settings.GetValue('sb','user_stalk').trim().split(/\s*,\s*/);
+  var user_stalk = Settings.GetValue('sb','user_stalk');
 
   var anek_active = Settings.GetValue('sb','anek_active');
   var pn_link = Settings.GetValue('sb','pnlink_active');
@@ -1246,12 +1254,12 @@ function ShoutboxWindow() {
     }
     div.className+='intbl';
     //First detect Moderators ...
-    if (Settings.GetValue('sb','highlight_mod')) {
+    if (shoutclass_mod) {
       if (a.style.cssText.match(/color\:/))
         shout.className+=' ' + shoutclass_mod;
     }
     // and after this the followed\stalked users, to allow overriding the style properly
-    if (Settings.GetValue('sb','highlight_stalk')) {
+    if (shoutclass_stalk) {
       if (user_stalk.some(
         function (e){
           return e == shout_user;
@@ -1259,7 +1267,7 @@ function ShoutboxWindow() {
         shout.className+=' ' + shoutclass_stalk;
     }
     // at last the logged on user, to allow overriding the style properly
-    if (Settings.GetValue('sb','highlight_me')) {
+    if (shoutclass_me) {
       if (shout_user==UserMan.loggedOnUser)
         shout.className+=' ' + shoutclass_me;
     }
@@ -1353,7 +1361,7 @@ ShoutboxWindow.prototype = {
   ev_stalk: function(user) {
     user = unescape(user);
 
-    var user_list = Settings.GetValue('sb','user_stalk').trim().split(/\s*,\s*/);
+    var user_list = Settings.GetValue('sb','user_stalk');
 
     if (user_list.some(function (item) { return item == user; })) {
       user_list = user_list.filter(function(el) { return el != user; });
@@ -1361,7 +1369,7 @@ ShoutboxWindow.prototype = {
       user_list.push(user);
     }
 
-    Settings.SetValue('sb','user_stalk',user_list.join(',').replace(/^,*|,*$/, ''));
+    Settings.SetValue('sb','user_stalk',user_list);
     Settings_SaveToDisk();
     window.location.reload();
   }
@@ -1954,6 +1962,13 @@ function upgradeSettings(){
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
     Settings.SetValue('sb','highlight_mod', chk?3:0);
+  }
+
+  //0.19: Upgrade of string stalk list to array
+  var chk = Settings.GetValue('sb','user_stalk');
+  if(typeof chk == 'string') {
+    upgraded = true;
+    Settings.SetValue('sb','user_stalk', chk.trim().split(/\s*,\s*/));
   }
 
   if (upgraded) {
