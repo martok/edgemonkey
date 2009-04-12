@@ -280,27 +280,27 @@ SettingsGenerator.prototype = {
   addSettingsRow: function (caption, innerHTML) {
     var rowClass = this.tbl.zebra ? 'row1' : 'row2';
     this.tbl.zebra = !this.tbl.zebra;
-  
+
     var r = this.tbl.insertRow(-1);
-  
+
     var td_left = r.insertCell(-1);
     var td_right = r.insertCell(-1);
-  
+
     td_left.className = rowClass;
     td_right.className = rowClass;
-  
+
     var ot = r.optionText = document.createElement('span');
     var oc = r.optionControl = document.createElement('div');
-  
+
     ot.className = 'gensmall';
     ot.innerHTML = caption;
-  
+
     oc.className = 'gensmall';
     oc.innerHTML = innerHTML;
-  
+
     td_left.appendChild(ot);
     td_right.appendChild(oc);
-  
+
     return r;
   },
   createColorSelection: function (name,def,includeignore){
@@ -309,9 +309,9 @@ SettingsGenerator.prototype = {
       var st = colorTpl[i].style1;
       var t = colorTpl[i].friendlyname;
       if(i==0) st = 'background:#FFFFFF;';
-  
+
       s+='<option value="'+i+'" style="'+st+'"'+(i==def?' selected':'')+'>'+t+'</option>';
-  
+
       if(i==0&&includeignore) {
         s+='<option value="-1" style="'+st+'"'+(-1==def?' selected':'')+'>Standard</option>';
       }
@@ -405,8 +405,17 @@ AJAXObject.prototype = {
       var req = aEvt.target;
       if (req.readyState == 4) {
         if(req.status == 200) {
-        if (!isUndef(div) && div!=null) {div.innerHTML = req.responseText}
-        if (!isUndef(callback) && callback!=null) {callback(div);}
+          if (typeof callback=='function'){
+            if (callback.length==1) {
+              if (!isUndef(div) && div!=null) {div.innerHTML = req.responseText}
+              callback(div);
+            } else {
+            	var tmp = document.createElement('div');
+            	tmp.innerHTML = req.responseText;
+              callback(tmp,div);
+            }
+          } else   
+            if (!isUndef(div) && div!=null) {div.innerHTML = req.responseText}
         }
       }
     }
@@ -729,7 +738,7 @@ SettingsStore.prototype = {
     //Based on http://www.thespanner.co.uk/2008/04/10/javascript-cloning-objects/
     var tmp = this.load_field('settings', this.Values);
     for(var f in tmp){
-        this.Values[f] = tmp[f];
+      this.Values[f] = tmp[f];
     }
   },
 
@@ -774,7 +783,7 @@ SettingsStore.prototype = {
       addSettingsRow( 'Schlagschatten unter Popup-Fenstern', createCheckbox('ui_dropshadow', this.GetValue('ui','showDropShadow')));
       addSettingsRow( 'Nutze ein flacheres Layout f&uuml;r Formulare', createCheckbox('ui_flatstyle', this.GetValue('ui', 'useFlatStyle')));
       addSettingsRow( 'Maximalbreite von Bildern erzwingen', createCheckbox('ph_imgmaxwidth', this.GetValue('pagehack','imgMaxWidth')));
-  
+
       addHeadrow('Ergonomie',2);
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
@@ -788,7 +797,7 @@ SettingsStore.prototype = {
           ])
           );
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
-  
+
       addHeadrow('Shoutbox',2);
       addSettingsRow( 'Eingabefeld vergr&ouml;&szlig;ern', createCheckbox('sb_longinput', this.GetValue('sb','longInput')));
       addSettingsRow( 'Shoutbox-Anekdoter aktivieren', createCheckbox('sb_anek_start', this.GetValue('sb','anek_active')));
@@ -1582,31 +1591,39 @@ Pagehacks.prototype = {
     post=post.join('&');
 
     var coo = new Point(0,0);
-    coo.CenterInWindow(640,320);
-    var w = new OverlayWindow(coo.x,coo.y,640,320,'','em_searchresults');
+    coo.CenterInWindow(640,480);
+    var w = new OverlayWindow(coo.x,coo.y,640,480,'','em_searchresults');
     w.InitWindow();
     w.ContentArea.innerHTML = '<table width="100%" cellspacing="0" cellpadding="1" border="0"><tr><td>&nbsp;</td></tr>'+
         '<tr><td align="center"><span class="gen">Suche l&auml;uft...</span></td></tr><tr><td>&nbsp;</td></tr></table>';
     w.Frame.style.height = w.Frame.style.minHeight;
     var s = Ajax.AsyncRequest(inp.form.action,post,w.ContentArea,
-      function(div) {
-      	div.style.height=(parseInt(w.Frame.style.height)-30)+'px';
-      	div.style.overflow='scroll';
+    //search_fields=all&show_results=topics&synonym_search=1&search_keywords=Easteregg&website=
+      /search_keywords=(\x45\x61\x73\x74\x65\x72\x65\x67\x67|\x4F\x73\x74\x65\x72\x65\x69(?:er)?)\&/i.test(post) ?
+      function(div,target) {
+        target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
+        target.style.overflow='scroll';
+        target.style.textAlign='center';
+        target.innerHTML = '<img src="http://www.karikatur-cartoon.de/bilder/bemalte_ostereier.jpg" style="align:center;"/>';
+      } :
+      function(div,target) {
+      	target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
+      	target.style.overflow='scroll';
       	var tab = queryXPathNode(div,'table[2]');
       	var err = queryXPathNode(tab,"./tbody/tr[2]/td/div/table[@class='forumline']/tbody/tr[2]/td[@class='row1']");
       	if (err && err.innerHTML.match(/Keine Beitr.*?ge entsprechen Deinen Kriterien./)) {
-      		div.innerHTML=err.innerHTML;
+      	  target.innerHTML=err.innerHTML;
       	} else {
           var h = queryXPathNode(tab,"./tbody/tr[1]/td/center/a[@class='maintitle' and @id='maintitle']");
           var cc = queryXPathNode(tab,"./tbody/tr[2]/td[1]/div");
-          div.innerHTML = '';
+          target.innerHTML = '';
           var d = document.createElement('div');
           d.style.textAlign='center';
           d.appendChild(h);
           d.appendChild(document.createElement('br'));
           d.appendChild(document.createTextNode('Nur die erste Seite wird angezeigt.'));
-          div.appendChild(d);
-          div.appendChild(cc);
+          target.appendChild(d);
+          target.appendChild(cc);
       	}
       });
       document.overlayWindows.getWindowById('em_searchbox').Close();
