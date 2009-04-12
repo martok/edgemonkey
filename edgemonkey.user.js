@@ -192,6 +192,11 @@ function isUndef(what)
   return (typeof what == "undefined");
 }
 
+function isEmpty(what)
+{
+  return isUndef(what) || null==what;
+}
+
 //http://www.infocamp.de/javascript_htmlspecialchars.php
 String.prototype.escapeHTML = function (typ) {
   if(typeof typ!="number")
@@ -2019,22 +2024,25 @@ function upgradeSettings(){
   var chk = Settings.GetValue('sb','user_stalk');
   if(typeof chk == 'string') {
     upgraded = true;
-    Settings.SetValue('sb','user_stalk', chk.trim().split(/\s*,\s*/));
+    var a = chk.trim().split(/\s*,\s*/);
+    Settings.SetValue('sb','user_stalk', a);
   }
 
   if (upgraded) {
     Settings_SaveToDisk();
-    window.alert(
-      'Die Einstellungen wurden auf ein aktualisiertes Datenformat konvertiert.\n' +
-      'Ein Downgrade von EdgeMonkey kann daher zu Fehlfunktionen oder Datenverlust führen.'
-    );
-    window.location.reload(false);
+    window.setTimeout(function() { 
+      window.alert( 
+        'Die Einstellungen wurden auf ein aktualisiertes Datenformat konvertiert.\n' + 
+        'Ein Downgrade von EdgeMonkey kann daher zu Fehlfunktionen oder Datenverlust führen.'
+      );
+      window.location.reload(false);
+      }, 50);
   }
 }
 
 function initEdgeApe() {
   //No upgrade from inside any popup
-  if(isUndef(window.opener) || null == window.opener)
+  if(isEmpty(window.opener) && (window.parent==window) )
   {
     upgradeSettings();
   }
@@ -2056,13 +2064,20 @@ function initEdgeApe() {
   }
 }
 
-window.EM = {};
-unsafeWindow.EM = EM;
-Settings = new SettingsStore();
+if (!isEmpty(unsafeWindow.parent.EM)) {
+  window.EM = unsafeWindow.parent.EM;
+  unsafeWindow.EM = EM;
+  UserMan = EM.User;
+  Settings = EM.Settings;
+} else {
+  window.EM = {};
+  Settings = new SettingsStore();
+  UserMan = new UserManager();
+  EM.Settings = Settings;
+  EM.User = UserMan;
+  unsafeWindow.EM = EM;
+}
 Ajax = new AJAXObject();
-UserMan = new UserManager();
-EM.User = UserMan;
-EM.Settings = Settings;
 Location = window.location.href;
 
 initEdgeApe(); //Should go as soon as possible ...
