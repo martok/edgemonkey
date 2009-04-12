@@ -453,7 +453,7 @@ AJAXObject.prototype = {
             	tmp.innerHTML = req.responseText;
               callback(tmp,div);
             }
-          } else   
+          } else
             if (!isUndef(div) && div!=null) {div.innerHTML = req.responseText}
         }
       }
@@ -796,6 +796,7 @@ SettingsStore.prototype = {
     this.Values['ui.betaFeatures']=false;
 
     this.Values['sb.longInput']=false;
+    this.Values['sb.boldUser']=false;
     this.Values['sb.anek_active']=true;
     this.Values['sb.anek_reverse']=true;
     this.Values['sb.highlight_me']=0;
@@ -840,6 +841,7 @@ SettingsStore.prototype = {
 
       addHeadrow('Shoutbox',2);
       addSettingsRow( 'Eingabefeld vergr&ouml;&szlig;ern', createCheckbox('sb_longinput', this.GetValue('sb','longInput')));
+      addSettingsRow( 'Shoutenden Username hervorheben', createCheckbox('sb_bolduser', this.GetValue('sb','boldUser')));
       addSettingsRow( 'Shoutbox-Anekdoter aktivieren', createCheckbox('sb_anek_start', this.GetValue('sb','anek_active')));
       addSettingsRow( 'Anekdoten oben einf&uuml;gen', createCheckbox('sb_anek_rev', this.GetValue('sb','anek_reverse')));
       addSettingsRow( 'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
@@ -880,6 +882,7 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('sb','highlight_mod', getValue('sb_highlight_mod'));
       EM.Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
       EM.Settings.SetValue('sb','longInput', getBool('sb_longinput'));
+      EM.Settings.SetValue('sb','boldUser', getBool('sb_bolduser'));
       EM.Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
       EM.Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
     }
@@ -1087,20 +1090,34 @@ function ShoutboxControls() {
     	}
     	var ev = EM.Settings.GetValue('pagehack','smileyOverlay')>0?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
     	with (insertCell(-1)) {
+    		align='center';
+    		innerHTML='<span class="gensmall">'+
+                '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'b\'); return false;" href="#" class="gensmall" title="Bold">B</a>'+
+                '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'i\'); return false;" href="#" class="gensmall" title="Italic">I</a>'+
+                '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'u\'); return false;" href="#" class="gensmall" title="Underlined">U</a>'+
+                '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'s\'); return false;" href="#" class="gensmall" title="Strikeout">S</a>'+
+                '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'url\'); return false;" href="#" class="gensmall" title="Link">L</a>'+
+                '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'user\'); return false;" href="#" class="gensmall" title="Member">M</a>'+
+                '</span>';
+    	}
+    	with (insertCell(-1)) {
     		align='right';
-    		innerHTML='<span class="gensmall"><a onclick="'+ev+'; return false;" href="posting.php?mode=smilies" class="gensmall">Smilies</a>';
+    		innerHTML='<span class="gensmall">'+
+                '<a onclick="'+ev+'; return false;" href="posting.php?mode=smilies" class="gensmall" style="font-weight: bold;">Smilies</a>'+
+                '</span>';
     	}
     }
     with (tab.insertRow(-1)) {
     	with (insertCell(-1)) {
     		align='left';
-    		colSpan=2;
-    	  innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
+    		colSpan=3;
+    		innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
     	}
     }
     with (tab.insertRow(-1)) {
     	with (insertCell(-1)) {
     		align='left';
+            colSpan=2;
     		innerHTML='<span class="gensmall"><input style="color: green;" value="150" readonly="readonly" name="shoutchars" class="charcount" id="shoutchars" type="text"> Zeichen übrig</span>';
     	}
     	with (insertCell(-1)) {
@@ -1294,6 +1311,9 @@ function ShoutboxWindow() {
     var shout = trs[i].firstChild;
     this.shouts.push(shout);
     var a = shout.firstChild;
+    if(EM.Settings.GetValue('sb','anek_active')) {
+        a.style.cssText+='font-weight: bold;';
+    }
     var div = document.createElement('div');
     var std = document.createElement('span');
     var shout_user = EM.User.usernameFromProfile(a.href);
@@ -1715,6 +1735,27 @@ Pagehacks.prototype = {
     new SmileyWindow(target);
   },
 
+  SBTagify: function(target, tag) {
+    var edit = document.getElementById(target);
+    var oldStart = edit.selectionStart;
+    var oldEnd = edit.selectionEnd;
+    var theSelection = edit.value.substring(oldStart, oldEnd);
+    edit.value =
+      edit.value.substring(0, oldStart) +
+      '[' + tag + ']' +
+      theSelection +
+      '[/' + tag + ']' +
+      edit.value.substring(oldEnd, edit.value.length);
+    if (oldStart == oldEnd)
+    {
+      edit.selectionStart = oldStart + tag.length + 2;
+      edit.selectionEnd = oldStart + tag.length + 2;
+    } else {
+      edit.selectionStart = oldStart + theSelection.length + tag.length + 2;
+      edit.selectionEnd = oldStart + theSelection.length + tag.length + 2;
+    }
+  },
+
   cssHacks: function() {
     for (var s = 0; s < document.styleSheets.length; s++) {
       var rules = document.styleSheets[s].cssRules;
@@ -2031,7 +2072,7 @@ function upgradeSettings(){
     EM.Settings.SetValue('sb','highlight_mod', chk?3:0);
   }
 
-  //0.19: Upgrade of boolean to number for 
+  //0.19: Upgrade of boolean to number for
   var chk = EM.Settings.GetValue('pagehack','smileyOverlay');
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
@@ -2055,9 +2096,9 @@ function upgradeSettings(){
 
   if (upgraded) {
     Settings_SaveToDisk();
-    window.setTimeout(function() { 
-      window.alert( 
-        'Die Einstellungen wurden auf ein aktualisiertes Datenformat konvertiert.\n' + 
+    window.setTimeout(function() {
+      window.alert(
+        'Die Einstellungen wurden auf ein aktualisiertes Datenformat konvertiert.\n' +
         'Ein Downgrade von EdgeMonkey kann daher zu Fehlfunktionen oder Datenverlust führen.'
       );
       window.location.reload(false);
