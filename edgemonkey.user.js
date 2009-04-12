@@ -99,7 +99,6 @@ if (!console || RELEASE) {
   console = new Object();
   console.log = function() {return true; };
 }
-var Settings;
 
 var colorTpl = new Array(
     {
@@ -474,7 +473,7 @@ function UserWindow(title, name,options,previous,body_element) {
   wnd.document.write(
     '<?xml version="1.0" encoding="UTF-8"?>'+
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'+
-    '<html><head><script type="text/javascript">Settings=opener.EM.Settings</script>'+
+    '<html><head><script type="text/javascript">EM=opener.EM</script>'+
     '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />'+
     '<meta http-equiv="Content-Style-Type" content="text/css" />'+
     '<link rel="stylesheet" type="text/css" href="styles/common.css" />'+
@@ -591,7 +590,7 @@ function OverlayWindow(x,y,w,h,content,id)
   this.Shadows = [];
   var pwn = this.Outer;
   var swtop = 0;
-  if(Settings.GetValue('ui', 'showDropShadow')) {
+  if(EM.Settings.GetValue('ui', 'showDropShadow')) {
     for(i=10; i>=0; i--) {
       var filterCSS = 'position:relative; overflow:visible; display:block;';
       filterCSS += 'left:'+i+'px; top:'+(-(swtop-i))+'px;';
@@ -759,7 +758,7 @@ function SettingsStore() {
 }
 
 var Settings_SaveToDisk = function () { // global deklarieren
-  Settings.store_field('settings', Settings.Values);
+  EM.Settings.store_field('settings', EM.Settings.Values);
 }
 
 SettingsStore.prototype = {
@@ -862,44 +861,44 @@ SettingsStore.prototype = {
   },
 
   ev_SaveDialog: function(evt) {
-    with (Settings.Window.OptionsGenerator) {
-      Settings.SetValue('pagehack','monospace', getBool('ph_mono'));
-      Settings.SetValue('pagehack','quickProfMenu', getBool('ph_ddmyedge'));
-      Settings.SetValue('pagehack','quickSearchMenu', getBool('ph_ddsearch'));
-      Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
-      Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
-      Settings.SetValue('pagehack','imgMaxWidth', getBool('ph_imgmaxwidth'));
-      Settings.SetValue('pagehack','smileyOverlay', getValue('ph_smileyOverlay'));
+    with (EM.Settings.Window.OptionsGenerator) {
+      EM.Settings.SetValue('pagehack','monospace', getBool('ph_mono'));
+      EM.Settings.SetValue('pagehack','quickProfMenu', getBool('ph_ddmyedge'));
+      EM.Settings.SetValue('pagehack','quickSearchMenu', getBool('ph_ddsearch'));
+      EM.Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
+      EM.Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
+      EM.Settings.SetValue('pagehack','imgMaxWidth', getBool('ph_imgmaxwidth'));
+      EM.Settings.SetValue('pagehack','smileyOverlay', getValue('ph_smileyOverlay'));
 
-      Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
-      Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
-      Settings.SetValue('ui','betaFeatures', getBool('ui_betaFeatures'));
+      EM.Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
+      EM.Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
+      EM.Settings.SetValue('ui','betaFeatures', getBool('ui_betaFeatures'));
 
-      Settings.SetValue('sb','anek_active', getBool('sb_anek_start'));
-      Settings.SetValue('sb','anek_reverse', getBool('sb_anek_rev'));
-      Settings.SetValue('sb','highlight_me', getValue('sb_highlight_me'));
-      Settings.SetValue('sb','highlight_mod', getValue('sb_highlight_mod'));
-      Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
-      Settings.SetValue('sb','longInput', getBool('sb_longinput'));
-      Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
-      Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
+      EM.Settings.SetValue('sb','anek_active', getBool('sb_anek_start'));
+      EM.Settings.SetValue('sb','anek_reverse', getBool('sb_anek_rev'));
+      EM.Settings.SetValue('sb','highlight_me', getValue('sb_highlight_me'));
+      EM.Settings.SetValue('sb','highlight_mod', getValue('sb_highlight_mod'));
+      EM.Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
+      EM.Settings.SetValue('sb','longInput', getBool('sb_longinput'));
+      EM.Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
+      EM.Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
       window.location.reload(false);
     }
-    Settings.Window.close();
+    EM.Settings.Window.close();
   },
 
   ev_ClearAll: function(evt) {
     if (!confirm("Sollen wirklich alle Einstellungen zurückgesetzt werden?"))
       return false;
-    Settings.RestoreDefaults();
+    EM.Settings.RestoreDefaults();
     Settings_SaveToDisk();
     if (confirm("Einstellugen auf Standard zurückgesetzt.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?")) {
       window.location.reload(false);
     }
-    Settings.Window.close();
+    EM.Settings.Window.close();
   },
 
   ev_EditSettings: function(evt) {
@@ -1013,8 +1012,8 @@ ButtonBar.prototype = {
 }
 
 function UserManager() {
-  this.knownUIDs = Settings.load_field('uidcache',this.knownUIDs);
-  this.loggedOnUserId = Settings.cookies['ee_data']['userid'];
+  this.knownUIDs = EM.Settings.load_field('uidcache',this.knownUIDs);
+  this.loggedOnUserId = EM.Settings.cookies['ee_data']['userid'];
   this.loggedOnSessionId = "";
   this.loggedOnUser = this.knownUIDs[-1];
   var a=document.getElementsByTagName('a');
@@ -1022,7 +1021,7 @@ function UserManager() {
     if (a[i].href.match(/login\.php\?logout=true/) && a[i].innerHTML.match(/Logout/)) {
       this.loggedOnUser = a[i].innerHTML.match(/\((.*)\)/)[1];
       this.knownUIDs[-1] = this.loggedOnUser;
-      Settings.store_field('uidcache', this.knownUIDs);
+      EM.Settings.store_field('uidcache', this.knownUIDs);
 
       //Get the Session ID
       var sid = a[i].href.match(/sid=([a-f0-9]{32})/i);
@@ -1041,7 +1040,7 @@ UserManager.prototype = {
       prof = prof.SyncRequest('ajax_get_userid.php?username='+name, null);
       var id = prof.match(/<userid><!\[CDATA\[([0-9]*)\]\]><\/userid>/ );
       if (id) this.knownUIDs[name] = id[1];
-      Settings.store_field('uidcache', this.knownUIDs);
+      EM.Settings.store_field('uidcache', this.knownUIDs);
     }
     return this.knownUIDs[name];
   },
@@ -1075,7 +1074,7 @@ function ShoutboxControls() {
   this.shout_url = this.get_iframe().src;
   this.form_go = document.getElementById('shoutsubmit');
   this.form = this.form_go.form;
-  if (Settings.GetValue('sb','longInput')) {
+  if (EM.Settings.GetValue('sb','longInput')) {
     this.form.innerHTML='';
     var tab = document.createElement('table');
     this.form.appendChild(tab);
@@ -1086,7 +1085,7 @@ function ShoutboxControls() {
     		align='left';
     		innerHTML='<span class="gensmall">Dein Text:</span>';
     	}
-    	var ev = Settings.GetValue('pagehack','smileyOverlay')>0?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
+    	var ev = EM.Settings.GetValue('pagehack','smileyOverlay')>0?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
     	with (insertCell(-1)) {
     		align='right';
     		innerHTML='<span class="gensmall"><a onclick="'+ev+'; return false;" href="posting.php?mode=smilies" class="gensmall">Smilies</a>';
@@ -1110,7 +1109,7 @@ function ShoutboxControls() {
     	}
     }
   } else {
-    if(Settings.GetValue('pagehack','smileyOverlay')>0) {
+    if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
       this.form.getElementsByTagName('a')[0].setAttribute('onclick','EM.Pagehacks.SmileyWin("shoutmessage"); return false;');
     }
   }
@@ -1279,14 +1278,14 @@ ShoutboxControls.prototype = {
 function ShoutboxWindow() {
   var trs = document.getElementsByTagName('tr');
 
-  var shoutclass_me = 'emctpl' + Settings.GetValue('sb','highlight_me');
-  var shoutclass_mod = 'emctpl' + Settings.GetValue('sb','highlight_mod');
-  var shoutclass_stalk = 'emctpl' + Settings.GetValue('sb','highlight_stalk');
+  var shoutclass_me = 'emctpl' + EM.Settings.GetValue('sb','highlight_me');
+  var shoutclass_mod = 'emctpl' + EM.Settings.GetValue('sb','highlight_mod');
+  var shoutclass_stalk = 'emctpl' + EM.Settings.GetValue('sb','highlight_stalk');
 
-  var user_stalk = Settings.GetValue('sb','user_stalk');
+  var user_stalk = EM.Settings.GetValue('sb','user_stalk');
 
-  var anek_active = Settings.GetValue('sb','anek_active');
-  var pn_link = Settings.GetValue('sb','pnlink_active');
+  var anek_active = EM.Settings.GetValue('sb','anek_active');
+  var pn_link = EM.Settings.GetValue('sb','pnlink_active');
 //  console.log('me: '+shoutclass_me);
 //  console.log('mod: '+shoutclass_mod);
 
@@ -1297,7 +1296,7 @@ function ShoutboxWindow() {
     var a = shout.firstChild;
     var div = document.createElement('div');
     var std = document.createElement('span');
-    var shout_user = UserMan.usernameFromProfile(a.href);
+    var shout_user = EM.User.usernameFromProfile(a.href);
     for (var j=0;j<shout.childNodes.length+5;j++) {
       var nd = shout.removeChild(shout.firstChild);
       if (nd.nodeName=='BR') {
@@ -1322,7 +1321,7 @@ function ShoutboxWindow() {
     }
     // at last the logged on user, to allow overriding the style properly
     if (shoutclass_me) {
-      if (shout_user==UserMan.loggedOnUser)
+      if (shout_user==EM.User.loggedOnUser)
         shout.className+=' ' + shoutclass_me;
     }
     std.className = 'incell left';
@@ -1339,9 +1338,9 @@ function ShoutboxWindow() {
       tool_html+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')">A</a>';
     }
     if(pn_link) {
-      tool_html+='<a href="privmsg.php?mode=post&u=' + UserMan.getUID(shout_user) + '" target="_parent">P</a>';
+      tool_html+='<a href="privmsg.php?mode=post&u=' + EM.User.getUID(shout_user) + '" target="_parent">P</a>';
     }
-    if(Settings.GetValue('sb','highlight_stalk')>0) {
+    if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
       tool_html+='<a href="javascript:EM.ShoutWin.ev_stalk(\''+escape(shout_user)+'\')">E</a>';
     }
     if(tool_html!='') {
@@ -1405,7 +1404,7 @@ ShoutboxWindow.prototype = {
     this.Anekdoter = new UserWindow('EdgeMonkey :: SB-Anekdoter', 'em_wnd_sbanekdote',
           'HEIGHT=400,resizable=yes,WIDTH=500,scrollbars=yes',undefined,'<pre></pre>');
 
-    if (Settings.GetValue('sb','anek_reverse'))
+    if (EM.Settings.GetValue('sb','anek_reverse'))
        this.Anekdoter.Body.firstChild.innerHTML = this.Anekdote(this.shouts[idx]) + ih;
     else
        this.Anekdoter.Body.firstChild.innerHTML = ih + this.Anekdote(this.shouts[idx]);
@@ -1416,7 +1415,7 @@ ShoutboxWindow.prototype = {
 // don't really know why it gets double-escaped...
 //    user = unescape(user);
 
-    var user_list = Settings.GetValue('sb','user_stalk');
+    var user_list = EM.Settings.GetValue('sb','user_stalk');
 
     if (user_list.some(function (item) { return item.equals(user); })) {
       user_list = user_list.filter(function(el) { return !el.equals(user); });
@@ -1424,7 +1423,7 @@ ShoutboxWindow.prototype = {
       user_list.push(user);
     }
 
-    Settings.SetValue('sb','user_stalk',user_list);
+    EM.Settings.SetValue('sb','user_stalk',user_list);
     Settings_SaveToDisk();
     window.location.reload();
   }
@@ -1440,7 +1439,7 @@ function SmileyWindow(target) {
   pt.CenterInWindow(440,290);
   console.log(pt);
   this.win = new OverlayWindow(pt.x,pt.y,440,290,'','em_SmileyWin');
-  if(Settings.GetValue('pagehack','smileyOverlay')==1) {
+  if(EM.Settings.GetValue('pagehack','smileyOverlay')==1) {
     this.win.InitWindow();
   } else {
     this.win.InitDropdown();
@@ -1558,12 +1557,12 @@ SmileyWindow.prototype = {
 }
 
 function Pagehacks() {
-  if (Settings.GetValue('pagehack','monospace'))
+  if (EM.Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
   EM.Buttons.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
   EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
   this.AddCustomStyles();
-  if(Settings.GetValue('pagehack','extSearchPage') &&
+  if(EM.Settings.GetValue('pagehack','extSearchPage') &&
     /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
   {
     this.FixEmptyResults();
@@ -1571,20 +1570,20 @@ function Pagehacks() {
   if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Location)) {
     this.HelpAJAXified();
   }
-  if(Settings.GetValue('pagehack','extPostSubmission') &&
+  if(EM.Settings.GetValue('pagehack','extPostSubmission') &&
     /\bposting\.php/i.test(Location)) {
     this.FixPostingDialog();
   }
-  if(Settings.GetValue('pagehack','quickProfMenu')) {
+  if(EM.Settings.GetValue('pagehack','quickProfMenu')) {
     this.AddQuickProfileMenu();
   }
-  if(Settings.GetValue('pagehack','quickSearchMenu')) {
+  if(EM.Settings.GetValue('pagehack','quickSearchMenu')) {
     this.AddQuickSearchMenu();
   }
-  if(Settings.GetValue('ui','betaFeatures')) {
+  if(EM.Settings.GetValue('ui','betaFeatures')) {
     this.AddBetaLinks();
   }
-  if(Settings.GetValue('pagehack','smileyOverlay')>0) {
+  if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
 }
@@ -1738,7 +1737,7 @@ Pagehacks.prototype = {
       style.type = 'text/css';
       style.innerHTML+= ' div.overlayWin { position: absolute; z-index: 1;}';
 
-      if(Settings.GetValue('ui', 'useFlatStyle')) {
+      if(EM.Settings.GetValue('ui', 'useFlatStyle')) {
         style.innerHTML+=
           "input, textarea, select {"+
           "  background-color:#fff;"+
@@ -1756,7 +1755,7 @@ Pagehacks.prototype = {
           "}";
       }
 
-      if(Settings.GetValue('ph', 'imgMaxWidth')) {
+      if(EM.Settings.GetValue('ph', 'imgMaxWidth')) {
         style.innerHTML+=
           ".postbody img {"+
           "  max-width: 80%;"+
@@ -1891,7 +1890,7 @@ Pagehacks.prototype = {
         "");//"PDF erstellen");
     tbl.addMenuItem(
         "/graphics/Attachment.gif",
-        "/uacp.php?u="+escape(UserMan.loggedOnUserId)+"&amp;sid="+escape(UserMan.loggedOnSessionId),
+        "/uacp.php?u="+escape(EM.User.loggedOnUserId)+"&amp;sid="+escape(EM.User.loggedOnSessionId),
         "Dateianh&auml;nge",
         "");
     tbl.addMenuItem(
@@ -1974,8 +1973,8 @@ Pagehacks.prototype = {
         var loc = replace(Location, 'http://branch.');
         if (! /[\?\&]sid=/.test(loc)) {
           var p=loc.indexOf('?');
-          if (p<0) loc+='?sid='+UserMan.loggedOnSessionId;
-          else loc = loc.substring(0,p+1)+'sid='+UserMan.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
+          if (p<0) loc+='?sid='+EM.User.loggedOnSessionId;
+          else loc = loc.substring(0,p+1)+'sid='+EM.User.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
 
         }
         Lks.push(['Branch', loc]);
@@ -2018,36 +2017,36 @@ function upgradeSettings(){
   var upgraded = false;
 
   //0.18: Upgrade of boolean to number for Shout Highlighting related settings
-  var chk = Settings.GetValue('sb','highlight_me');
+  var chk = EM.Settings.GetValue('sb','highlight_me');
 //  console.log('sb.me:'+typeof chk);
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
-    Settings.SetValue('sb','highlight_me', chk?2:0);
+    EM.Settings.SetValue('sb','highlight_me', chk?2:0);
   }
 
-  chk = Settings.GetValue('sb','highlight_mod');
+  chk = EM.Settings.GetValue('sb','highlight_mod');
 //  console.log('sb.mod:'+typeof chk);
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
-    Settings.SetValue('sb','highlight_mod', chk?3:0);
+    EM.Settings.SetValue('sb','highlight_mod', chk?3:0);
   }
 
   //0.19: Upgrade of boolean to number for 
-  var chk = Settings.GetValue('pagehack','smileyOverlay');
+  var chk = EM.Settings.GetValue('pagehack','smileyOverlay');
   if(parseInt(chk, 10) == NaN) {
     upgraded = true;
-    Settings.SetValue('pagehack','smileyOverlay', chk?1:0);
+    EM.Settings.SetValue('pagehack','smileyOverlay', chk?1:0);
   }
 
   //0.19: remove that typo quickSearhMenu
-  if (Settings.GetValue('pagehack','quickSearhMenu')!=null) {
+  if (EM.Settings.GetValue('pagehack','quickSearhMenu')!=null) {
     upgraded = true;
-    Settings.Values['pagehack.quickSearhMenu'] = undefined;
-    delete Settings.Values['pagehack.quickSearhMenu'];
+    EM.Settings.Values['pagehack.quickSearhMenu'] = undefined;
+    delete EM.Settings.Values['pagehack.quickSearhMenu'];
   }
 
   //0.19: Upgrade of string stalk list to array
-  var chk = Settings.GetValue('sb','user_stalk');
+  var chk = EM.Settings.GetValue('sb','user_stalk');
   if(typeof chk == 'string') {
     upgraded = true;
     var a = chk.trim().split(/\s*,\s*/);
@@ -2074,7 +2073,7 @@ function initEdgeApe() {
   }
 
   if (Location.match(/shoutbox_view.php/)) {
-    if (UserMan.loggedOnUser) {
+    if (EM.User.loggedOnUser) {
       EM.ShoutWin = new ShoutboxWindow();
     }
   }
@@ -2093,14 +2092,10 @@ function initEdgeApe() {
 if (!isEmpty(unsafeWindow.parent.EM)) {
   window.EM = unsafeWindow.parent.EM;
   unsafeWindow.EM = EM;
-  UserMan = EM.User;
-  Settings = EM.Settings;
 } else {
   window.EM = {};
-  Settings = new SettingsStore();
-  UserMan = new UserManager();
-  EM.Settings = Settings;
-  EM.User = UserMan;
+  EM.Settings = new SettingsStore();
+  EM.User = new UserManager();
   unsafeWindow.EM = EM;
 }
 Ajax = new AJAXObject();
