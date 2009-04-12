@@ -273,24 +273,42 @@ Point.prototype.TranslateWindow = function()
 
 function addEvent(elementObject, eventName, functionObject, wantCapture)
 {
-  var a = isUndef(wantCapture) ? false : wantCapture;
-  if(document.addEventListener)
-    elementObject.addEventListener(eventName,
-      function (evt) {
+  var c = isUndef(wantCapture) ? false : wantCapture;
+  var func = function (evt) {
         functionObject(elementObject, evt);
-      },
-      a);
+      };
+  if(document.addEventListener) {
+    elementObject.addEventListener(eventName, func, c);
+    return func;
+  }
+  return null;
 }
 
 function addGlobalEvent(elementObject, eventName, functionObject, wantCapture)
 {
-  var a = isUndef(wantCapture) ? false : wantCapture;
-  if(document.addEventListener)
-    document.body.addEventListener(eventName,
-      function (evt) {
-        functionObject(elementObject, evt)
-      },
-      a);
+  var c = isUndef(wantCapture) ? false : wantCapture;
+  var func = function (evt) {
+        functionObject(elementObject, evt);
+      };
+  if(document.addEventListener) {
+    document.body.addEventListener(eventName, func, c);
+    return func;
+  }
+  return null;
+}
+
+function removeEvent(elementObject, eventName, functionObject, wantCapture)
+{
+  var c = isUndef(wantCapture) ? false : wantCapture;
+  if(document.removeEventListener)
+    elementObject.removeEventListener(eventName, functionObject, c);
+}
+
+function removeGlobalEvent(eventName, functionObject, wantCapture)
+{
+  var c = isUndef(wantCapture) ? false : wantCapture;
+  if(document.removeEventListener)
+    document.body.removeEventListener(eventName, functionObject, c);
 }
 
 
@@ -638,7 +656,7 @@ OverlayWindow.prototype = {
 
     console.log('Overlay Caption Bar Close Button');
     this.moving = false;
-    addEvent(this.TitleBar,'mousedown',function(dv,event) {
+    this.evmousedown = addEvent(this.TitleBar,'mousedown',function(dv,event) {
       var win = dv.Window;
       var x=event.clientX + window.scrollX;
       var y=event.clientY + window.scrollY;
@@ -649,7 +667,7 @@ OverlayWindow.prototype = {
       win.top = parseInt(win.Outer.style.top,10);
       win.zSort = win.BringToFront();
     });
-    addGlobalEvent(this.TitleBar,'mousemove',function(dv,event) {
+    this.evmousemove = addGlobalEvent(this.TitleBar,'mousemove',function(dv,event) {
       var win = dv.Window;
       if (win.moving) {
         var x=event.clientX + window.scrollX;
@@ -663,7 +681,7 @@ OverlayWindow.prototype = {
         win.mov_pr_y = y;
       }
     },true);
-    addEvent(this.TitleBar,'mouseup',function(dv,event) {
+    this.evmouseup = addEvent(this.TitleBar,'mouseup',function(dv,event) {
       var win = dv.Window;
       if (win.moving) {
         win.moving=false;
@@ -681,7 +699,7 @@ OverlayWindow.prototype = {
     console.log('Overlay Caption Bar Window');
     this.Outer.style.zIndex=1000;
 
-    addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
+    this.evgmousedown = addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
       var clicked = event.target;
 
       while(clicked != null) {
@@ -714,6 +732,12 @@ OverlayWindow.prototype = {
     this.showing=false;
     this.Outer.style.cssText+=' display:none';
     this.Outer.parentNode.removeChild(this.Outer);
+    
+    if (this.evmousedown) removeEvent(this.TitleBar,'mousedown',this.evmousedown);
+    if (this.evmousemove) removeGlobalEvent('mousemove',this.evmousemove,true);
+    if (this.evmouseup) removeEvent(this.TitleBar,'mouseup',this.evmouseup)
+    if (this.evgmousedown) removeGlobalEvent('mousedown',this.evgmousedown,true);
+
     document.overlayWindows.remove(this);
   },
   BringToFront: function() {
