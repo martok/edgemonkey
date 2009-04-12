@@ -17,7 +17,7 @@ const ScriptVersion = 0.19;
 // @changelog
 /*
 
-0.19           09-03-**
+0.19           09-04-12
   -setting for anekdoter (BenBE)
   -ph: max-width for images (BenBE)
   -better user-tag-linking
