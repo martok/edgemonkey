@@ -1022,7 +1022,7 @@ UserManager.prototype = {
   usernameFromProfile: function(href) {
     var m = href.match(/user_(.*)\.html/);
     if (m)
-      return m[1];
+      return unescape(m[1]);
     else
       return '';
   }
@@ -1954,7 +1954,6 @@ Pagehacks.prototype = {
       if (test(Location))
         Lks.push(['Trunk', replace(Location, 'http://trunk.')]);
     }
-    console.log(Lks);
     with (table.insertRow(-1)) {
       insertCell(-1).style.cssText='width: 100%;';
       with (insertCell(-1)) {
