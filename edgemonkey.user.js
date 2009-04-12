@@ -1384,7 +1384,8 @@ ShoutboxWindow.prototype = {
   },
 
   ev_stalk: function(user) {
-    user = unescape(user);
+// don't really know why it gets double-escaped...
+//    user = unescape(user);
 
     var user_list = Settings.GetValue('sb','user_stalk');
 
