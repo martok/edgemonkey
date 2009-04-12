@@ -160,6 +160,30 @@ var colorTpl = new Array(
     }
 );
 
+var data = {
+	searchAnim: 'data:image/gif,GIF89a2%002%00%80%01%00%00%00%00%FF%FF%FF!%FF%0BNETSCAPE2.0%03%01%00%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%002%00%00%02%81%8C%'+
+    '8F%A9%07%BD%0F%A3l%14%C8%8BW%AD%B9%E3%CDy%A2%06%3A%E3i%94%14%CA%AA%16%FB%AC%24%08%CF%B2BG%AFWB%A6%7F%FB%F4Z%A1%CC%10%B5%E1%E5%90Aa%11%B6%135k%D4%AA%F5%8'+
+    'A%CDj%B7%DC%AE%F7%AB%033l%E0g%CA%ACM%22%D4%5D%F6%F9%D7%9E%A6%C4s%BA%FD%8E%CF%EB%F7%FC~%F9%1A%D5%81628Q(x%18%93%E8%04%C7H%B5%E8%03%F8%15%98%07%E9%E5%86%8'+
+    '7yg9%E9%E7%99U%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%002%00%00%02%84%8C%8F%A9%CB%ED%CF%00%80%B4.%89%A7%DD0c%0E%5E%9E%14%96%C8%A8%99%25%1A%05%A4%1A'+
+    'yq%16%A6%CD\'%8E%1Bm%A2%2F%25%5B%F9%2CA%90%EF%D7%C1%09Y%3B%D8%10V%2BB%A3%D3%AA%F5%8A%CDj%B7%DC%EE%CA%7B%CA%D9%B6%BCS%99%7Cv%A5%B3R5%12%FD%3E%8C%BBs%B0%FD'+
+    '%8E%CF%EB%F7%FC%BE%3F%5CU%97%14g%A4D%B4%C6%D16H%B8%83%E8%E0%D8%C8%D8a%25H%F9%E7Vi%A7%88%B7y%07%C9y%19%8AU%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%00'+
+    '2%00%00%02%7F%8C%8F%A9%CB%ED%0F%A3%9C%09%D0%2B%81%B6%B8%B3%ADy%22%02r%A3%08%9Ej%606%9B%D7%C2%E5%95%8Ee8%CD%F2M%E9%7B%9Dy%D9x4%15q%D5%11%22%97%CC%A6%F3%0'+
+    '9%8DJ%9D%16%DC%F4%E3%23MoV%96%F2%C9%B5f%9Ba%D3xY6%7F%A9%E1%CA%96%7B%5D%1C%E3%8A.%FD%8E%CF%EB%F7%7C%23%3A%B9%06h%17qF%03%14%14h%98%E8p%F8%03%F3\'%15%A3%D7'+
+    '%98WHg%19G9%D9%C7%19U%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%002%00%00%02%83%8C%8F%A9%CB%ED%0F%A3%9C%09%D0%2B%81%B6%B8%B3%ADy%22%02r%A3%08%9Ej%60%A'+
+    'EK%7B%C2%D9%A6%A6W%19%DB%13%3E%F2%3B%9D%0Bud(%97%F1%88L*%97%CC%A6%F3%09u%01%15Dd%09%A6%5B%5E%5B%BE%E4%96%9B%F5%5EIS%ED%B8%F2%3CG%D1%C2%B5%FB%0D%8F%CB%D7'+
+    '%966%5CM%A9%FE%F0%90%F0%ED%BBg%F7%B7%15%A8%F7%F0%25%E8%E0%97%07%98%17%D4ud%C8\'U%F6b%F8x%D9%04%E9%B6%F8%969%07*R%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%'+
+    '002%002%00%00%02%81%8C%8F%A9%CB%ED%0F%A3%9C%09%D0%2B%81%B6%B8%B3%ADy%22%02r%A3%08%9Ej%60%AEK%7B%C2%D9%A6%A6W%19%DB%13%3E%F2%3B%9D%0Bud(%97%F1%88L*%97%CC'+
+    '%A6%F3%09%85%12%97D%1D%D3j%F0Q%B1Ze%17%EB%05*%A6%DE%A8%F9%8CN%AB%D7%EC%F6%8C%FC%80%BF%C5%F3%20%D8%D1%A5%94%E8%90%BC~%FF\'%84%87%07xCx%C7%E2g%C7G%22h%B4%C'+
+    '7%D8%04%19)9%896)%97d%99%06%B9%868Q%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%002%00%00%02%83%8C%8F%A9%CB%ED%0F%A3%9C%09%D0%2B%81%B6%B8%B3%ADy%22%02r%'+
+    'A3%08%9Ej%60%AEK%7B%C2%D9%A6%A6W%19%DB%13%3E%F2%3B%9D%0Bud(%97%F1%88L*%97%CC%A6%F3%09%85%12%97D%1D%D3j%F0Q%B1Ze%17%EB%05*%A6%DE%A8%F9%8CN%AB%D7.%8BP%5D%'+
+    '227%E3%EF%22%85%5E%BF%89%23x%F9%A3%DB%D0%E7%E7%00%18%88%87%B2%07q%F8%91%F7%82%11%C7%08%D6%26G%97%B6%88Vi%09%A9)%19%E56%C8FQ%00%00!%F9%04%09%0A%00%01%00%'+
+    '2C%00%00%00%002%002%00%00%02%82%8C%8F%A9%CB%ED%0F%A3%9C%09%D0%2B%81%B6%B8%B3%ADy%22%02r%A3%08%9Ej%60%AEK%7B%C2%D9%A6%A6W%19%DB%13%3E%F2%3B%9D%0Bud(%97%F'+
+    '1%88L*%97%CC%A6%B3a!%3E%0D%25%A9%B3*l%B6%B0%40%A5%8Ek%5D%F1%C0%E1%60%96%AB%ED%B2%B0OYu%FAa%C1%E7%F4%BA%FD%8E%A7%A8%EF%BE%DE%8D%8D%B2%07%01%E8%D1%F7%80%1'+
+    '6(%E8%408%A4%B8hXX%98%05%95G%E5%08%079%97%89y%A9Y%F9%A9T%00%00!%F9%04%01%0A%00%01%00%2C%00%00%00%002%002%00%00%02%85%8C%8F%A9%CB%ED%0F%A3%9C%09%D0%2B%81'+
+    '%B6%B8%B3%ADy%22%02r%E3b%85%0Dx~%E5c%B6d%A9%8EqDo%22%3B%E55%F6%C2%F9n%94%A00%B7%D3%F5%90\'%22%84%26KF%A7%D4%AA%F5%8A%CDjm%BF%AD%02%EA%252%B1%3C%83Ok%0C%8'+
+    'C%AF%E9%B5%B5lNg%9D)%A7%F7%8E%CF%EB%F7%FC%BE%FFn%D7%11%E8%00%E7Qx%D4%05t%08%B3X%D4%B8%A2%C4%95%9815(c%19%16%D9\'%A7%C7%99%F7%F8%F9\'%9AU%00%00%3B'
+}
+
 function queryXPath(node,xpath){
     //I hate having to always type this crap ...
     return unsafeWindow.document.evaluate(xpath, node, null, XPathResult.ANY_TYPE, null);
@@ -1651,17 +1675,19 @@ Pagehacks.prototype = {
     coo.CenterInWindow(640,480);
     var w = new OverlayWindow(coo.x,coo.y,640,480,'','em_searchresults');
     w.InitWindow();
-    w.ContentArea.innerHTML = '<table width="100%" cellspacing="0" cellpadding="1" border="0"><tr><td>&nbsp;</td></tr>'+
-        '<tr><td align="center"><span class="gen">Suche l&auml;uft...</span></td></tr><tr><td>&nbsp;</td></tr></table>';
+    w.ContentArea.innerHTML = '<table width="100%" style="height:100%" cellspacing="0" cellpadding="1" border="0"><tr><td>&nbsp;</td></tr>'+
+        '<tr><td align="center"><span class="gen">Suche l&auml;uft...</span></td></tr>'+
+        '<tr><td style="vertical-align:center; text-align:center"><img src="'+data.searchAnim+'" /></td></tr>'+
+        '<tr><td>&nbsp;</td></tr></table>';
     w.Frame.style.height = w.Frame.style.minHeight;
     var s = Ajax.AsyncRequest(inp.form.action,post,w.ContentArea,
     //search_fields=all&show_results=topics&synonym_search=1&search_keywords=Easteregg&website=
       /search_keywords=(\x45\x61\x73\x74\x65\x72\x65\x67\x67|\x4F\x73\x74\x65\x72\x65\x69(?:er)?)\&/i.test(post) ?
       function(div,target) {
         target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
-        target.style.overflow='scroll';
+        target.style.overflow='hidden';
         target.style.textAlign='center';
-        target.innerHTML = '<img src="http://www.karikatur-cartoon.de/bilder/bemalte_ostereier.jpg" style="align:center;"/>';
+        target.innerHTML = '<img src="'+unescape('%68%74%74%70%3A%2F%2F%77%77%77%2E%6B%61%72%69%6B%61%74%75%72%2D%63%61%72%74%6F%6F%6E%2E%64%65%2F%62%69%6C%64%65%72%2F%62%65%6D%61%6C%74%65%5F%6F%73%74%65%72%65%69%65%72%2E%6A%70%67')+'" style="align:center;"/>';
       } :
       function(div,target) {
       	target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
