@@ -29,6 +29,8 @@ const ScriptVersion = 0.19;
   -Multiline Textarea for Shoutbox (Martok)
   -improved autoshout features (BenBE)
   -Opera Compatibility (BenBE)
+  -User Highlighting in Shoutbox (BenBE, Martok)
+  -improved Shoutbox tools (BenBE, Martok)
 
 0.18           09-02-28
   -Flat Styles by BenBE
@@ -213,6 +215,9 @@ String.prototype.escapeHTML = function (typ) {
   return str;
 };
 
+String.prototype.equals = function (what) {
+  return this.toLowerCase()==what.toLowerCase();
+};
 
 // FF 3.1+ has it native (JS 1.8.1)
 if (!String.prototype.trim) String.prototype.trim = function() {
@@ -332,11 +337,17 @@ SettingsGenerator.prototype = {
   	});
   	return '<select name="'+name+'">'+op+'</select>';
   },
+  createArrayInput: function (name, arr) {
+    return '<textarea name="'+name+'">'+arr.map(function(e) {return new String(e).escapeHTML(3)}).join("\n")+'</textarea>';
+  },
   getBool: function(name) {
   	return this.Document.getElementsByName(name)[0].checked;
   },
   getValue: function(name) {
   	return this.Document.getElementsByName(name)[0].value;
+  },
+  getArray: function(name) {
+    return this.Document.getElementsByName(name)[0].value.split("\n").map(function(e) { return e.trim() });
   }
 }
 
@@ -762,7 +773,8 @@ SettingsStore.prototype = {
     this.Values['sb.highlight_me']=0;
     this.Values['sb.highlight_mod']=0;
     this.Values['sb.highlight_stalk']=0;
-    this.Values['sb.user_stalk']="";
+    this.Values['sb.user_stalk']=new Array();
+    this.Values['sb.pnlink_active']=true;
   },
 
   GetValue: function(sec,key) {
@@ -811,7 +823,9 @@ SettingsStore.prototype = {
       addSettingsRow( 'Shouts von Moderatoren/Admins hervorheben',
           createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
           );
-      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',createTextInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
+      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',createArrayInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
+      addSettingsRow( 'Zeige Link zum Schreiben einer PN an Benutzer',createCheckbox('sb_pnlink', this.GetValue('sb','pnlink_active')));
+
     }
     this.Window.OptionsTable = tbl;
     this.Window.OptionsGenerator = sg;
@@ -838,7 +852,8 @@ SettingsStore.prototype = {
       Settings.SetValue('sb','highlight_mod', getValue('sb_highlight_mod'));
       Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
       Settings.SetValue('sb','longInput', getBool('sb_longinput'));
-      Settings.SetValue('sb','user_stalk', getValue('sb_user_stalk'));
+      Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
+      Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -856,6 +871,14 @@ SettingsStore.prototype = {
       window.location.reload(false);
     }
     Settings.Window.close();
+  },
+
+  ev_EditSettings: function(evt) {
+    var _save = this;
+    window.setTimeout(function() {
+      _save.LoadFromDisk();
+      _save.ShowSettingsDialog();
+    },0);
   },
 
   ShowSettingsDialog: function() {
@@ -1231,9 +1254,10 @@ function ShoutboxWindow() {
   var shoutclass_mod = 'emctpl' + Settings.GetValue('sb','highlight_mod');
   var shoutclass_stalk = 'emctpl' + Settings.GetValue('sb','highlight_stalk');
 
-  var user_stalk = Settings.GetValue('sb','user_stalk').trim().split(/\s*,\s*/);
+  var user_stalk = Settings.GetValue('sb','user_stalk');
 
   var anek_active = Settings.GetValue('sb','anek_active');
+  var pn_link = Settings.GetValue('sb','pnlink_active');
 //  console.log('me: '+shoutclass_me);
 //  console.log('mod: '+shoutclass_mod);
 
@@ -1255,20 +1279,20 @@ function ShoutboxWindow() {
     }
     div.className+='intbl';
     //First detect Moderators ...
-    if (Settings.GetValue('sb','highlight_mod')) {
+    if (shoutclass_mod) {
       if (a.style.cssText.match(/color\:/))
         shout.className+=' ' + shoutclass_mod;
     }
     // and after this the followed\stalked users, to allow overriding the style properly
-    if (Settings.GetValue('sb','highlight_stalk')) {
+    if (shoutclass_stalk) {
       if (user_stalk.some(
         function (e){
-          return e == shout_user;
+          return e.equals(shout_user);
         }))
         shout.className+=' ' + shoutclass_stalk;
     }
     // at last the logged on user, to allow overriding the style properly
-    if (Settings.GetValue('sb','highlight_me')) {
+    if (shoutclass_me) {
       if (shout_user==UserMan.loggedOnUser)
         shout.className+=' ' + shoutclass_me;
     }
@@ -1280,10 +1304,21 @@ function ShoutboxWindow() {
     shout.insertBefore(cnt, shout.firstChild);
     shout.insertBefore(div, shout.firstChild);
 
+    var tools = null;
+    var tool_html = '';
     if(anek_active) {
-      var tools = document.createElement('span');
+      tool_html+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')">A</a>';
+    }
+    if(pn_link) {
+      tool_html+='<a href="privmsg.php?mode=post&u=' + UserMan.getUID(shout_user) + '" target="_parent">P</a>';
+    }
+    if(Settings.GetValue('sb','highlight_stalk')>0) {
+      tool_html+='<a href="javascript:EM.ShoutWin.ev_stalk(\''+escape(shout_user)+'\')">E</a>';
+    }
+    if(tool_html!='') {
+      tools = document.createElement('span');
       tools.className+=' incell right';
-      tools.innerHTML+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')>A</a>';
+      tools.innerHTML = tool_html;
       div.appendChild(tools);
     }
   };
@@ -1346,6 +1381,22 @@ ShoutboxWindow.prototype = {
     else
        this.Anekdoter.Body.firstChild.innerHTML = ih + this.Anekdote(this.shouts[idx]);
     this.Anekdoter.Window.focus();
+  },
+
+  ev_stalk: function(user) {
+    user = unescape(user);
+
+    var user_list = Settings.GetValue('sb','user_stalk');
+
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
+    } else {
+      user_list.push(user);
+    }
+
+    Settings.SetValue('sb','user_stalk',user_list);
+    Settings_SaveToDisk();
+    window.location.reload();
   }
 }
 
@@ -1964,6 +2015,13 @@ function upgradeSettings(){
     delete Settings.Values['pagehack.quickSearhMenu'];
   }
 
+  //0.19: Upgrade of string stalk list to array
+  var chk = Settings.GetValue('sb','user_stalk');
+  if(typeof chk == 'string') {
+    upgraded = true;
+    Settings.SetValue('sb','user_stalk', chk.trim().split(/\s*,\s*/));
+  }
+
   if (upgraded) {
     Settings_SaveToDisk();
     window.alert(
@@ -1991,7 +2049,7 @@ function initEdgeApe() {
     EM.Buttons = new ButtonBar();
 
     with(EM.Buttons) {
-      addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ShowSettingsDialog()');
+      addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
     }
     EM.Pagehacks = new Pagehacks();
     EM.Shouts = new ShoutboxControls();
