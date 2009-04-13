@@ -2154,7 +2154,16 @@ function initEdgeApe() {
   }
 }
 
-if (!isEmpty(unsafeWindow.parent.EM)) {
+//check if we can access the parent or if its against SOP.
+var SOP_ok = false;
+try {
+  SOP_ok = unsafeWindow.parent.document?true:false;
+}
+catch(v) {
+  SOP_ok = false;
+}
+
+if (SOP_ok && !isEmpty(unsafeWindow.parent.EM)) {
   window.EM = unsafeWindow.parent.EM;
   unsafeWindow.EM = EM;
 } else {
