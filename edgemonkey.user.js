@@ -1316,6 +1316,49 @@ ShoutboxControls.prototype = {
   }
 }
 
+function ShoutboxAnekdoter() {
+	this.Wnd = new UserWindow('EdgeMonkey :: SB-Anekdoter', 'em_wnd_sbanekdote',
+            'HEIGHT=400,resizable=yes,WIDTH=500,scrollbars=yes',undefined,'<pre id="cont"></pre>');
+  this.Wnd.Body.setAttribute('ununload','EM.Anekdoter.onClose()');
+  this.list = new Array();
+}
+
+ShoutboxAnekdoter.prototype = {
+	UpdateContent: function() {
+		var cont = this.Wnd.Document.getElementById('cont');
+  	var sh = this.list;
+    if (EM.Settings.GetValue('sb','anek_reverse')) {
+    	sh.reverse();
+    }
+    cont.innerHTML=sh.map(function(item) {
+    	return '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n'+item.shout;
+    	}).join("\n");
+	},
+	Anekdote: function(item) {
+		var o = {user:'',time:'',shout:''};
+    o.user = item.getElementsByTagName('a')[0].firstChild.innerHTML;
+    o.time = item.getElementsByTagName('span')[2].innerHTML;
+    var sht = item.childNodes[1].childNodes;
+    var res = new Array();
+    for (var i=0;i<sht.length;i++) {
+      switch (sht[i].tagName) {
+        case 'A': res.push('[url='+sht[i].href+']'+sht[i].innerHTML+'[/url]');break;
+        case 'IMG': res.push(sht[i].alt);break;
+        default: res.push(sht[i].textContent);break;
+      }
+    }
+    o.shout = res.join('');
+    this.list.push(o);
+    this.UpdateContent();
+	},
+	focus: function() {
+		this.Wnd.Window.focus();
+	},
+	onClose: function(dv,ev) {
+		alert('closing');
+	}
+}
+
 function ShoutboxWindow() {
   var trs = document.getElementsByTagName('tr');
 
@@ -1426,33 +1469,12 @@ ShoutboxWindow.prototype = {
     }
   },
 
-  Anekdote: function(item) {
-    var an='';
-    an+= '[user]'+item.getElementsByTagName('a')[0].firstChild.innerHTML+'[/user]';
-    an+= ' [color=#777777]'+item.getElementsByTagName('span')[2].innerHTML+'[/color]\n';
-    var sht = item.childNodes[1].childNodes;
-    var res = new Array();
-    for (var i=0;i<sht.length;i++) {
-      switch (sht[i].tagName) {
-        case 'A': res.push('[url='+sht[i].href+']'+sht[i].innerHTML+'[/url]');break;
-        case 'IMG': res.push(sht[i].alt);break;
-        default: res.push(sht[i].textContent);break;
-      }
-    }
-
-    return an+res.join('')+'\n';
-  },
-
   ev_anekdote: function(idx) {
-    var ih = (this.Anekdoter)?this.Anekdoter.Body.firstChild.innerHTML:'';
-    this.Anekdoter = new UserWindow('EdgeMonkey :: SB-Anekdoter', 'em_wnd_sbanekdote',
-          'HEIGHT=400,resizable=yes,WIDTH=500,scrollbars=yes',undefined,'<pre></pre>');
-
-    if (EM.Settings.GetValue('sb','anek_reverse'))
-       this.Anekdoter.Body.firstChild.innerHTML = this.Anekdote(this.shouts[idx]) + ih;
-    else
-       this.Anekdoter.Body.firstChild.innerHTML = ih + this.Anekdote(this.shouts[idx]);
-    this.Anekdoter.Window.focus();
+  	if (!EM.Anekdoter || EM.Anekdoter.Wnd.Window.closed) {
+      EM.Anekdoter = new ShoutboxAnekdoter();
+    }
+  	EM.Anekdoter.Anekdote(this.shouts[idx]);
+  	EM.Anekdoter.focus();
   },
 
   ev_stalk: function(user) {
