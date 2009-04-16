@@ -1318,46 +1318,72 @@ ShoutboxControls.prototype = {
 }
 
 function ShoutboxAnekdoter() {
-	this.Wnd = new UserWindow('EdgeMonkey :: SB-Anekdoter', 'em_wnd_sbanekdote',
+  this.Wnd = new UserWindow('EdgeMonkey :: SB-Anekdoter', 'em_wnd_sbanekdote',
             'HEIGHT=400,resizable=yes,WIDTH=500,scrollbars=yes',undefined,'<pre id="cont"></pre>');
   this.Wnd.Body.setAttribute('ununload','EM.Anekdoter.onClose()');
   this.list = new Array();
 }
 
 ShoutboxAnekdoter.prototype = {
-	UpdateContent: function() {
-		var cont = this.Wnd.Document.getElementById('cont');
-  	var sh = this.list;
+  UpdateContent: function() {
+    var cont = this.Wnd.Document.getElementById('cont');
+    var sh = this.list;
     if (EM.Settings.GetValue('sb','anek_reverse')) {
-    	sh.reverse();
+      sh.reverse();
     }
     cont.innerHTML=sh.map(function(item) {
-    	return '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n'+item.shout;
-    	}).join("\n");
-	},
-	Anekdote: function(item) {
-		var o = {user:'',time:'',shout:''};
-    o.user = item.getElementsByTagName('a')[0].firstChild.innerHTML;
-    o.time = item.getElementsByTagName('span')[2].innerHTML;
-    var sht = item.childNodes[1].childNodes;
-    var res = new Array();
-    for (var i=0;i<sht.length;i++) {
+      return '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n'+item.shout;
+      }).join("\n\n");
+  },
+  convertTag: function(elem,skip) {
+    var sht = elem.childNodes;
+    var res = [];
+    for(var i=0; i<sht.length; i++) {
+      if (sht[i]==skip) continue;
       switch (sht[i].tagName) {
-        case 'A': res.push('[url='+sht[i].href+']'+sht[i].innerHTML+'[/url]');break;
+        case 'A': {
+          var ii;
+          var tmp;
+          if((tmp=sht[i].href.match(/\/profile.php\?.*&u=([^&]*)/)) && tmp!=null &&
+             (ii=sht[i].firstChild) && ii.alt=="user profile icon") {
+            var txt=sht[i].textContent;
+            var usr=tmp[1];
+            if (txt==usr)
+              res.push('[user]'+usr+'[/user]');
+            else
+              res.push('[user="'+usr+'"]'+this.convertTag(sht[i],ii)+'[/user]');
+          } else
+            res.push('[url='+sht[i].href+']'+this.convertTag(sht[i])+'[/url]');
+        }; break;
+        case 'SPAN': {
+          var s = sht[i].style.cssText;
+          var t = '';
+          if (/bold/.test(s)) t='b'; else
+          if (/italic/.test(s)) t='i'; else
+          if (/underline/.test(s)) t='u'; else
+          if (/line-through/.test(s)) t='s';
+          res.push((t?'['+t+']':'')+this.convertTag(sht[i])+(t?'[/'+t+']':''));
+        }; break;
         case 'IMG': res.push(sht[i].alt);break;
         default: res.push(sht[i].textContent);break;
       }
     }
-    o.shout = res.join('');
+    return res.join('');
+  },
+  Anekdote: function(item) {
+    var o = {user:'',time:'',shout:''};
+    o.user = item.getElementsByTagName('a')[0].firstChild.innerHTML;
+    o.time = item.getElementsByTagName('span')[2].innerHTML;
+    o.shout = this.convertTag(item.childNodes[1]);
     this.list.push(o);
     this.UpdateContent();
-	},
-	focus: function() {
-		this.Wnd.Window.focus();
-	},
-	onClose: function(dv,ev) {
-		alert('closing');
-	}
+  },
+  focus: function() {
+    this.Wnd.Window.focus();
+  },
+  onClose: function(dv,ev) {
+    alert('closing');
+  }
 }
 
 function ShoutboxWindow() {
