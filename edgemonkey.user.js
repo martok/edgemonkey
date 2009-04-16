@@ -1405,7 +1405,7 @@ function ShoutboxWindow() {
     var shout = trs[i].firstChild;
     this.shouts.push(shout);
     var a = shout.firstChild;
-    if(EM.Settings.GetValue('sb','anek_active')) {
+    if(EM.Settings.GetValue('sb','boldUser')) {
         a.style.cssText+='font-weight: bold;';
     }
     var div = document.createElement('div');
