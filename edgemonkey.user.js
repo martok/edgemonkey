@@ -17,6 +17,15 @@ const ScriptVersion = 0.19;
 // @changelog
 /*
 
+0.20           09-04-**
+  -New Anekdoter with better html2code (Martok)
+  -display shouting user in bold
+  -global usage of EM object across all (i)frames & popups
+  -better (more native feeling) dropdown handling
+  -quicklink dropdowns default on
+  -enhanced Opera compatibility
+  
+ 
 0.19           09-04-12
   -setting for anekdoter (BenBE)
   -ph: max-width for images (BenBE)
@@ -812,8 +821,8 @@ SettingsStore.prototype = {
     this.Values['pagehack.imgMaxWidth']=false;
     this.Values['pagehack.extSearchPage']=true;
     this.Values['pagehack.extPostSubmission']=true;
-    this.Values['pagehack.quickProfMenu']=false;
-    this.Values['pagehack.quickSearchMenu']=false;
+    this.Values['pagehack.quickProfMenu']=true;
+    this.Values['pagehack.quickSearchMenu']=true;
     this.Values['pagehack.smileyOverlay']=1;
 
     this.Values['ui.showDropShadow']=true;
@@ -1136,7 +1145,8 @@ function ShoutboxControls() {
     	with (insertCell(-1)) {
     		align='left';
     		colSpan=3;
-    		innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage" id="shoutmessage" style="width:100%"></textarea>';
+    		innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage"'+
+                  ' id="shoutmessage" style="width:100%; font-size: 11px; height: 4em"></textarea>';
     	}
     }
     with (tab.insertRow(-1)) {
@@ -1543,7 +1553,7 @@ function SmileyWindow(target) {
   this.tab.cellSpacing=0;
   this.tab.cellPadding=5;
   this.tab.border=0;
-  this.addLine([
+  this.addLine(
     {cmd:':D', hint:'Very Happy', ico:'biggrin'},
     {cmd:':)', hint:'Smile', ico:'smile'},
     {cmd:':(', hint:'Sad', ico:'sad'},
@@ -1551,9 +1561,9 @@ function SmileyWindow(target) {
     {cmd:':shock:', hint:'Shocked', ico:'eek'},
     {cmd:':?', hint:'Confused', ico:'confused'},
     {cmd:'8)', hint:'Cool', ico:'cool'},
-    {cmd:':lol:', hint:'Laughing', ico:'lol'},
-  ]);
-  this.addLine([
+    {cmd:':lol:', hint:'Laughing', ico:'lol'}
+  );
+  this.addLine(
     {cmd:':x', hint:'Mad', ico:'mad'},
     {cmd:':P', hint:'Razz', ico:'razz'},
     {cmd:':oops:', hint:'Embarassed', ico:'redface'},
@@ -1561,9 +1571,9 @@ function SmileyWindow(target) {
     {cmd:':evil:', hint:'Evil or Very Mad', ico:'evil'},
     {cmd:':twisted:', hint:'Twisted Evil', ico:'twisted'},
     {cmd:':roll:', hint:'Rolling Eyes', ico:'rolleyes'},
-    {cmd:':wink:', hint:'Wink', ico:'wink'},
-  ]);
-  this.addLine([
+    {cmd:':wink:', hint:'Wink', ico:'wink'}
+  );
+  this.addLine(
     {cmd:':!:', hint:'Exclamation', ico:'exclaim'},
     {cmd:':?:', hint:'Question', ico:'question'},
     {cmd:':idea:', hint:'Idea', ico:'idea'},
@@ -1571,9 +1581,9 @@ function SmileyWindow(target) {
     {cmd:':|', hint:'Neutral', ico:'neutral'},
     {cmd:':mrgreen:', hint:'Mr. Green', ico:'mrgreen'},
     {cmd:':angel:', hint:'Angel', ico:'angel'},
-    {cmd:':bawling:', hint:'Bawling', ico:'bawling'},
-  ]);
-  this.addLine([
+    {cmd:':bawling:', hint:'Bawling', ico:'bawling'}
+  );
+  this.addLine(
     {cmd:':beer:', hint:'Beer chug', ico:'beerchug'},
     {cmd:':?!?:', hint:'Confused', ico:'confused2'},
     {cmd:':crying:', hint:'Crying', ico:'crying'},
@@ -1581,9 +1591,9 @@ function SmileyWindow(target) {
     {cmd:':dance2:', hint:'Dance', ico:'dance'},
     {cmd:':dunce:', hint:'Dunce', ico:'dunce'},
     {cmd:':eyecrazy:', hint:'Eyecrazy', ico:'eyecrazy'},
-    {cmd:':eyes:', hint:'Eyes', ico:'eyes'},
-  ]);
-  this.addLine([
+    {cmd:':eyes:', hint:'Eyes', ico:'eyes'}
+  );
+  this.addLine(
     {cmd:':hair:', hint:'Hair', ico:'hair'},
     {cmd:':nixweiss:', hint:'Nix weiss', ico:'nixweiss'},
     {cmd:':nut:', hint:'Nuß', ico:'nut'},
@@ -1591,9 +1601,9 @@ function SmileyWindow(target) {
     {cmd:':puke:', hint:'Puke', ico:'puke'},
     {cmd:':rofl:', hint:'Rofl mao', ico:'roflmao'},
     {cmd:':schmoll:', hint:'Schmoll', ico:'schmoll'},
-    {cmd:':think:', hint:'Think', ico:'think'},
-  ]);
-  this.addLine([
+    {cmd:':think:', hint:'Think', ico:'think'}
+  );
+  this.addLine(
     {cmd:':tongue:', hint:'Tongue', ico:'tongue'},
     {cmd:':wave:', hint:'Wave', ico:'wave'},
     {cmd:':welcome:', hint:'Willkommen', ico:'welcome'},
@@ -1601,16 +1611,16 @@ function SmileyWindow(target) {
     {cmd:':mahn:', hint:'Mahn', ico:'znaika'},
     {cmd:':autsch:', hint:'Autsch', ico:'autsch'},
     {cmd:':flehan:', hint:'Fleh an', ico:'flehan'},
-    {cmd:':gruebel:', hint:'Grübel', ico:'gruebel'},
-  ]);
-  this.addLine([
+    {cmd:':gruebel:', hint:'Grübel', ico:'gruebel'}
+  );
+  this.addLine(
     {cmd:':les:', hint:'Les', ico:'les'},
     {cmd:':lupe:', hint:'Lupe', ico:'lupe'},
     {cmd:':motz:', hint:'Motz', ico:'motz'},
     {cmd:':gaehn:', hint:'Gähn', ico:'gaehn'},
     {cmd:':zustimm:', hint:'Zustimmen', ico:'zustimm'},
-    {cmd:':zwinker:', hint:'Zwinkern', ico:'zwinkern'},
-  ]);
+    {cmd:':zwinker:', hint:'Zwinkern', ico:'zwinkern'}
+  );
 }
 
 SmileyWindow.prototype = {
@@ -1618,7 +1628,8 @@ SmileyWindow.prototype = {
     var tr = this.tab.insertRow(-1);
     tr.valign='middle';
     tr.align='center';
-    for each (var sm in smileys) {
+    for (var i=0; i<arguments.length; i++) {
+    	var sm = arguments[i];
       with (tr.insertCell(-1)) {
         var a = this.win.createElement('a');
         a.innerHTML='<img border="0" title="'+sm.hint+' '+sm.cmd+'" alt="'+sm.hint+' '+sm.cmd+'" src="images/smiles/icon_'+sm.ico+'.gif"/>';
@@ -1714,7 +1725,7 @@ Pagehacks.prototype = {
       var as = bc.getElementsByTagName('a');
       for(var i = 0;i<as.length; i++) {
         var m;
-        if (m=as[i].href.match(/forum_(\d+)\.html/)) ee_forum = m[1];
+        if (m=as[i].href.match(/forum_(?:\D+_)?(\d+)\.html/)) ee_forum = m[1];
         if (m=as[i].href.match(/t=(\d+)\D/)) ee_topic = m[1];
       }
     }
