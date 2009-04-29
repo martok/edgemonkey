@@ -1341,9 +1341,9 @@ ShoutboxAnekdoter.prototype = {
     if (EM.Settings.GetValue('sb','anek_reverse')) {
       sh.reverse();
     }
-    cont.innerHTML=sh.map(function(item) {
+    cont.innerHTML='[quote="Shoutbox-Anekdote, erstellt '+new Date().toLocaleString()+':"]\n'+sh.map(function(item) {
       return '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n'+item.shout;
-      }).join("\n\n");
+      }).join("\n\n")+'\n[/quote]';
   },
   convertTag: function(elem,skip) {
     var sht = elem.childNodes;
