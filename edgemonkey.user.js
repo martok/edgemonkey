@@ -1130,7 +1130,7 @@ function ShoutboxControls() {
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'i\'); return false;" href="#" class="gensmall" title="Italic">I</a>'+
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'u\'); return false;" href="#" class="gensmall" title="Underlined">U</a>'+
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'s\'); return false;" href="#" class="gensmall" title="Strikeout">S</a>'+
-                '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'url\'); return false;" href="#" class="gensmall" title="Link">L</a>'+
+                '<a onclick="EM.Pagehacks.SBInsertURL(\'shoutmessage\'); return false;" href="#" class="gensmall" title="Link">L</a>'+
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'user\'); return false;" href="#" class="gensmall" title="Member">M</a>'+
                 '</span>';
     	}
@@ -1838,6 +1838,33 @@ Pagehacks.prototype = {
       edit.selectionStart = oldStart + theSelection.length + tag.length + 2;
       edit.selectionEnd = oldStart + theSelection.length + tag.length + 2;
     }
+  },
+
+  SBInsertURL: function(target) {
+    var edit = document.getElementById(target);
+    var oldStart = edit.selectionStart;
+    var oldEnd = edit.selectionEnd;
+    var theSelection = edit.value.substring(oldStart, oldEnd);
+    var theURL = '';
+    if (theSelection=='') {
+    	theURL=prompt('Bitte die URL eingeben:','');
+    	if (theURL=='') return false;
+    	theSelection=prompt('Bitte den Link-Text eingeben:',theURL);
+    	if (theSelection==theURL) {
+        edit.value =
+          edit.value.substring(0, oldStart) +
+          '[url]' + theSelection + '[/url]' +
+          edit.value.substring(oldEnd, edit.value.length);
+      } else {
+        edit.value =
+          edit.value.substring(0, oldStart) +
+          '[url=' + theURL + ']' + theSelection + '[/url]' +
+          edit.value.substring(oldEnd, edit.value.length);
+      }
+      edit.selectionStart = oldEnd;
+      edit.selectionEnd = oldEnd;
+    } else
+      this.SBTagify(target, 'url');
   },
 
   cssHacks: function() {
