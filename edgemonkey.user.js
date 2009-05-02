@@ -1170,6 +1170,16 @@ function ShoutboxControls() {
   //addEvent(this.form,'submit',function() {return false });
   this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
+  var ifr=this.get_iframe();
+  var sp = document.createElement('span');
+  sp.innerHTML='<a href="#" title="Kleiner" onclick="EM.Shouts.ev_resize(-50); return false;">'+
+                  '<img border="0" style="border-left: 1px solid rgb(46, 95, 134); width: 7px; height: 9px;" alt="Smaller" src="./graphics/categorie_up.gif"/></a>'+
+               '<a href="#" title="Gr&ouml;&szlig;er" onclick="EM.Shouts.ev_resize(+50); return false;">'+
+                  '<img border="0" alt="Move category down" src="./graphics/categorie_down.gif"/></a>';
+  ifr.parentNode.appendChild(sp);
+  var h=EM.Settings.GetValue('sb','displayHeight');
+  if (!isEmpty(h)) ifr.style.height = h+'px';
+
   if (this.shout_obj) {
     this.btnUpdate = document.getElementsByName('shoutrefresh')[0];
     this.btnUpdate.style.cssText+='width: 152px !important';
@@ -1324,6 +1334,15 @@ ShoutboxControls.prototype = {
       }
     }
     unsafeWindow.shoutBoxKey.apply(window,arguments);
+  },
+
+  ev_resize: function(delta) {
+    var ifr=this.get_iframe();
+    var ch= parseInt(ifr.style.height);
+    ch += delta;
+    ifr.style.height=ch+'px';
+    EM.Settings.SetValue('sb','displayHeight',ch);
+    Settings_SaveToDisk();
   }
 }
 
