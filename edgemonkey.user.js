@@ -24,8 +24,8 @@ const ScriptVersion = 0.19;
   -better (more native feeling) dropdown handling
   -quicklink dropdowns default on
   -enhanced Opera compatibility
-  
- 
+
+
 0.19           09-04-12
   -setting for anekdoter (BenBE)
   -ph: max-width for images (BenBE)
@@ -169,7 +169,7 @@ var colorTpl = new Array(
 );
 
 var data = {
-	searchAnim: 'data:image/gif,GIF89a2%002%00%80%01%00%00%00%00%FF%FF%FF!%FF%0BNETSCAPE2.0%03%01%00%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%002%00%00%02%81%8C%'+
+  searchAnim: 'data:image/gif,GIF89a2%002%00%80%01%00%00%00%00%FF%FF%FF!%FF%0BNETSCAPE2.0%03%01%00%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%002%00%00%02%81%8C%'+
     '8F%A9%07%BD%0F%A3l%14%C8%8BW%AD%B9%E3%CDy%A2%06%3A%E3i%94%14%CA%AA%16%FB%AC%24%08%CF%B2BG%AFWB%A6%7F%FB%F4Z%A1%CC%10%B5%E1%E5%90Aa%11%B6%135k%D4%AA%F5%8'+
     'A%CDj%B7%DC%AE%F7%AB%033l%E0g%CA%ACM%22%D4%5D%F6%F9%D7%9E%A6%C4s%BA%FD%8E%CF%EB%F7%FC~%F9%1A%D5%81628Q(x%18%93%E8%04%C7H%B5%E8%03%F8%15%98%07%E9%E5%86%8'+
     '7yg9%E9%E7%99U%00%00!%F9%04%09%0A%00%01%00%2C%00%00%00%002%002%00%00%02%84%8C%8F%A9%CB%ED%CF%00%80%B4.%89%A7%DD0c%0E%5E%9E%14%96%C8%A8%99%25%1A%05%A4%1A'+
@@ -323,12 +323,12 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
 
 function SettingsGenerator(table, doc)
 {
-	this.tbl = table;
-	this.Document = doc;
+  this.tbl = table;
+  this.Document = doc;
 }
 
 SettingsGenerator.prototype = {
-	addHeadrow: function (content, colspan)
+  addHeadrow: function (content, colspan)
   {
     var r = this.tbl.insertRow(-1);
     var th = document.createElement('th');
@@ -383,23 +383,23 @@ SettingsGenerator.prototype = {
     return '<input name="'+name+'" type="text" value="' + new String(value).escapeHTML(3) + '" />';
   },
   createCheckbox: function (name,checked) {
-  	return '<input name="'+name+'" type="checkbox"'+(checked?' checked="checked"':'')+' />';
+    return '<input name="'+name+'" type="checkbox"'+(checked?' checked="checked"':'')+' />';
   },
   createSelect: function (name, selected, options) {
-  	var op='';
-  	options.forEach(function(o) {
-  		op+='<option value="'+o[1]+'"'+(selected==o[1]?' selected="selected"':'')+'>'+o[0]+'</option>';
-  	});
-  	return '<select name="'+name+'">'+op+'</select>';
+    var op='';
+    options.forEach(function(o) {
+      op+='<option value="'+o[1]+'"'+(selected==o[1]?' selected="selected"':'')+'>'+o[0]+'</option>';
+    });
+    return '<select name="'+name+'">'+op+'</select>';
   },
   createArrayInput: function (name, arr) {
     return '<textarea name="'+name+'">'+arr.map(function(e) {return new String(e).escapeHTML(3)}).join("\n")+'</textarea>';
   },
   getBool: function(name) {
-  	return this.Document.getElementsByName(name)[0].checked;
+    return this.Document.getElementsByName(name)[0].checked;
   },
   getValue: function(name) {
-  	return this.Document.getElementsByName(name)[0].value;
+    return this.Document.getElementsByName(name)[0].value;
   },
   getArray: function(name) {
     return this.Document.getElementsByName(name)[0].value.split("\n").map(function(e) { return e.trim() });
@@ -476,8 +476,8 @@ AJAXObject.prototype = {
               if (!isUndef(div) && div!=null) {div.innerHTML = req.responseText}
               callback(div);
             } else {
-            	var tmp = document.createElement('div');
-            	tmp.innerHTML = req.responseText;
+              var tmp = document.createElement('div');
+              tmp.innerHTML = req.responseText;
               callback(tmp,div);
             }
           } else
@@ -554,21 +554,21 @@ if (!document.getElementsByClassName) {
 }
 
 document.overlayWindows = {
-	_list: [],
-	add: function(win) {this._list.push(win); },
-	remove: function(win) {
-		var oldList = this._list;
-		this._list = oldList.filter(function(el) {
-			return el != win;
-		});
-	},
-	getWindowById: function(id) {
-		for (var i=0; i<this._list.length; i++) {
-			if (this._list[i].id==id)
-				return this._list[i];
-		}
-		return null;
-	}
+  _list: [],
+  add: function(win) {this._list.push(win); },
+  remove: function(win) {
+    var oldList = this._list;
+    this._list = oldList.filter(function(el) {
+      return el != win;
+    });
+  },
+  getWindowById: function(id) {
+    for (var i=0; i<this._list.length; i++) {
+      if (this._list[i].id==id)
+        return this._list[i];
+    }
+    return null;
+  }
 }
 
 function bringToFront(obj)
@@ -742,7 +742,7 @@ OverlayWindow.prototype = {
     this.showing=false;
     this.Outer.style.cssText+=' display:none';
     this.Outer.parentNode.removeChild(this.Outer);
-    
+
     if (this.evmousedown) removeEvent(this.TitleBar,'mousedown',this.evmousedown);
     if (this.evmousemove) removeGlobalEvent('mousemove',this.evmousemove,true);
     if (this.evmouseup) removeEvent(this.TitleBar,'mouseup',this.evmouseup)
@@ -1118,14 +1118,14 @@ function ShoutboxControls() {
     tab.width='100%';
     tab.cellSpacing=0;
     with (tab.insertRow(-1)) {
-    	with (insertCell(-1)) {
-    		align='left';
-    		innerHTML='<span class="gensmall">Dein Text:</span>';
-    	}
-    	var ev = EM.Settings.GetValue('pagehack','smileyOverlay')>0?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
-    	with (insertCell(-1)) {
-    		align='center';
-    		innerHTML='<span class="gensmall">'+
+      with (insertCell(-1)) {
+        align='left';
+        innerHTML='<span class="gensmall">Dein Text:</span>';
+      }
+      var ev = EM.Settings.GetValue('pagehack','smileyOverlay')>0?"EM.Pagehacks.SmileyWin('shoutmessage')":"window.open('posting.php?mode=sbsmilies', '_phpbbsmilies', 'HEIGHT=396,resizable=yes,scrollbars=yes,WIDTH=484')";
+      with (insertCell(-1)) {
+        align='center';
+        innerHTML='<span class="gensmall">'+
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'b\'); return false;" href="#" class="gensmall" title="Bold">B</a>'+
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'i\'); return false;" href="#" class="gensmall" title="Italic">I</a>'+
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'u\'); return false;" href="#" class="gensmall" title="Underlined">U</a>'+
@@ -1133,32 +1133,32 @@ function ShoutboxControls() {
                 '<a onclick="EM.Pagehacks.SBInsertURL(\'shoutmessage\'); return false;" href="#" class="gensmall" title="Link">L</a>'+
                 '<a onclick="EM.Pagehacks.SBTagify(\'shoutmessage\',\'user\'); return false;" href="#" class="gensmall" title="Member">M</a>'+
                 '</span>';
-    	}
-    	with (insertCell(-1)) {
-    		align='right';
-    		innerHTML='<span class="gensmall">'+
+      }
+      with (insertCell(-1)) {
+        align='right';
+        innerHTML='<span class="gensmall">'+
                 '<a onclick="'+ev+'; return false;" href="posting.php?mode=smilies" class="gensmall" style="font-weight: bold;">Smilies</a>'+
                 '</span>';
-    	}
+      }
     }
     with (tab.insertRow(-1)) {
-    	with (insertCell(-1)) {
-    		align='left';
-    		colSpan=3;
-    		innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage"'+
+      with (insertCell(-1)) {
+        align='left';
+        colSpan=3;
+        innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage"'+
                   ' id="shoutmessage" style="width:100%; font-size: 11px; height: 4em"></textarea>';
-    	}
+      }
     }
     with (tab.insertRow(-1)) {
-    	with (insertCell(-1)) {
-    		align='left';
+      with (insertCell(-1)) {
+        align='left';
             colSpan=2;
-    		innerHTML='<span class="gensmall"><input style="color: green;" value="150" readonly="readonly" name="shoutchars" class="charcount" id="shoutchars" type="text"> Zeichen übrig</span>';
-    	}
-    	with (insertCell(-1)) {
-    		align='right';
-    		innerHTML='<input value="Go!" name="shoutgo" class="sidebarbutton" id="shoutsubmit" type="submit" style="width: 40px">';
-    	}
+        innerHTML='<span class="gensmall"><input style="color: green;" value="150" readonly="readonly" name="shoutchars" class="charcount" id="shoutchars" type="text"> Zeichen übrig</span>';
+      }
+      with (insertCell(-1)) {
+        align='right';
+        innerHTML='<input value="Go!" name="shoutgo" class="sidebarbutton" id="shoutsubmit" type="submit" style="width: 40px">';
+      }
     }
   } else {
     if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
@@ -1526,11 +1526,11 @@ ShoutboxWindow.prototype = {
   },
 
   ev_anekdote: function(idx) {
-  	if (!EM.Anekdoter || EM.Anekdoter.Wnd.Window.closed) {
+    if (!EM.Anekdoter || EM.Anekdoter.Wnd.Window.closed) {
       EM.Anekdoter = new ShoutboxAnekdoter();
     }
-  	EM.Anekdoter.Anekdote(this.shouts[idx]);
-  	EM.Anekdoter.focus();
+    EM.Anekdoter.Anekdote(this.shouts[idx]);
+    EM.Anekdoter.focus();
   },
 
   ev_stalk: function(user) {
@@ -1648,7 +1648,7 @@ SmileyWindow.prototype = {
     tr.valign='middle';
     tr.align='center';
     for (var i=0; i<arguments.length; i++) {
-    	var sm = arguments[i];
+      var sm = arguments[i];
       with (tr.insertCell(-1)) {
         var a = this.win.createElement('a');
         a.innerHTML='<img border="0" title="'+sm.hint+' '+sm.cmd+'" alt="'+sm.hint+' '+sm.cmd+'" src="images/smiles/icon_'+sm.ico+'.gif"/>';
@@ -1812,13 +1812,13 @@ Pagehacks.prototype = {
         target.innerHTML = '<img src="'+unescape('%68%74%74%70%3A%2F%2F%77%77%77%2E%6B%61%72%69%6B%61%74%75%72%2D%63%61%72%74%6F%6F%6E%2E%64%65%2F%62%69%6C%64%65%72%2F%62%65%6D%61%6C%74%65%5F%6F%73%74%65%72%65%69%65%72%2E%6A%70%67')+'" style="align:center;"/>';
       } :
       function(div,target) {
-      	target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
-      	target.style.overflow='scroll';
-      	var tab = queryXPathNode(div,'table[2]');
-      	var err = queryXPathNode(tab,"./tbody/tr[2]/td/div/table[@class='forumline']/tbody/tr[2]/td[@class='row1']");
-      	if (err && err.innerHTML.match(/Keine Beitr.*?ge entsprechen Deinen Kriterien./)) {
-      	  target.innerHTML=err.innerHTML;
-      	} else {
+        target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
+        target.style.overflow='scroll';
+        var tab = queryXPathNode(div,'table[2]');
+        var err = queryXPathNode(tab,"./tbody/tr[2]/td/div/table[@class='forumline']/tbody/tr[2]/td[@class='row1']");
+        if (err && err.innerHTML.match(/Keine Beitr.*?ge entsprechen Deinen Kriterien./)) {
+          target.innerHTML=err.innerHTML;
+        } else {
           var h = queryXPathNode(tab,"./tbody/tr[1]/td/center/a[@class='maintitle' and @id='maintitle']");
           var cc = queryXPathNode(tab,"./tbody/tr[2]/td[1]/div");
           target.innerHTML = '';
@@ -1829,7 +1829,7 @@ Pagehacks.prototype = {
           d.appendChild(document.createTextNode('Nur die erste Seite wird angezeigt.'));
           target.appendChild(d);
           target.appendChild(cc);
-      	}
+        }
       });
       document.overlayWindows.getWindowById('em_searchbox').Close();
    },
@@ -1866,10 +1866,10 @@ Pagehacks.prototype = {
     var theSelection = edit.value.substring(oldStart, oldEnd);
     var theURL = '';
     if (theSelection=='') {
-    	theURL=prompt('Bitte die URL eingeben:','');
-    	if (theURL=='') return false;
-    	theSelection=prompt('Bitte den Link-Text eingeben:',theURL);
-    	if (theSelection==theURL) {
+      theURL=prompt('Bitte die URL eingeben:','');
+      if (theURL=='') return false;
+      theSelection=prompt('Bitte den Link-Text eingeben:',theURL);
+      if (theSelection==theURL) {
         edit.value =
           edit.value.substring(0, oldStart) +
           '[url]' + theSelection + '[/url]' +
@@ -2172,13 +2172,13 @@ Pagehacks.prototype = {
   },
 
   AddSmileyOverlay: function() {
-  	var f = document.forms.namedItem('post');
-  	if (f) {
+    var f = document.forms.namedItem('post');
+    if (f) {
       var links = f.getElementsByTagName('a');
       for (var i=0; i<links.length; i++) {
-      	if (links[i].href.match(/posting\.php\?mode=smilies/)) {
-      		links[i].setAttribute('onclick','EM.Pagehacks.SmileyWin("message"); return false;');
-      	}
+        if (links[i].href.match(/posting\.php\?mode=smilies/)) {
+          links[i].setAttribute('onclick','EM.Pagehacks.SmileyWin("message"); return false;');
+        }
       }
     }
   }
