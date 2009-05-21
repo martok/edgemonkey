@@ -219,6 +219,25 @@ function last_child(node,kind)
   return c[c.length-1];
 }
 
+function previousNode(node)
+{
+  var res=node.previousSibling;
+  while (res!=null && res.nodeType!=1) {
+    res = res.previousSibling;
+  }
+  return res;
+}
+
+function nextNode(node)
+{
+  var res=node.nextSibling;
+  while (res!=null && res.nodeType!=1) {
+    res = res.nextSibling;
+  }
+  return res;
+}
+
+
 function isUndef(what)
 {
   return (typeof what == "undefined");
@@ -843,6 +862,8 @@ SettingsStore.prototype = {
     this.Values['topic.highlight_mod']=0;
     this.Values['topic.highlight_stalk']=0;
     this.Values['topic.user_stalk']=new Array();
+    this.Values['topic.user_killfile']=new Array();
+    this.Values['topic.killFileType']=1;
   },
 
   GetValue: function(sec,key) {
@@ -879,16 +900,24 @@ SettingsStore.prototype = {
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
 
       addHeadrow('Thread-Ansicht',2);
-      addSettingsRow( 'Beiträge von mir hervorheben',
+      addSettingsRow( 'Beitr&auml;ge von mir hervorheben',
           createColorSelection('topic_highlight_me',this.GetValue('topic','highlight_me'), false)
           );
-      addSettingsRow( 'Beiträge von ausgew&auml;hlten Nutzern hervorheben<br />',
+      addSettingsRow( 'Beitr&auml;ge von ausgew&auml;hlten Nutzern hervorheben<br />',
           createColorSelection('topic_highlight_stalk',this.GetValue('topic','highlight_stalk'), false)
           );
-      addSettingsRow( 'Beiträge von Moderatoren/Admins hervorheben',
+      addSettingsRow( 'Beitr&auml;ge von Moderatoren/Admins hervorheben',
           createColorSelection('topic_highlight_mod',this.GetValue('topic','highlight_mod'), false)
           );
       addSettingsRow( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)',createArrayInput('topic_user_stalk',this.GetValue('topic','user_stalk')));
+      addSettingsRow( 'Benutzer ausblenden',
+          createSelect('topic_killFileType', this.GetValue('topic','killFileType'), [
+            ['Nein', 0],
+            ['Beitrag verkleinern', 1],
+            ['Minimal', 2],
+          ])
+          );
+      addSettingsRow( 'Terrorkartei<br />(Ein Benutzer je Zeile)',createArrayInput('topic_user_killfile',this.GetValue('topic','user_killfile')));
 
       addHeadrow('Shoutbox',2);
       addSettingsRow( 'Eingabefeld vergr&ouml;&szlig;ern', createCheckbox('sb_longinput', this.GetValue('sb','longInput')));
@@ -938,13 +967,11 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
 
       EM.Settings.SetValue('topic','highlight_me', getValue('topic_highlight_me'));
-      console.log(1);
       EM.Settings.SetValue('topic','highlight_mod', getValue('topic_highlight_mod'));
-      console.log(2);
       EM.Settings.SetValue('topic','highlight_stalk', getValue('topic_highlight_stalk'));
-      console.log(3);
       EM.Settings.SetValue('topic','user_stalk', getArray('topic_user_stalk'));
-      console.log(4);
+      EM.Settings.SetValue('topic','user_killfile', getArray('topic_user_killfile'));
+      EM.Settings.SetValue('topic','killFileType', getArray('topic_killFileType'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -2238,19 +2265,44 @@ Pagehacks.prototype = {
     var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
 
     var user_stalk = EM.Settings.GetValue('topic','user_stalk');
-
+    var user_killfile = EM.Settings.GetValue('topic','user_killfile');
+    var kftype = EM.Settings.GetValue('topic','killFileType');
     for(var i = 1; i < tr.length - 1; i += 3) {
       var tdProfile = queryXPathNode(tr[i], "td[1]");
       var tdPost = queryXPathNode(tr[i], "td[2]");
       var tdBottom = queryXPathNode(tr[i+1], "td[1]");
       var linkUser = queryXPathNode(tdProfile, "b/a[1]");
       var spanUser = queryXPathNode(linkUser, "span[1]");
+      var idPost = queryXPathNode(tdProfile, "a[1]").name;
       var strUser = spanUser.textContent;
 
       var isSelf = strUser == EM.User.loggedOnUser;
       var isMod = /color\:/.test(linkUser.style.cssText);
 
       var cssClassAdd = '';
+
+      if (kftype && user_killfile.some(
+          function (e){
+            return e.equals(strUser);
+          })) {
+        if (kftype==1) {
+          var userp = queryXPathNode(tdProfile,"./span[@class='postdetails']");
+          var postc = queryXPathNode(tdPost,"./div[@class='postbody']");
+          userp.style.display='none';
+          postc.style.display='none';
+          var show = document.createElement('span');
+          show.className+=' gensmall';
+          show.innerHTML='Post ausgeblendet. <a href="#'+idPost+'" onclick="EM.Pagehacks.ShowHiddenPosts('+idPost+')">Anzeigen</a>';
+          tdPost.insertBefore(show,postc);
+        } else
+        if (kftype==2) {
+          tr[i].style.display='none';
+          tr[i+1].style.display='none';
+          var tdSpacer = queryXPathNode(tr[i+2], "td[1]");
+          tdSpacer.className+=' gensmall';
+          tdSpacer.innerHTML='<b>'+strUser+'</b>: Post ausgeblendet. <a href="#'+idPost+'" onclick="EM.Pagehacks.ShowHiddenPosts('+idPost+')">Anzeigen</a>';
+        }
+      }
 
       //First detect Moderators ...
       if (postclass_mod) {
@@ -2282,6 +2334,26 @@ Pagehacks.prototype = {
       tdProfile.className.replace(/Highlight/, '');
       tdPost.className.replace(/Highlight/, '');
       tdBottom.className.replace(/Highlight/, '');
+    }
+  },
+  ShowHiddenPosts: function(rel) {
+    var trPost = queryXPathNode(unsafeWindow.document, '//a[@name='+rel+']/../..');
+    var trBottom = nextNode(trPost);
+    var kftype = EM.Settings.GetValue('topic','killFileType');
+
+    if (kftype==1) {
+      var userp = queryXPathNode(trPost,"./td[1]/span[@class='postdetails']");
+      var postc = queryXPathNode(trPost,"./td[2]/div[@class='postbody']");
+      userp.style.display='';
+      postc.style.display='';
+      var span = queryXPathNode(trPost,"./td[2]/span");
+      span.parentNode.removeChild(span);
+    } else
+    if (kftype==2) {
+      trBottom.style.display='';
+      trPost.style.display='';
+      var tdSpacer = queryXPathNode(nextNode(trBottom),"td[1]");
+      tdSpacer.innerHTML='';
     }
   }
 }
