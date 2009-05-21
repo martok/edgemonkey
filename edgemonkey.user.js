@@ -838,6 +838,11 @@ SettingsStore.prototype = {
     this.Values['sb.highlight_stalk']=0;
     this.Values['sb.user_stalk']=new Array();
     this.Values['sb.pnlink_active']=true;
+
+    this.Values['topic.highlight_me']=0;
+    this.Values['topic.highlight_mod']=0;
+    this.Values['topic.highlight_stalk']=0;
+    this.Values['topic.user_stalk']=new Array();
   },
 
   GetValue: function(sec,key) {
@@ -858,7 +863,6 @@ SettingsStore.prototype = {
       addSettingsRow( 'Schlagschatten unter Popup-Fenstern', createCheckbox('ui_dropshadow', this.GetValue('ui','showDropShadow')));
       addSettingsRow( 'Nutze ein flacheres Layout f&uuml;r Formulare', createCheckbox('ui_flatstyle', this.GetValue('ui', 'useFlatStyle')));
       addSettingsRow( 'Maximalbreite von Bildern erzwingen', createCheckbox('ph_imgmaxwidth', this.GetValue('pagehack','imgMaxWidth')));
-      addSettingsRow( 'Shout-Hervorhebung auch auf Posts anwenden:', createCheckbox('ui_highlightPosts', this.GetValue('ui','highlightPosts')));
 
       addHeadrow('Ergonomie',2);
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
@@ -874,6 +878,18 @@ SettingsStore.prototype = {
           );
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
 
+      addHeadrow('Thread-Ansicht',2);
+      addSettingsRow( 'Beiträge von mir hervorheben',
+          createColorSelection('topic_highlight_me',this.GetValue('topic','highlight_me'), false)
+          );
+      addSettingsRow( 'Beiträge von ausgew&auml;hlten Nutzern hervorheben<br />',
+          createColorSelection('topic_highlight_stalk',this.GetValue('topic','highlight_stalk'), false)
+          );
+      addSettingsRow( 'Beiträge von Moderatoren/Admins hervorheben',
+          createColorSelection('topic_highlight_mod',this.GetValue('topic','highlight_mod'), false)
+          );
+      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)',createArrayInput('topic_user_stalk',this.GetValue('topic','user_stalk')));
+
       addHeadrow('Shoutbox',2);
       addSettingsRow( 'Eingabefeld vergr&ouml;&szlig;ern', createCheckbox('sb_longinput', this.GetValue('sb','longInput')));
       addSettingsRow( 'Shoutenden Username hervorheben', createCheckbox('sb_bolduser', this.GetValue('sb','boldUser')));
@@ -888,7 +904,7 @@ SettingsStore.prototype = {
       addSettingsRow( 'Shouts von Moderatoren/Admins hervorheben',
           createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
           );
-      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Benutzer mit Komma trennen)',createArrayInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
+      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)',createArrayInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
       addSettingsRow( 'Zeige Link zum Schreiben einer PN an Benutzer',createCheckbox('sb_pnlink', this.GetValue('sb','pnlink_active')));
 
     }
@@ -906,7 +922,6 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
       EM.Settings.SetValue('pagehack','imgMaxWidth', getBool('ph_imgmaxwidth'));
       EM.Settings.SetValue('pagehack','smileyOverlay', getValue('ph_smileyOverlay'));
-      EM.Settings.SetValue('ui','highlightPosts', getBool('ui_highlightPosts'));
 
       EM.Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
       EM.Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
@@ -921,6 +936,15 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('sb','boldUser', getBool('sb_bolduser'));
       EM.Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
       EM.Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
+
+      EM.Settings.SetValue('topic','highlight_me', getValue('topic_highlight_me'));
+      console.log(1);
+      EM.Settings.SetValue('topic','highlight_mod', getValue('topic_highlight_mod'));
+      console.log(2);
+      EM.Settings.SetValue('topic','highlight_stalk', getValue('topic_highlight_stalk'));
+      console.log(3);
+      EM.Settings.SetValue('topic','user_stalk', getArray('topic_user_stalk'));
+      console.log(4);
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -1711,7 +1735,7 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
-  if(EM.Settings.GetValue('ui','highlightPosts') && /\bviewtopic\.php/.test(Location))
+  if(/\bviewtopic\.php/.test(Location))
   {
     this.HighlightPosts();
   }
@@ -2209,11 +2233,11 @@ Pagehacks.prototype = {
     var tbl = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table[1]");
     var tr = queryXPathNodeSet(tbl, "tbody/tr");
 
-    var shoutclass_me = ' emctpl' + EM.Settings.GetValue('sb','highlight_me');
-    var shoutclass_mod = ' emctpl' + EM.Settings.GetValue('sb','highlight_mod');
-    var shoutclass_stalk = ' emctpl' + EM.Settings.GetValue('sb','highlight_stalk');
+    var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
+    var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
+    var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
 
-    var user_stalk = EM.Settings.GetValue('sb','user_stalk');
+    var user_stalk = EM.Settings.GetValue('topic','user_stalk');
 
     for(var i = 1; i < tr.length - 1; i += 3) {
       var tdProfile = queryXPathNode(tr[i], "td[1]");
@@ -2229,24 +2253,24 @@ Pagehacks.prototype = {
       var cssClassAdd = '';
 
       //First detect Moderators ...
-      if (shoutclass_mod) {
+      if (postclass_mod) {
         if (isMod)
-          cssClassAdd += shoutclass_mod;
+          cssClassAdd += postclass_mod;
       }
 
       // and after this the followed\stalked users, to allow overriding the style properly
-      if (shoutclass_stalk) {
+      if (postclass_stalk) {
         if (user_stalk.some(
           function (e){
             return e.equals(strUser);
           }))
-          cssClassAdd += shoutclass_stalk;
+          cssClassAdd += postclass_stalk;
       }
 
       // at last the logged on user, to allow overriding the style properly
-      if (shoutclass_me) {
+      if (postclass_me) {
         if (isSelf)
-          cssClassAdd += shoutclass_me;
+          cssClassAdd += postclass_me;
       }
 
       //Now lets check against the blacklist :P
