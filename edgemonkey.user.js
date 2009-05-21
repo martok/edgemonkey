@@ -858,6 +858,7 @@ SettingsStore.prototype = {
       addSettingsRow( 'Schlagschatten unter Popup-Fenstern', createCheckbox('ui_dropshadow', this.GetValue('ui','showDropShadow')));
       addSettingsRow( 'Nutze ein flacheres Layout f&uuml;r Formulare', createCheckbox('ui_flatstyle', this.GetValue('ui', 'useFlatStyle')));
       addSettingsRow( 'Maximalbreite von Bildern erzwingen', createCheckbox('ph_imgmaxwidth', this.GetValue('pagehack','imgMaxWidth')));
+      addSettingsRow( 'Shout-Hervorhebung auch auf Posts anwenden:', createCheckbox('ui_highlightPosts', this.GetValue('ui','highlightPosts')));
 
       addHeadrow('Ergonomie',2);
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
@@ -905,6 +906,7 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
       EM.Settings.SetValue('pagehack','imgMaxWidth', getBool('ph_imgmaxwidth'));
       EM.Settings.SetValue('pagehack','smileyOverlay', getValue('ph_smileyOverlay'));
+      EM.Settings.SetValue('ui','highlightPosts', getBool('ui_highlightPosts'));
 
       EM.Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
       EM.Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
@@ -1709,7 +1711,7 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
-  if(true || /\bviewtopic\.php/.test(Location))
+  if(EM.Settings.GetValue('ui','highlightPosts') && /\bviewtopic\.php/.test(Location))
   {
     this.HighlightPosts();
   }
@@ -1873,7 +1875,6 @@ Pagehacks.prototype = {
       theURL=prompt('Bitte die URL eingeben:','');
       if (theURL=='') return false;
       theSelection=prompt('Bitte den Link-Text eingeben:',theURL);
-      theURL = theURL.replace('[','\%5B').replace(']','\%5B');
       if (theSelection==theURL) {
         edit.value =
           edit.value.substring(0, oldStart) +
