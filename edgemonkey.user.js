@@ -1709,6 +1709,10 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
+  if(true || /\bviewtopic\.php/.test(Location))
+  {
+    this.HighlightPosts();
+  }
 }
 
 Pagehacks.prototype = {
@@ -1932,6 +1936,22 @@ Pagehacks.prototype = {
           ".postbody img {"+
           "  max-width: 80%;"+
           "}";
+      }
+
+      style.innerHTML+= ' .incell { display: table-cell}';
+      style.innerHTML+= ' .incell.left{float:none;text-align:left}';
+      style.innerHTML+= ' .incell.right{text-align:right;padding-right:1px;}';
+      style.innerHTML+= ' .intbl { display: table; width: 100%}';
+      style.innerHTML+= ' .row1.mypost { background-color: #FEF4E4}';
+      style.innerHTML+= ' .row2.mypost { background-color: #FEEFD7}';
+      style.innerHTML+= ' .row1.modpost { background-color: #E8FED4}';
+      style.innerHTML+= ' .row2.modpost { background-color: #DBFEC4}';
+      for(var i = 0; i < colorTpl.length; i++) {
+        var tpl = colorTpl[i];
+        style.innerHTML+= ' .row1.emctpl'+i+',.userrow1.emctpl'+i+',.butrow1.emctpl'+i+' { '+tpl.style1+' }';
+        style.innerHTML+= ' .row2.emctpl'+i+',.userrow2.emctpl'+i+',.butrow2.emctpl'+i+' { '+tpl.style2+' }';
+        style.innerHTML+= ' .row3.emctpl'+i+',.userrow3.emctpl'+i+',.butrow3.emctpl'+i+' { '+tpl.style3+' }';
+        style.innerHTML+= ' .row4.emctpl'+i+',.userrow4.emctpl'+i+',.butrow4.emctpl'+i+' { '+tpl.style4+' }';
       }
 
       head.appendChild(style);
@@ -2181,6 +2201,62 @@ Pagehacks.prototype = {
           links[i].setAttribute('onclick','EM.Pagehacks.SmileyWin("message"); return false;');
         }
       }
+    }
+  },
+
+  HighlightPosts: function() {
+    var tbl = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table[1]");
+    var tr = queryXPathNodeSet(tbl, "tbody/tr");
+
+    var shoutclass_me = ' emctpl' + EM.Settings.GetValue('sb','highlight_me');
+    var shoutclass_mod = ' emctpl' + EM.Settings.GetValue('sb','highlight_mod');
+    var shoutclass_stalk = ' emctpl' + EM.Settings.GetValue('sb','highlight_stalk');
+
+    var user_stalk = EM.Settings.GetValue('sb','user_stalk');
+
+    for(var i = 1; i < tr.length - 1; i += 3) {
+      var tdProfile = queryXPathNode(tr[i], "td[1]");
+      var tdPost = queryXPathNode(tr[i], "td[2]");
+      var tdBottom = queryXPathNode(tr[i+1], "td[1]");
+      var linkUser = queryXPathNode(tdProfile, "b/a[1]");
+      var spanUser = queryXPathNode(linkUser, "span[1]");
+      var strUser = spanUser.textContent;
+
+      var isSelf = strUser == EM.User.loggedOnUser;
+      var isMod = /color\:/.test(linkUser.style.cssText);
+
+      var cssClassAdd = '';
+
+      //First detect Moderators ...
+      if (shoutclass_mod) {
+        if (isMod)
+          cssClassAdd += shoutclass_mod;
+      }
+
+      // and after this the followed\stalked users, to allow overriding the style properly
+      if (shoutclass_stalk) {
+        if (user_stalk.some(
+          function (e){
+            return e.equals(strUser);
+          }))
+          cssClassAdd += shoutclass_stalk;
+      }
+
+      // at last the logged on user, to allow overriding the style properly
+      if (shoutclass_me) {
+        if (isSelf)
+          cssClassAdd += shoutclass_me;
+      }
+
+      //Now lets check against the blacklist :P
+      tdProfile.className += cssClassAdd;
+      tdPost.className += cssClassAdd;
+      tdBottom.className += cssClassAdd;
+
+      //Remove the DF Highlighting to ensure proper colors :P
+      tdProfile.className.replace(/Highlight/, '');
+      tdPost.className.replace(/Highlight/, '');
+      tdBottom.className.replace(/Highlight/, '');
     }
   }
 }
