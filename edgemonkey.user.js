@@ -1869,6 +1869,7 @@ Pagehacks.prototype = {
       theURL=prompt('Bitte die URL eingeben:','');
       if (theURL=='') return false;
       theSelection=prompt('Bitte den Link-Text eingeben:',theURL);
+      theURL = theURL.replace('[','\%5B').replace(']','\%5B');
       if (theSelection==theURL) {
         edit.value =
           edit.value.substring(0, oldStart) +
