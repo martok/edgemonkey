@@ -1762,8 +1762,7 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
-  if(/\bviewtopic\.php/.test(Location))
-  {
+  if(/\bviewtopic\.php|\btopic_/.test(Location)) {
     this.HighlightPosts();
   }
 }
