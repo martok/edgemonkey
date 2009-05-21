@@ -2331,9 +2331,9 @@ Pagehacks.prototype = {
       tdBottom.className += cssClassAdd;
 
       //Remove the DF Highlighting to ensure proper colors :P
-      tdProfile.className.replace(/Highlight/, '');
-      tdPost.className.replace(/Highlight/, '');
-      tdBottom.className.replace(/Highlight/, '');
+      tdProfile.className = tdProfile.className.replace(/Highlight/, '');
+      tdPost.className = tdPost.className.replace(/Highlight/, '');
+      tdBottom.className = tdBottom.className.replace(/Highlight/, '');
     }
   },
   ShowHiddenPosts: function(rel) {
