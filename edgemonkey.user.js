@@ -12,20 +12,22 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.19;
+const ScriptVersion = 0.20;
 
 // @changelog
 /*
 
-0.20           09-04-**
-  -New Anekdoter with better html2code (Martok)
-  -display shouting user in bold
+0.20           09-05-23
   -global usage of EM object across all (i)frames & popups
+  -display shouting user in bold
   -better (more native feeling) dropdown handling
+  -New Anekdoter with better html2code (Martok)
   -quicklink dropdowns default on
   -enhanced Opera compatibility
   -builtin urldrop functionality for SB
   -resizable SB
+  -new colors
+  -Post highlighter
 
 
 0.19           09-04-12
