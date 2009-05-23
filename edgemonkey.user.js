@@ -24,6 +24,8 @@ const ScriptVersion = 0.19;
   -better (more native feeling) dropdown handling
   -quicklink dropdowns default on
   -enhanced Opera compatibility
+  -builtin urldrop functionality for SB
+  -resizable SB
 
 
 0.19           09-04-12
@@ -120,7 +122,15 @@ var colorTpl = new Array(
     },
     {
         name:'red',
-        friendlyname:'Helles Rot',
+        friendlyname:'Kräftig Rot',
+        style1:'background:#FEC8C8;',
+        style2:'background:#FEB3B3;',
+        style3:'background:#FEACAC;',
+        style4:'background:#FEA7A7;',
+    },
+    {
+        name:'orange',
+        friendlyname:'Fruchtig Orange',
         style1:'background:#FEE8D4;',
         style2:'background:#FEDBC4;',
         style3:'background:#FED7C0;',
@@ -151,6 +161,14 @@ var colorTpl = new Array(
         style4:'background:#A6C8FE;',
     },
     {
+        name:'lila',
+        friendlyname:'Heißes Pink',
+        style1:'background:#E2CCFE;',
+        style2:'background:#D7BBFE;',
+        style3:'background:#DCC0FE;',
+        style4:'background:#DAB9FE;',
+    },
+    {
         name:'pink',
         friendlyname:'Schwules Pink',
         style1:'background:#F8D4FE;',
@@ -162,9 +180,17 @@ var colorTpl = new Array(
         name:'grey',
         friendlyname:'Trist Grau',
         style1:'background:#E8E8E8;',
-        style2:'background:#D0D0D0;',
+        style2:'background:#DCDCDC;',
         style3:'background:#B0B0B0;',
         style4:'background:#C0C0C0;',
+    },
+    {
+        name:'chrome',
+        friendlyname:'Depressiv Monochrome',
+        style1:'background:#D8D8D8',
+        style2:'background:#BCBCBC',
+        style3:'background:#A0A0A0',
+        style4:'background:#AAAAAA',
     }
 );
 
@@ -1356,7 +1382,7 @@ function ShoutboxAnekdoter() {
 ShoutboxAnekdoter.prototype = {
   UpdateContent: function() {
     var cont = this.Wnd.Document.getElementById('cont');
-    var sh = this.list;
+    var sh = [].concat(this.list);  // Kopie erstellen
     if (EM.Settings.GetValue('sb','anek_reverse')) {
       sh.reverse();
     }
@@ -1867,8 +1893,10 @@ Pagehacks.prototype = {
     var theURL = '';
     if (theSelection=='') {
       theURL=prompt('Bitte die URL eingeben:','');
-      if (theURL=='') return false;
+      if (theURL=='' || theURL==null) return false;
       theSelection=prompt('Bitte den Link-Text eingeben:',theURL);
+      if (theSelection=='' || theSelection==null) theSelection=theURL;
+      theURL = theURL.replace('[','\%5B').replace(']','\%5B');
       if (theSelection==theURL) {
         edit.value =
           edit.value.substring(0, oldStart) +
@@ -2221,7 +2249,7 @@ function upgradeSettings(){
   if(typeof chk == 'string') {
     upgraded = true;
     var a = chk.trim().split(/\s*,\s*/);
-    Settings.SetValue('sb','user_stalk', a);
+    EM.Settings.SetValue('sb','user_stalk', a);
   }
 
   if (upgraded) {
