@@ -1380,6 +1380,8 @@ ShoutboxControls.prototype = {
     s = s.replace(/\bbenbe\b/i, "BenBE");
     s = s.replace(/\bcih\b/, "ich");
     s = s.replace(/\bnciht\b/, "nicht");
+    s = s.replace(/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/i, ":mrgreen:");
+    s = s.replace(/\bFIF\b/, "Fragen in's Forum :mahn:"); 
 
     //Check for references to the branch
     if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
