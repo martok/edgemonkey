@@ -1441,11 +1441,49 @@ ShoutboxControls.prototype = {
 
   ev_shoutkeys: function(evt) {
     evt = (evt) ? evt : ((event) ? event : null);
-    if (evt && evt.keyCode==13) {
-      evt.preventDefault();
-      evt.cancelBubble = true;
-      if (EM.Shouts.ev_sb_post()) {
-        EM.Shouts.form.submit();
+    if (evt) {
+      if (evt.keyCode==32 && !isEmpty(EM.Shouts._ACIndex)) {
+        var edit = EM.Shouts.form_text;
+        edit.selectionEnd = edit.value.length;
+        edit.selectionStart = edit.selectionEnd;
+        evt.preventDefault();
+        evt.cancelBubble = true;
+      }
+      if (evt.keyCode==9) {
+        evt.preventDefault();
+        evt.cancelBubble = true;
+        var edit = EM.Shouts.form_text;
+        var n = edit.value.substring(0,edit.selectionStart);
+        if (n.charAt(0)=='@' && n.charAt(1)!='@') {
+        	if (isEmpty(EM.Shouts._ACIndex)) {
+            n = n.substring(1,n.length);
+          	var ulist = [];
+          	for (var i=0; i<EM.ShoutWin.shouts.length; i++) {
+          		u = EM.ShoutWin.shouts[i].getElementsByTagName('a')[0].firstChild.innerHTML;
+          		if (u != EM.User.loggedOnUser && u.substring(0,n.length)==n && ulist.indexOf(u)<0)
+          		  ulist.push(u);	
+          	}
+          	EM.Shouts._ACList = ulist;
+          	EM.Shouts._ACIndex = -1;
+          }
+          EM.Shouts._ACIndex = (EM.Shouts._ACIndex + 1) % EM.Shouts._ACList.length;
+          if (EM.Shouts._ACList.length>0) {
+            var p = edit.selectionStart;
+            edit.value='@'+EM.Shouts._ACList[EM.Shouts._ACIndex]+': ';
+            edit.selectionStart = p;
+            edit.selectionEnd = edit.value.length;
+          }
+        }
+      } else {
+      	EM.Shouts._ACIndex = null;
+      	EM.Shouts._ACList = null;
+      }
+      if (evt.keyCode== 13) {
+        evt.preventDefault();
+        evt.cancelBubble = true;
+        if (EM.Shouts.ev_sb_post()) {
+          EM.Shouts.form.submit();
+        }
       }
     }
     unsafeWindow.shoutBoxKey.apply(window,arguments);
