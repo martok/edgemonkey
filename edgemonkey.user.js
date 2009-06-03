@@ -1380,8 +1380,11 @@ ShoutboxControls.prototype = {
     s = s.replace(/\bbenbe\b/i, "BenBE");
     s = s.replace(/\bcih\b/, "ich");
     s = s.replace(/\bnciht\b/, "nicht");
+    s = s.replace(/\bmrg\b/i, "$1:mrgreen:$2");
     s = s.replace(/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/i, ":mrgreen:");
-    s = s.replace(/\bFIF\b/, "Fragen in's Forum :mahn:"); 
+    s = s.replace(/\bmrgreen\b/i, ":mrgreen:");
+    s = s.replace(/:+mrgreen:+/i, ":mrgreen:");
+    s = s.replace(/\bFIF\b/, "Fragen in's Forum :mahn:");
 
     //Check for references to the branch
     if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
@@ -1431,6 +1434,14 @@ ShoutboxControls.prototype = {
     s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:");
     s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:");
     s = s.replace(/^@@/, "@");
+
+    //AutoTagging
+    s = s.replace(/\bU@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+(?=@))?)@?(?=\s)/, "[user]$1[/user]");
+    s = s.replace(/\bT@(\d+)\b/, "[url=http://www.delphi-forum.de/viewtopic.php?t=$1]Topic $1[/url]");
+    s = s.replace(/\bP@(\d+)\b/, "[url=http://www.delphi-forum.de/viewtopic.php?p=$1#$1]Post $1[/url]");
+    s = s.replace(/\bS@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+(?=@))?)@?/, "[url=http://www.delphi-forum.de/search.php?search_keywords=$1]$1[/url]");
+    s = s.replace(/\bG@([\w\.\-<>\(\)\[\]\{\}\+]+)@?/, "[url=http://www.lmgtfy.com/?q=$1]LMGTFY: $1[/url]");
+    s = s.replace(/\bRFC0*((?!0)\d+)\b/, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]");
 
     //Implement /me-Tags (if present) ;-)
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
