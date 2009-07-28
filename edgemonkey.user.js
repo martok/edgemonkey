@@ -2738,9 +2738,11 @@ function ShoutboxControls() {
   this.form_go = document.getElementById('shoutsubmit');
   this.form = this.form_go.form;
   if (EM.Settings.GetValue('sb','longInput')) {
-    this.form.innerHTML='';
+    for (var i = 0; i < 7; i++)
+      this.form.removeChild(this.form.firstChild);
+
     var tab = document.createElement('table');
-    this.form.appendChild(tab);
+    this.form.insertBefore(tab, this.form.firstChild);
     tab.width='100%';
     tab.cellSpacing=0;
     with (tab.insertRow(-1)) {
