@@ -12,10 +12,14 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.20;
+const ScriptVersion = 0.21;
 
 // @changelog
 /*
+
+0.21           09-06-*
+  -SB: Auto-Tagging (BenBE)
+  -SB: IRC-Like Nickname Autocomplete (Martok)
 
 0.20           09-05-23
   -global usage of EM object across all (i)frames & popups
@@ -1377,14 +1381,15 @@ ShoutboxControls.prototype = {
 
   ev_sb_post: function (evt) {
     var s = EM.Shouts.form_text.value;
-    s = s.replace(/\bbenbe\b/i, "BenBE");
-    s = s.replace(/\bcih\b/, "ich");
-    s = s.replace(/\bnciht\b/, "nicht");
-    s = s.replace(/\bmrg\b/i, "$1:mrgreen:$2");
-    s = s.replace(/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/i, ":mrgreen:");
-    s = s.replace(/\bmrgreen\b/i, ":mrgreen:");
-    s = s.replace(/:+mrgreen:+/i, ":mrgreen:");
-    s = s.replace(/\bFIF\b/, "Fragen in's Forum :mahn:");
+    s = s.replace(/\bbenbe\b/gi, "BenBE");
+    s = s.replace(/\bcih\b/g, "ich");
+    s = s.replace(/\bnciht\b/g, "nicht");
+    s = s.replace(/\bmrg\b/gi, ":mrgreen:");
+    s = s.replace(/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/gi, ":mrgreen:");
+    s = s.replace(/\bmrgreen\b/gi, ":mrgreen:");
+    s = s.replace(/:+mrgreen:+/gi, ":mrgreen:");
+    s = s.replace(/\bFIF\b/g, "Fragen in's Forum :mahn:");
+    s = s.replace(/\bSIWO\b/g, "Suche ist weiter oben :mahn:");
 
     //Check for references to the branch
     if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
@@ -1395,10 +1400,10 @@ ShoutboxControls.prototype = {
     }
 
     //Wikipedia Link Support ...
-    s = s.replace(/\[\[(\w\w):(\w+)\|(.*?)\]\]/i, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]");
-    s = s.replace(/\[\[(\w+)\|(.*?)\]\]/i, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]");
-    s = s.replace(/\[\[(\w\w):(\w+)\]\]/i, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]");
-    s = s.replace(/\[\[(\w+)\]\]/i, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]");
+    s = s.replace(/\[\[(\w\w):(\w+)\|(.*?)\]\]/gi, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]");
+    s = s.replace(/\[\[(\w+)\|(.*?)\]\]/gi, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]");
+    s = s.replace(/\[\[(\w\w):(\w+)\]\]/gi, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]");
+    s = s.replace(/\[\[(\w+)\]\]/gi, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]");
 
     //Check for brackets in the shout (possible BBCodes
     if(/[\[\]]/i.test(s)) {
@@ -1429,19 +1434,20 @@ ShoutboxControls.prototype = {
     }
 
     //User-Tag-Verlinkung
-    s = s.replace(/^@(GTA):/, "[user=\"GTA-Place\"]GTA-Place[/user]:");
-    s = s.replace(/^@(TUFKAPL):/, "[user=\"Christian S.\"]TUFKAPL[/user]:");
-    s = s.replace(/^@(Wolle):/, "[user=\"Wolle92\"]Wolle92[/user]:");
-    s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/, "[user]$1[/user]:");
-    s = s.replace(/^@@/, "@");
+    s = s.replace(/^@(GTA):/g, "[user=\"GTA-Place\"]GTA-Place[/user]:");
+    s = s.replace(/^@(TUFKAPL):/g, "[user=\"Christian S.\"]TUFKAPL[/user]:");
+    s = s.replace(/^@(Wolle):/g, "[user=\"Wolle92\"]Wolle92[/user]:");
+    s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/g, "[user]$1[/user]:");
+    s = s.replace(/^@@/g, "@");
 
     //AutoTagging
-    s = s.replace(/\bU@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+(?=@))?)@?(?=\s)/, "[user]$1[/user]");
-    s = s.replace(/\bT@(\d+)\b/, "[url=http://www.delphi-forum.de/viewtopic.php?t=$1]Topic $1[/url]");
-    s = s.replace(/\bP@(\d+)\b/, "[url=http://www.delphi-forum.de/viewtopic.php?p=$1#$1]Post $1[/url]");
-    s = s.replace(/\bS@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+(?=@))?)@?/, "[url=http://www.delphi-forum.de/search.php?search_keywords=$1]$1[/url]");
-    s = s.replace(/\bG@([\w\.\-<>\(\)\[\]\{\}\+]+)@?/, "[url=http://www.lmgtfy.com/?q=$1]LMGTFY: $1[/url]");
-    s = s.replace(/\bRFC0*((?!0)\d+)\b/, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]");
+    s = s.replace(/\bU@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+(?=@))?)@?(?=\s|$)/g, "[user]$1[/user]");
+    s = s.replace(/\bT@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?t=$1]Topic $1[/url]");
+    s = s.replace(/\bP@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?p=$1#$1]Post $1[/url]");
+    s = s.replace(/\bF@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewforum.php?f=$1]Forum $1[/url]");
+    s = s.replace(/\bS@([\w\.\-<>\(\)\[\]\{\}\+]+)@?(?=\s|$)/g, "[url=http://www.delphi-forum.de/search.php?search_keywords=$1]$1[/url]");
+    s = s.replace(/\bG@([\w\.\-<>\(\)\[\]\{\}\+]+)@?(?=\s|$)/g, "[url=http://www.lmgtfy.com/?q=$1]LMGTFY: $1[/url]");
+    s = s.replace(/\bRFC\s?0*((?!0)\d+)\b/g, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]");
 
     //Implement /me-Tags (if present) ;-)
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
@@ -1471,7 +1477,7 @@ ShoutboxControls.prototype = {
             var ulist = [];
             for (var i=0; i<EM.ShoutWin.shouts.length; i++) {
               u = EM.ShoutWin.shouts[i].getElementsByTagName('a')[0].firstChild.innerHTML;
-              if (u != EM.User.loggedOnUser && u.substring(0,n.length)==n && ulist.indexOf(u)<0)
+              if (u != EM.User.loggedOnUser && u.substring(0,n.length).toLowerCase()==n.toLowerCase() && ulist.indexOf(u)<0)
                 ulist.push(u);
             }
             EM.Shouts._ACList = ulist;
@@ -2205,7 +2211,11 @@ Pagehacks.prototype = {
 
   AddQuickProfileMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
-    link.setAttribute('onclick','return EM.Pagehacks.QuickProfileMenu()');
+    var linkText = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[3]/a[1]");
+
+    if('Meine Ecke' == linkText.textContent) {
+      link.setAttribute('onclick','return EM.Pagehacks.QuickProfileMenu()');
+    }
   },
 
   AddQuickSearchMenu: function() {
