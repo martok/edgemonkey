@@ -2066,7 +2066,7 @@ Pagehacks.prototype = {
       var rules = document.styleSheets[s].cssRules;
       for (var r = 0; r < rules.length; r++) {
         var rule = rules[r];
-        if (!isUndef(rule.selectorText) && rule.selectorText.match(/\.code(Cell|comment|key|string|char|number|compilerdirective)|textarea\.posting_body/))
+        if (!isUndef(rule.selectorText) && rule.selectorText.match(/pre\.sourcecode|\.code(Cell|comment|key|string|char|number|compilerdirective)|textarea\.posting_body/))
           rule.style.fontFamily = "monospace";
       }
     }
