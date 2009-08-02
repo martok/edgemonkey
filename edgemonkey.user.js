@@ -2348,7 +2348,7 @@ Pagehacks.prototype = {
     }
     with (/http\:\/\/(www|branch)\./i) {
       if (test(Location))
-        Lks.push(['Trunk', replace(Location, 'http://trunk.')]);
+        Lks.push(['Trunk', 'http://'+window.location.host.replace(/(www|branch)/i,'trunk')+'/my.php']);
     }
     with (table.insertRow(-1)) {
       insertCell(-1).style.cssText='width: 100%;';
