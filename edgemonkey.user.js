@@ -2101,7 +2101,7 @@ Pagehacks.prototype = {
           "}";
       }
 
-      if(EM.Settings.GetValue('ph', 'imgMaxWidth')) {
+      if(EM.Settings.GetValue('pagehack', 'imgMaxWidth')) {
         style.innerHTML+=
           ".postbody img {"+
           "  max-width: 80%;"+
