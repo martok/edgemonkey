@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name           EdgeMonkey
 // @copyright      (c)2009, Martok
 // @namespace      entwickler-ecke.de
@@ -343,6 +343,53 @@ String.prototype.equals = function (what) {
 if (!String.prototype.trim) String.prototype.trim = function() {
   return this.replace(/^\s*/,'').replace(/\s*$/,'');
 };
+
+(function() {
+    var default_replace = String.prototype.replace;
+
+    String.prototype.replace = function(search,replace) {
+        // replace is not function
+        if(typeof replace != "function") {
+            return default_replace.apply(this,arguments);
+        }
+
+        var str = "" + this;
+        var callback = replace;
+
+        // search string is not RegExp
+        if(!(search instanceof RegExp)) {
+            var idx = str.indexOf(search);
+            return (
+                idx == -1 ? str :
+                default_replace.apply(str,[search,callback(search, idx, str)])
+                );
+        }
+
+        var reg = search;
+        var result = [];
+        var lastidx = reg.lastIndex;
+        var re;
+
+        while((re = reg.exec(str)) != null) {
+            var idx  = re.index;
+            var args = re.concat(idx, str);
+            result.push(
+                str.slice(lastidx,idx),
+                callback.apply(null,args).toString()
+                );
+            if(!reg.global) {
+                lastidx += RegExp.lastMatch.length;
+                break;
+            } else {
+                lastidx = reg.lastIndex;
+            }
+        }
+
+        result.push(str.slice(lastidx));
+        return result.join("");
+    }
+})();
+
 
 function Point(x,y)
 {
@@ -2101,7 +2148,7 @@ Pagehacks.prototype = {
           "}";
       }
 
-      if(EM.Settings.GetValue('ph', 'imgMaxWidth')) {
+      if(EM.Settings.GetValue('pagehack', 'imgMaxWidth')) {
         style.innerHTML+=
           ".postbody img {"+
           "  max-width: 80%;"+
