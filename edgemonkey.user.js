@@ -1488,13 +1488,23 @@ ShoutboxControls.prototype = {
     s = s.replace(/^@@/g, "@");
 
     //AutoTagging
-    s = s.replace(/\bU@([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+(?=@))?)@?(?=\s|$)/g, "[user]$1[/user]");
+    s = s.replace(/(^|\s)(\w?@)(?:(?:\{(.+)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
+                  function($0,before,cmd,brace,free) {
+                    var txt = free?free:brace;
+                    if (txt=='') return '';
+                    switch(cmd) {
+                      case '@': return before+'[user]'+txt+'[/user]';
+                      case 'S@': return before+'[url=http://www.delphi-forum.de/search.php?search_keywords='+encodeURIComponent(txt)+']'+txt+'[/url]';
+                      case 'G@': return before+'[url=http://www.lmgtfy.com/?q='+encodeURIComponent(txt)+']LMGTFY: '+txt+'[/url]';
+                    }
+                  });
+
     s = s.replace(/\bT@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?t=$1]Topic $1[/url]");
     s = s.replace(/\bP@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?p=$1#$1]Post $1[/url]");
     s = s.replace(/\bF@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewforum.php?f=$1]Forum $1[/url]");
-    s = s.replace(/\bS@([\w\.\-<>\(\)\[\]\{\}\+]+)@?(?=\s|$)/g, "[url=http://www.delphi-forum.de/search.php?search_keywords=$1]$1[/url]");
-    s = s.replace(/\bG@([\w\.\-<>\(\)\[\]\{\}\+]+)@?(?=\s|$)/g, "[url=http://www.lmgtfy.com/?q=$1]LMGTFY: $1[/url]");
+
     s = s.replace(/\bRFC\s?0*((?!0)\d+)\b/g, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]");
+
 
     //Implement /me-Tags (if present) ;-)
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
