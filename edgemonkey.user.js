@@ -390,6 +390,25 @@ if (!String.prototype.trim) String.prototype.trim = function() {
     }
 })();
 
+function encodeLongShout(text)
+{
+  return encodeURIComponent(text);
+}
+
+function decodeLongShout(text)
+{
+  return decodeURIComponent(text);
+}
+
+function processLongShouts(container)
+{
+  var ll = queryXPathNodeSet(container, '//a[starts-with(@href,"http://ls.em.local/")]');
+  for (var i=0; i<ll.length; i++) {
+    var a = ll[i];
+    var h = a.href.substr("http://ls.em.local/".length);
+    a.parentNode.replaceChild(document.createTextNode(decodeLongShout(h)), a);
+  }
+}
 
 function Point(x,y)
 {
@@ -1488,14 +1507,16 @@ ShoutboxControls.prototype = {
     s = s.replace(/^@@/g, "@");
 
     //AutoTagging
-    s = s.replace(/(^|\s)(\w?@)(?:(?:\{(.+)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
+    s = s.replace(/(^|\s)([\w\\]?@)(?:(?:\{(.+)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
                   function($0,before,cmd,brace,free) {
                     var txt = free?free:brace;
                     if (txt=='') return '';
+                    console.log(cmd);
                     switch(cmd) {
                       case '@': return before+'[user]'+txt+'[/user]';
                       case 'S@': return before+'[url=http://www.delphi-forum.de/search.php?search_keywords='+encodeURIComponent(txt)+']'+txt+'[/url]';
                       case 'G@': return before+'[url=http://www.lmgtfy.com/?q='+encodeURIComponent(txt)+']LMGTFY: '+txt+'[/url]';
+                      case '\\@': return before+'[url=http://ls.em.local/'+encodeLongShout(txt)+']...[/url]';
                     }
                   });
 
@@ -1699,6 +1720,7 @@ function ShoutboxWindow() {
     var cnt = document.createElement('div');
     cnt.innerHTML = shout.innerHTML;
     shout.innerHTML = '';
+    processLongShouts(cnt);
     shout.insertBefore(cnt, shout.firstChild);
     shout.insertBefore(div, shout.firstChild);
 
