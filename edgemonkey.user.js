@@ -407,7 +407,7 @@ function encodeLongShout(text)
 
 function decodeLongShout(text)
 {
-  if(text.test(/%/)) {
+  if(/%/.test(text)) {
     return decodeURIComponent(text);
   }
 
