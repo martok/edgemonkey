@@ -393,15 +393,13 @@ if (!String.prototype.trim) String.prototype.trim = function() {
 function encodeLongShout(text)
 {
   var b = '';
-  var s = text.replace(/\W/, function(m) {
-      if(' ' == m) {
+  var s = text.replace(/[^\w]/g, function(m) {
+      if(' ' == m)
         return '-';
-      }
 
       b += m.charCodeAt(0).toString(16);
       return '.';
     });
-
   return '' != b ? s + '?' + b : s;
 }
 
@@ -415,8 +413,8 @@ function decodeLongShout(text)
   var s = p[0];
   var b = p[1]!=''?p[1]:'';
 
-  s = s.replace(/-/, ' ');
-  s = s.replace(/\./, function(m) {
+  s = s.replace(/-/g, ' ');
+  s = s.replace(/\./g, function(m) {
       var c = b.substr(0, 2);
       b = b.substr(2);
 
