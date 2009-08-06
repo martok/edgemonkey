@@ -392,12 +392,41 @@ if (!String.prototype.trim) String.prototype.trim = function() {
 
 function encodeLongShout(text)
 {
-  return encodeURIComponent(text);
+  var b = '';
+  var s = text.replace(/\W/, function(m) {
+      if(' ' == m) {
+        return '-';
+      }
+
+      b += m.charCodeAt(0).toString(16);
+      return '.';
+    });
+
+  return '' != b ? s + '?' + b : s;
 }
 
 function decodeLongShout(text)
 {
-  return decodeURIComponent(text);
+  if(text.test(/%/)) {
+    return decodeURIComponent(text);
+  }
+
+  var p = text.split(/\?(?=(?:[a-f0-9]{2})+)/i, 2);
+  var s = p[0];
+  var b = p[1]!=''?p[1]:'';
+
+  s = s.replace(/-/, ' ');
+  s = s.replace(/\./, function(m) {
+      var c = b.substr(0, 2);
+      b = b.substr(2);
+
+      if('' == c)
+        return m;
+
+      return String.fromCharCode(parseInt(c, 16));
+    });
+
+  return s;
 }
 
 function processLongShouts(container)
