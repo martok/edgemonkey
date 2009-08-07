@@ -17,9 +17,13 @@ const ScriptVersion = 0.21;
 // @changelog
 /*
 
-0.21           09-06-*
+0.21           09-08-07
   -SB: Auto-Tagging (BenBE)
   -SB: IRC-Like Nickname Autocomplete (Martok)
+  -Trunk link changed
+  -Fix: monospace not always applied
+  -SB: some new replace rules
+  -fix: uid cache could cause freezes
 
 0.20           09-05-23
   -global usage of EM object across all (i)frames & popups
