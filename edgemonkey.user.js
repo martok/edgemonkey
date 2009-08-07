@@ -1621,6 +1621,7 @@ ShoutboxControls.prototype = {
         if (n.charAt(0)=='@' && n.charAt(1)!='@') {
           if (isEmpty(EM.Shouts._ACIndex)) {
             n = n.substring(1,n.length);
+            if (n.charAt(0)=='{') n=n.substr(1);
             var ulist = [];
             for (var i=0; i<EM.ShoutWin.shouts.length; i++) {
               u = EM.ShoutWin.shouts[i].getElementsByTagName('a')[0].firstChild.innerHTML;
@@ -1633,7 +1634,7 @@ ShoutboxControls.prototype = {
           EM.Shouts._ACIndex = (EM.Shouts._ACIndex + 1) % EM.Shouts._ACList.length;
           if (EM.Shouts._ACList.length>0) {
             var p = edit.selectionStart;
-            edit.value='@'+EM.Shouts._ACList[EM.Shouts._ACIndex]+': ';
+            edit.value='@{'+EM.Shouts._ACList[EM.Shouts._ACIndex]+'}: ';
             edit.selectionStart = p;
             edit.selectionEnd = edit.value.length;
           }
