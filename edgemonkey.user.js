@@ -958,6 +958,7 @@ SettingsStore.prototype = {
     this.Values['ui.showDropShadow']=true;
     this.Values['ui.useFlatStyle']=false;
     this.Values['ui.betaFeatures']=false;
+    this.Values['ui.disableShouting']=false;
 
     this.Values['sb.longInput']=false;
     this.Values['sb.boldUser']=false;
@@ -1008,7 +1009,10 @@ SettingsStore.prototype = {
             ['Ja, fest', 2],
           ])
           );
+
+      addHeadrow('Entwickler',2);
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
+      addSettingsRow( 'Deaktivieren des Absenden von Shouts', createCheckbox('ui_disableShouting', this.GetValue('ui','disableShouting')));
 
       addHeadrow('Thread-Ansicht',2);
       addSettingsRow( 'Beitr&auml;ge von mir hervorheben',
@@ -1066,6 +1070,7 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
       EM.Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
       EM.Settings.SetValue('ui','betaFeatures', getBool('ui_betaFeatures'));
+      EM.Settings.SetValue('ui','disableShouting', getBool('ui_disableShouting'));
 
       EM.Settings.SetValue('sb','anek_active', getBool('sb_anek_start'));
       EM.Settings.SetValue('sb','anek_reverse', getBool('sb_anek_rev'));
@@ -1500,6 +1505,11 @@ ShoutboxControls.prototype = {
     s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
 
     EM.Shouts.form_text.value = s;
+
+    if(EM.Settings.GetValue('ui','disableShouting')) {
+      return false;
+    }
+
     return true;
   },
 
@@ -2581,6 +2591,12 @@ function upgradeSettings(){
     upgraded = true;
     var a = chk.trim().split(/\s*,\s*/);
     EM.Settings.SetValue('sb','user_stalk', a);
+  }
+
+  //0.19: remove that typo quickSearhMenu
+  if (EM.Settings.GetValue('ui','disableShouting')==null) {
+    upgraded = true;
+    EM.Settings.Values['ui.disableShouting'] = false;
   }
 
   if (upgraded) {
