@@ -1264,6 +1264,7 @@ ButtonBar.prototype = {
 }
 
 function UserManager() {
+  this.AjaxAvail = true;
   this.knownUIDs = EM.Settings.load_field('uidcache',this.knownUIDs);
   this.loggedOnUserId = EM.Settings.cookies['ee_data']['userid'];
   this.loggedOnSessionId = "";
@@ -1288,8 +1289,13 @@ UserManager.prototype = {
   getUID: function(name) {
     if (!name) return -1;
     if (isUndef(this.knownUIDs[name])) {
+      if (!this.AjaxAvail) return -1;
       var prof = new AJAXObject();
       prof = prof.SyncRequest('ajax_get_userid.php?username='+name, null);
+      if (/<(error)>.*<\/\1>/.test(prof)) {
+        this.AjaxAvail = false;
+        return -1;
+      }
       var id = prof.match(/<userid><!\[CDATA\[([0-9]*)\]\]><\/userid>/ );
       if (id) this.knownUIDs[name] = id[1];
       EM.Settings.store_field('uidcache', this.knownUIDs);
@@ -1770,7 +1776,11 @@ function ShoutboxWindow() {
       tool_html+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')">A</a>';
     }
     if(pn_link) {
-      tool_html+='<a href="privmsg.php?mode=post&u=' + EM.User.getUID(shout_user) + '" target="_parent">P</a>';
+      var uid = EM.User.getUID(shout_user);
+      if (uid>=0)
+        tool_html+='<a href="privmsg.php?mode=post&u=' + uid + '" target="_parent">P</a>';
+      else
+        tool_html+='P';
     }
     if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
       tool_html+='<a href="javascript:EM.ShoutWin.ev_stalk(\''+escape(shout_user)+'\')">E</a>';
