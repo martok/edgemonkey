@@ -1438,6 +1438,9 @@ ShoutboxControls.prototype = {
     s = s.replace(/\bFIF\b/g, "Fragen in's Forum :mahn:");
     s = s.replace(/\bSIWO\b/g, "Suche ist weiter oben :mahn:");
 
+    //Wall-Hack
+    s = s.replace(/:wall:/g, ":autsch:");
+
     //Check for references to the branch
     if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
       //Die Idee mit der Branch-Infektion habe ich bei TUFKAPL gesehen, BenBE.
