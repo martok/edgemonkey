@@ -1531,10 +1531,9 @@ ShoutboxControls.prototype = {
     s = s.replace(/^@(TUFKAPL):/g, "[user=\"Christian S.\"]TUFKAPL[/user]:");
     s = s.replace(/^@(Wolle):/g, "[user=\"Wolle92\"]Wolle92[/user]:");
     s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/g, "[user]$1[/user]:");
-    s = s.replace(/^@@/g, "@");
 
     //AutoTagging
-    s = s.replace(/(^|\s)([\w\\]?@)(?:(?:\{(.+)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
+    s = s.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
                   function($0,before,cmd,brace,free) {
                     var txt = free?free:brace;
                     if (txt=='') return '';
@@ -1546,6 +1545,7 @@ ShoutboxControls.prototype = {
                       case '\\@': return before+'[url=http://ls.em.local/'+encodeLongShout(txt)+']...[/url]';
                     }
                   });
+    s = s.replace(/@@/g, '@');
 
     s = s.replace(/\bT@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?t=$1]Topic $1[/url]");
     s = s.replace(/\bP@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?p=$1#$1]Post $1[/url]");
