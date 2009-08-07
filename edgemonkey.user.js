@@ -1153,6 +1153,16 @@ SettingsStore.prototype = {
     EM.Settings.Window.close();
   },
 
+  ev_ClearUIDCache: function(evt) {
+    if (!confirm("Soll der User-Cache wirklich gelöscht werden?"))
+      return false;
+    EM.User.knownUIDs = {};
+    EM.User.AjaxAvail = true;
+    EM.Settings.store_field('uidcache', EM.User.knownUIDs);
+    alert("Cache gelöscht.");
+    EM.Settings.Window.close();
+  },
+
   ev_EditSettings: function(evt) {
     var _save = this;
     window.setTimeout(function() {
@@ -1178,12 +1188,25 @@ SettingsStore.prototype = {
       c.innerHTML += '<input type="button" class="mainoption" value="Speichern">';
       c.innerHTML += '&nbsp;&nbsp;';
       c.innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schlie&szlig;en">';
-      c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
       c.innerHTML += '&nbsp;';
       var i = c.getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_SaveDialog);
-      addEvent(i[2], 'click', this.ev_ClearAll);
+    }
+    var row = tbl.insertRow(-1);
+    with (row) {
+      var c = document.createElement('td');
+      row.appendChild(c);
+      c.colSpan = 2;
+      c.className = 'catBottom';
+      c.style.cssText = 'text-align:center;';
+      c.innerHTML = '&nbsp;';
+      c.innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
+      c.innerHTML += '&nbsp;&nbsp;';
+      c.innerHTML += '<input type="button" value="User-Cache l&ouml;schen" class="liteoption">';
+      c.innerHTML += '&nbsp;';
+      var i = c.getElementsByTagName('input');
+      addEvent(i[0], 'click', this.ev_ClearAll);
+      addEvent(i[1], 'click', this.ev_ClearUIDCache);
     }
     this.Window.Body.appendChild(tbl);
   }
