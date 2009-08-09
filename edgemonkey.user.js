@@ -1571,14 +1571,12 @@ ShoutboxControls.prototype = {
     s = s.replace(/^@(GTA):/g, "[user=\"GTA-Place\"]GTA-Place[/user]:");
     s = s.replace(/^@(TUFKAPL):/g, "[user=\"Christian S.\"]TUFKAPL[/user]:");
     s = s.replace(/^@(Wolle):/g, "[user=\"Wolle92\"]Wolle92[/user]:");
-    s = s.replace(/^@(?!@)([\w\.\-<>\(\)\[\]\{\}]+(\x20[\w\.\-<>\(\)\[\]\{\}]+)?):/g, "[user]$1[/user]:");
 
     //AutoTagging
-    s = s.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
+    s = s.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
                   function($0,before,cmd,brace,free) {
                     var txt = free?free:brace;
                     if (txt=='') return '';
-                    console.log(cmd);
                     switch(cmd) {
                       case '@': return before+'[user]'+txt+'[/user]';
                       case 'S@': return before+'[url=http://www.delphi-forum.de/search.php?search_keywords='+encodeURIComponent(txt)+']'+txt+'[/url]';
