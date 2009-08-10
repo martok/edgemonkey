@@ -410,7 +410,7 @@ function encodeLongShout(text)
 function decodeLongShout(text)
 {
   if(/%/.test(text)) {
-    return decodeURIComponent(text);
+    return decodeURIComponent(text.replace(/\+/g, '%20'));
   }
 
   var p = text.split(/\?(?=(?:[a-f0-9]{2})+)/i, 2);
