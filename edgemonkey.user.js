@@ -128,7 +128,7 @@ var colorTpl = new Array(
         style1:'',
         style2:'',
         style3:'',
-        style4:'',
+        style4:''
     },
     {
         name:'red',
@@ -136,7 +136,7 @@ var colorTpl = new Array(
         style1:'background:#FEC8C8;',
         style2:'background:#FEB3B3;',
         style3:'background:#FEACAC;',
-        style4:'background:#FEA7A7;',
+        style4:'background:#FEA7A7;'
     },
     {
         name:'orange',
@@ -144,7 +144,7 @@ var colorTpl = new Array(
         style1:'background:#FEE8D4;',
         style2:'background:#FEDBC4;',
         style3:'background:#FED7C0;',
-        style4:'background:#FEDBC4;',
+        style4:'background:#FEDBC4;'
     },
     {
         name:'yellow',
@@ -152,7 +152,7 @@ var colorTpl = new Array(
         style1:'background:#FEF4E4;',
         style2:'background:#FEEFD7;',
         style3:'background:#FEE2C8;',
-        style4:'background:#FEEFD7;',
+        style4:'background:#FEEFD7;'
     },
     {
         name:'green',
@@ -160,7 +160,7 @@ var colorTpl = new Array(
         style1:'background:#E8FED4;',
         style2:'background:#DBFEC4;',
         style3:'background:#D7FEC0;',
-        style4:'background:#D7FEC0;',
+        style4:'background:#D7FEC0;'
     },
     {
         name:'blue',
@@ -168,7 +168,7 @@ var colorTpl = new Array(
         style1:'background:#D4E4FE;',
         style2:'background:#B6D4FE;',
         style3:'background:#A8CCFE;',
-        style4:'background:#A6C8FE;',
+        style4:'background:#A6C8FE;'
     },
     {
         name:'lila',
@@ -176,7 +176,7 @@ var colorTpl = new Array(
         style1:'background:#E2CCFE;',
         style2:'background:#D7BBFE;',
         style3:'background:#DCC0FE;',
-        style4:'background:#DAB9FE;',
+        style4:'background:#DAB9FE;'
     },
     {
         name:'pink',
@@ -184,7 +184,7 @@ var colorTpl = new Array(
         style1:'background:#F8D4FE;',
         style2:'background:#FBC4FE;',
         style3:'background:#F0C0FE;',
-        style4:'background:#FBC4FE;',
+        style4:'background:#FBC4FE;'
     },
     {
         name:'grey',
@@ -192,7 +192,7 @@ var colorTpl = new Array(
         style1:'background:#E8E8E8;',
         style2:'background:#DCDCDC;',
         style3:'background:#B0B0B0;',
-        style4:'background:#C0C0C0;',
+        style4:'background:#C0C0C0;'
     },
     {
         name:'chrome',
@@ -200,7 +200,7 @@ var colorTpl = new Array(
         style1:'background:#D8D8D8',
         style2:'background:#BCBCBC',
         style3:'background:#A0A0A0',
-        style4:'background:#AAAAAA',
+        style4:'background:#AAAAAA'
     }
 );
 
@@ -1701,8 +1701,11 @@ ShoutboxAnekdoter.prototype = {
               res.push('[user]'+usr+'[/user]');
             else
               res.push('[user="'+usr+'"]'+this.convertTag(sht[i],ii)+'[/user]');
-          } else
+          } else if (sht[i].className=="postlink") {
             res.push('[url='+sht[i].href+']'+this.convertTag(sht[i])+'[/url]');
+          } else {
+            res.push(this.convertTag(sht[i]));
+          }
         }; break;
         case 'SPAN': {
           var s = sht[i].style.cssText;
