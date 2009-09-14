@@ -441,6 +441,24 @@ function processLongShouts(container)
   }
 }
 
+function resolveForumSelect(patt, text)
+{
+  // never ever forget escaping here...
+  // these are strings, not regexp; thus, they are parsed as such: \ gets killed.
+  var re = new RegExp("^("+patt+")(?:\\sIN\\s(df|csf|dl|csl))?$","i");
+  var res = null,
+  m;
+  if(m=text.match(re)) {
+    res = {forum: 'delphi-forum', match: m, found: m[1]};
+    switch (m[m.length-1].toLowerCase()) {
+      case 'csf': res.forum = 'c-sharp-forum'; break;
+      case 'csl': res.forum = 'c-sharp-library'; break;
+      case 'dl': res.forum = 'delphi-library'; break;
+    }
+  }
+  return res;
+}
+
 function Point(x,y)
 {
   this.x = x;
@@ -1576,19 +1594,41 @@ ShoutboxControls.prototype = {
     s = s.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
                   function($0,before,cmd,brace,free) {
                     var txt = free?free:brace;
+                    var re;
                     if (txt=='') return '';
                     switch(cmd) {
                       case '@': return before+'[user]'+txt+'[/user]';
-                      case 'S@': return before+'[url=http://www.delphi-forum.de/search.php?search_keywords='+encodeURIComponent(txt)+']'+txt+'[/url]';
                       case 'G@': return before+'[url=http://www.lmgtfy.com/?q='+encodeURIComponent(txt)+']LMGTFY: '+txt+'[/url]';
                       case '\\@': return before+'[url=http://ls.em.local/'+encodeLongShout(txt)+']...[/url]';
+                      case 'T@': {
+                        if(re = resolveForumSelect("\\d+", txt)) {
+                          return before+"[url=http://www."+re.forum+".de/viewtopic.php?t="+
+                                  re.found+"]Topic "+re.found+"[/url]";
+                        }
+                      } break;
+                      case 'P@': {
+                        if(re = resolveForumSelect("\\d+", txt)) {
+                          return before+"[url=http://www."+re.forum+".de/viewtopic.php?p="+
+                                  re.found+"#"+re.found+"]Post "+re.found+"[/url]";
+                        }
+                      } break;
+                      case 'F@': {
+                        if(re = resolveForumSelect("\\d+", txt)) {
+                          return before+"[url=http://www."+re.forum+".de/viewforum.php?f="+
+                                  re.found+"]Forum "+re.found+"[/url]";
+                        }
+                      } break;
+                      case 'S@': {
+                        if(re = resolveForumSelect(".*?", txt)) {
+                          console.log(re);
+                          return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
+                                  encodeURIComponent(re.found)+"]"+re.found+"[/url]";
+                        }
+                      } break;
                     }
+                    return $0;
                   });
     s = s.replace(/@@/g, '@');
-
-    s = s.replace(/\bT@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?t=$1]Topic $1[/url]");
-    s = s.replace(/\bP@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewtopic.php?p=$1#$1]Post $1[/url]");
-    s = s.replace(/\bF@(\d+)\b/g, "[url=http://www.delphi-forum.de/viewforum.php?f=$1]Forum $1[/url]");
 
     s = s.replace(/\bRFC\s?0*((?!0)\d+)\b/g, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]");
 
