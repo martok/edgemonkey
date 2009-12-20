@@ -686,6 +686,24 @@ AJAXObject.prototype = {
     var request = this.prepareRequest(url,postData,true);
     request.addEventListener('load',readyEvent,false);
     return request.send(request.postBody);
+  },
+  AsyncRequest2: function(url,postData,s,callback) {
+    function readyEvent(aEvt) {
+      var req = aEvt.target;
+      if (req.readyState == 4) {
+        if(req.status == 200) {
+          if (typeof callback=='function'){
+            if (callback.length==1) {
+              s = req.responseText;
+              callback(s);
+            }
+          }
+        }
+      }
+    }
+    var request = this.prepareRequest(url,postData,true);
+    request.addEventListener('load',readyEvent,false);
+    return request.send(request.postBody);
   }
 }
 
@@ -2326,6 +2344,74 @@ Pagehacks.prototype = {
     }
   },
 
+  SetAnswered:function(topic){
+    if(!topic) return;
+    var content='';
+    var img=document.getElementById('folderFor'+topic);
+    if(!img) return;
+    var template=img.src.match(/(.*[\/|\\])[^\/|\\]*\.[a-zA-Z]{3,4}\b/);
+    if(!template || !template[1]){
+	alert('No template?');
+	return;
+    }
+    template=template[1];
+    img.src=template+'folder.gif';
+    Ajax.AsyncRequest2('viewtopic.php?&t='+topic,undefined,content,
+      function(content) {
+	var p=content.match(/markanswered.{1,6}t.(\d+).{1,6}p.(\d+)[^0-9]/);
+	if(!p || !p[2]) return;
+    	Ajax.AsyncRequest2('posting.php?mode=markanswered&t='+topic+'&p='+p[2],undefined,content,
+      	  function(content) {
+	    img.src=template+'folder_answered.gif';
+        });
+      });  },
+
+  EnableAnswer: function(){
+    var a=document.getElementById('aAnswerOpen');
+    if(a.innerHTML.match(/aktivieren/)){
+      var table=EM.Buttons.mainTable.getElementsByClassName('forumline')[1];
+      if(!table) return;
+      var th=table.getElementsByTagName('th')[0];
+      if(!th || !th.textContent.match(/Themen/)) return;
+      var trs=table.getElementsByTagName('tr');
+      var img;var a2;var parent;var id;
+      for(var i=1;i<trs.length;i++){
+	img=trs[i].getElementsByTagName('img')[0];
+	if(!img) continue;
+	img.title='Thread auf Gelöst setzen';
+	parent=img.parentNode;
+	parent.removeChild(img);
+	a2=document.createElement('a');
+	a2.appendChild(img);
+	id=img.id.match(/[^0-9](\d+)\b/);
+	a2.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+id[1]+'");return false;');
+	parent.appendChild(a2);
+      }
+      a.innerHTML='Gelöst Modus aktiviert';
+    }else{
+      var table=EM.Buttons.mainTable.getElementsByClassName('forumline')[1];
+      if(!table) return;
+      var th=table.getElementsByTagName('th')[0];
+      if(!th || !th.textContent.match(/Themen/)) return;
+      var trs=table.getElementsByTagName('tr');
+      var img;
+      var parent;
+      var parpar;
+      for(var i=1;i<trs.length;i++){
+	img=trs[i].getElementsByTagName('img')[0];
+	if(!img) continue;
+	if(img.title!='Thread auf Gelöst setzen') continue;
+	img.title='Frage ungelöst';
+	parent=img.parentNode;
+	if(parent.tagName!='A') continue;
+	parpar=parent.parentNode;
+	parpar.removeChild(parent);
+	parpar.appendChild(img);
+      }
+      a.innerHTML='Gelöst Modus aktivieren';
+    }
+  },
+
   FixEmptyResults: function () {
     if (!EM.Buttons.mainTable) return;
     var sp = EM.Buttons.mainTable.getElementsByTagName('span');
@@ -2334,6 +2420,23 @@ Pagehacks.prototype = {
         sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zur&uuml;ck zum Suchformular</a>';
         sp[i].innerHTML+='<br><br><a href="/index.php">Zur&uuml;ck zum Index</a>';
         break;
+      }
+    }
+    var sp = EM.Buttons.mainTable.getElementsByClassName('thCorner');
+    var aNode;
+    for (var i=0; i<sp.length; i++) {
+      if(sp[i].firstChild.textContent.match(/Suchparameter/)){
+        aNode=sp[i].parentNode.parentNode.getElementsByTagName('td')[0];
+	if(aNode && aNode.textContent.match(/Meine offenen Fragen/) && aNode.firstChild && aNode.firstChild.firstChild){
+	  var aAnswerOpen=document.createElement('a');
+	  aAnswerOpen.innerHTML='Gelöst Modus aktivieren';
+	  aAnswerOpen.href='#';
+	  aAnswerOpen.id='aAnswerOpen';
+	  aAnswerOpen.setAttribute("onclick",'EM.Pagehacks.EnableAnswer();return false;');
+	  aNode.firstChild.firstChild.appendChild(document.createElement('br'));
+	  aNode.firstChild.firstChild.appendChild(aAnswerOpen);
+	  break;
+	}
       }
     }
   },
