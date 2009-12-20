@@ -1250,6 +1250,7 @@ function ButtonBar() {
 
   this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
   //man könnte auch XPath nehmen... :P
+  this.navTable.style.cssText += "z-index: 1; position:relative;";
 
   var cont = this.navTable.getElementsByTagName('tbody')[0];
 
