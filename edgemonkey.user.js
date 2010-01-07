@@ -2206,6 +2206,113 @@ Pagehacks.prototype = {
       document.overlayWindows.getWindowById('em_searchbox').Close();
    },
 
+  TLColourize: function (tltable) {
+    var entries = queryXPathNodeSet(tltable,"./tbody/tr");
+
+    var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
+    var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
+    var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
+    var postclass_kill = ' emctpl' + 8;
+
+    var user_stalk = EM.Settings.GetValue('topic','user_stalk');
+    var user_killfile = EM.Settings.GetValue('topic','user_killfile');
+    var kftype = EM.Settings.GetValue('topic','killFileType');
+
+    for(var i = 1; i < entries.length; i++) { //Skip entry 0 (table header)
+      var row = entries[i];
+      var cols = queryXPathNodeSet(row, './td');
+
+      var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
+      var tuser = queryXPathNode(row,"./td[2]/span[2]/span/a/span");
+      var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
+      var puser = queryXPathNode(row,"./td[4]/span/a[2]/span");
+      var pcount = queryXPathNode(row,"./td[3]/div/span");
+
+      var t_isSelf = tuser.textContent == EM.User.loggedOnUser;
+      var p_isSelf = puser.textContent == EM.User.loggedOnUser;
+
+      var t_isMod = /color\:/.test(tuser_l.style.cssText);
+      var p_isMod = /color\:/.test(puser_l.style.cssText);
+
+      var t_cssClassAdd = '';
+      var p_cssClassAdd = '';
+
+      if (kftype && user_killfile.some(
+          function (e){
+            return e.equals(tuser.textContent);
+          })) {
+        t_cssClassAdd += postclass_kill;
+      }
+      if (kftype && user_killfile.some(
+          function (e){
+            return e.equals(puser.textContent);
+          })) {
+        p_cssClassAdd += postclass_kill;
+      }
+
+      //First detect Moderators ...
+      if (postclass_mod) {
+        if (t_isMod)
+          t_cssClassAdd += postclass_mod;
+        if (p_isMod)
+          p_cssClassAdd += postclass_mod;
+      }
+
+      // and after this the followed\stalked users, to allow overriding the style properly
+      if (postclass_stalk) {
+        if (user_stalk.some(
+          function (e){
+            return e.equals(tuser.textContent);
+          }))
+          t_cssClassAdd += postclass_stalk;
+        if (user_stalk.some(
+          function (e){
+            return e.equals(puser.textContent);
+          }))
+          p_cssClassAdd += postclass_stalk;
+      }
+
+      // at last the logged on user, to allow overriding the style properly
+      if (postclass_me) {
+        if (t_isSelf)
+          t_cssClassAdd += postclass_me;
+        if (p_isSelf)
+          p_cssClassAdd += postclass_me;
+      }
+
+      var c_cssClassAdd = '';
+      if (pcount.textContent == 0) {
+          c_cssClassAdd += ' emctpl' + 1; //Red
+      } else if (pcount.textContent < 3) {
+          c_cssClassAdd += ' emctpl' + 2; //Orange
+      } else if (pcount.textContent < 10) {
+          c_cssClassAdd += ' emctpl' + 3; //Yellow
+      } else if (pcount.textContent < 40) {
+          c_cssClassAdd += ' emctpl' + 4; //Green
+      } else if (pcount.textContent < 100) {
+          c_cssClassAdd += ' emctpl' + 5; //Blue
+      } else if (pcount.textContent < 500) {
+          c_cssClassAdd += ' emctpl' + 6; //Magenta
+      } else {
+          c_cssClassAdd += ' emctpl' + 7; //Lila
+      }
+
+      //Now lets check against the blacklist :P
+      cols[0].className += t_cssClassAdd;
+      cols[1].className += t_cssClassAdd;
+      cols[2].className += c_cssClassAdd;
+      cols[3].className += p_cssClassAdd;
+
+      //Remove the DF Highlighting to ensure proper colors :P
+      cols[0].className = cols[0].className.replace(/Highlight/, '');
+      cols[1].className = cols[1].className.replace(/Highlight/, '');
+      cols[2].className = cols[2].className.replace(/Highlight/, '');
+      cols[3].className = cols[3].className.replace(/Highlight/, '');
+    }
+
+    return true;
+  },
+
   SmileyWin: function(target) {
     new SmileyWindow(target);
   },
@@ -2330,13 +2437,20 @@ Pagehacks.prototype = {
   FixEmptyResults: function () {
     if (!EM.Buttons.mainTable) return;
     var sp = EM.Buttons.mainTable.getElementsByTagName('span');
+    var noresult = false;
     for (var i=0; i<sp.length; i++) {
       if (sp[i].firstChild.textContent.match( /Keine Beitr.*?ge entsprechen Deinen Kriterien./ )) {
         sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zur&uuml;ck zum Suchformular</a>';
         sp[i].innerHTML+='<br><br><a href="/index.php">Zur&uuml;ck zum Index</a>';
+        noresult = true;
         break;
       }
     }
+    if(noresult) return;
+
+    //TLColourize hack:
+    var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td/div/table[2]");
+    this.TLColourize(resTable);
   },
 
   FixPostingDialog: function () {
