@@ -2175,7 +2175,6 @@ Pagehacks.prototype = {
         '<tr><td>&nbsp;</td></tr></table>';
     w.Frame.style.height = w.Frame.style.minHeight;
     var s = Ajax.AsyncRequest(inp.form.action,post,w.ContentArea,
-    //search_fields=all&show_results=topics&synonym_search=1&search_keywords=Easteregg&website=
       /search_keywords=(\x45\x61\x73\x74\x65\x72\x65\x67\x67|\x4F\x73\x74\x65\x72\x65\x69(?:er)?)\&/i.test(post) ?
       function(div,target) {
         target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
@@ -2203,8 +2202,8 @@ Pagehacks.prototype = {
           target.appendChild(cc);
         }
       });
-      document.overlayWindows.getWindowById('em_searchbox').Close();
-   },
+    document.overlayWindows.getWindowById('em_searchbox').Close();
+  },
 
   SmileyWin: function(target) {
     new SmileyWindow(target);
