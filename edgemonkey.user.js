@@ -2204,11 +2204,9 @@ Pagehacks.prototype = {
         }
       });
       document.overlayWindows.getWindowById('em_searchbox').Close();
-   },
+  },
 
-  TLColourize: function (tltable) {
-    var entries = queryXPathNodeSet(tltable,"./tbody/tr");
-
+  helper_getHLStyleByUserLink: function (user_link) {
     var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
     var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
     var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
@@ -2218,67 +2216,55 @@ Pagehacks.prototype = {
     var user_killfile = EM.Settings.GetValue('topic','user_killfile');
     var kftype = EM.Settings.GetValue('topic','killFileType');
 
+    var user_span = queryXPathNode(user_link,"./span");
+    var user_name = user_span.textContent;
+
+    var isSelf = user_name == EM.User.loggedOnUser;
+    var isMod = /color\:/.test(user_link.style.cssText);
+
+    var cssClassAdd = '';
+
+    if (kftype && user_killfile.some(
+        function (e){
+          return e.equals(user_name);
+        })) {
+      cssClassAdd += postclass_kill;
+    }
+
+    //First detect Moderators ...
+    if (postclass_mod && isMod) {
+        cssClassAdd += postclass_mod;
+    }
+
+    // and after this the followed\stalked users, to allow overriding the style properly
+    if (postclass_stalk && user_stalk.some(
+        function (e){
+          return e.equals(user_name);
+        })) {
+      cssClassAdd += postclass_stalk;
+    }
+
+    // at last the logged on user, to allow overriding the style properly
+    if (postclass_me && isSelf) {
+      cssClassAdd += postclass_me;
+    }
+
+    return cssClassAdd;
+  },
+
+  TLColourize: function (tltable) {
+    var entries = queryXPathNodeSet(tltable,"./tbody/tr");
+
     for(var i = 1; i < entries.length; i++) { //Skip entry 0 (table header)
       var row = entries[i];
       var cols = queryXPathNodeSet(row, './td');
 
       var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
-      var tuser = queryXPathNode(row,"./td[2]/span[2]/span/a/span");
       var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
-      var puser = queryXPathNode(row,"./td[4]/span/a[2]/span");
       var pcount = queryXPathNode(row,"./td[3]/div/span");
 
-      var t_isSelf = tuser.textContent == EM.User.loggedOnUser;
-      var p_isSelf = puser.textContent == EM.User.loggedOnUser;
-
-      var t_isMod = /color\:/.test(tuser_l.style.cssText);
-      var p_isMod = /color\:/.test(puser_l.style.cssText);
-
-      var t_cssClassAdd = '';
-      var p_cssClassAdd = '';
-
-      if (kftype && user_killfile.some(
-          function (e){
-            return e.equals(tuser.textContent);
-          })) {
-        t_cssClassAdd += postclass_kill;
-      }
-      if (kftype && user_killfile.some(
-          function (e){
-            return e.equals(puser.textContent);
-          })) {
-        p_cssClassAdd += postclass_kill;
-      }
-
-      //First detect Moderators ...
-      if (postclass_mod) {
-        if (t_isMod)
-          t_cssClassAdd += postclass_mod;
-        if (p_isMod)
-          p_cssClassAdd += postclass_mod;
-      }
-
-      // and after this the followed\stalked users, to allow overriding the style properly
-      if (postclass_stalk) {
-        if (user_stalk.some(
-          function (e){
-            return e.equals(tuser.textContent);
-          }))
-          t_cssClassAdd += postclass_stalk;
-        if (user_stalk.some(
-          function (e){
-            return e.equals(puser.textContent);
-          }))
-          p_cssClassAdd += postclass_stalk;
-      }
-
-      // at last the logged on user, to allow overriding the style properly
-      if (postclass_me) {
-        if (t_isSelf)
-          t_cssClassAdd += postclass_me;
-        if (p_isSelf)
-          p_cssClassAdd += postclass_me;
-      }
+      var t_cssClassAdd = this.helper_getHLStyleByUserLink(tuser_l);
+      var p_cssClassAdd = this.helper_getHLStyleByUserLink(puser_l);
 
       var c_cssClassAdd = '';
       if (pcount.textContent == 0) {
