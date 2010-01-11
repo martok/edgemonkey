@@ -2681,11 +2681,6 @@ Pagehacks.prototype = {
     var tbl = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table[1]");
     var tr = queryXPathNodeSet(tbl, "tbody/tr");
 
-    var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
-    var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
-    var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
-
-    var user_stalk = EM.Settings.GetValue('topic','user_stalk');
     var user_killfile = EM.Settings.GetValue('topic','user_killfile');
     var kftype = EM.Settings.GetValue('topic','killFileType');
     for(var i = 1; i < tr.length - 1; i += 3) {
@@ -2697,10 +2692,7 @@ Pagehacks.prototype = {
       var idPost = queryXPathNode(tdProfile, "a[1]").name;
       var strUser = spanUser.textContent;
 
-      var isSelf = strUser == EM.User.loggedOnUser;
-      var isMod = /color\:/.test(linkUser.style.cssText);
-
-      var cssClassAdd = '';
+      var cssClassAdd = this.helper_getHLStyleByUserLink(linkUser);
 
       if (kftype && user_killfile.some(
           function (e){
@@ -2723,27 +2715,6 @@ Pagehacks.prototype = {
           tdSpacer.className+=' gensmall';
           tdSpacer.innerHTML='<b>'+strUser+'</b>: Post ausgeblendet. <a href="#'+idPost+'" onclick="EM.Pagehacks.ShowHiddenPosts('+idPost+')">Anzeigen</a>';
         }
-      }
-
-      //First detect Moderators ...
-      if (postclass_mod) {
-        if (isMod)
-          cssClassAdd += postclass_mod;
-      }
-
-      // and after this the followed\stalked users, to allow overriding the style properly
-      if (postclass_stalk) {
-        if (user_stalk.some(
-          function (e){
-            return e.equals(strUser);
-          }))
-          cssClassAdd += postclass_stalk;
-      }
-
-      // at last the logged on user, to allow overriding the style properly
-      if (postclass_me) {
-        if (isSelf)
-          cssClassAdd += postclass_me;
       }
 
       //Now lets check against the blacklist :P
