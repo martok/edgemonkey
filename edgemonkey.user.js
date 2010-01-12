@@ -2314,10 +2314,10 @@ Pagehacks.prototype = {
 
       var isSelf = queryXPathNode(tuser_l, './span').textContent == EM.User.loggedOnUser;
 
-      if(img && isSelf) {
+      if(img && isSelf && !img.src.match(/answered/)) {
         var topicid = img.id.match(/^folderFor(\d+)$/);
         var std_a = document.createElement('a');
-        std_a.innerHTML = '&#x2714;<br />A';
+        std_a.innerHTML = '&#x2714;';
         std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
         std_a.style.cssText+=' cursor:pointer;';
         std.appendChild(std_a);
