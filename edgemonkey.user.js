@@ -2296,6 +2296,41 @@ Pagehacks.prototype = {
       cols[1].className = cols[1].className.replace(/Highlight/, '');
       cols[2].className = cols[2].className.replace(/Highlight/, '');
       cols[3].className = cols[3].className.replace(/Highlight/, '');
+
+      //We need to do this here, since we will change HTML later ...
+      var img = queryXPathNode(cols[0], './/img');
+
+      //Add "Close topic" link ...
+      var div = document.createElement('div');
+      div.className+='intbl';
+
+      var cnt = document.createElement('span');
+      cnt.className = 'incell left';
+      cnt.innerHTML = cols[0].innerHTML;
+      cols[0].innerHTML = '';
+
+      var std = document.createElement('span');
+      std.className = 'gensmall incell right';
+
+      var isSelf = queryXPathNode(tuser_l, './span').textContent == EM.User.loggedOnUser;
+
+      if(img && isSelf) {
+        var topicid = img.id.match(/^folderFor(\d+)$/);
+        var std_a = document.createElement('a');
+        std_a.innerHTML = '&#x2714;<br />A';
+        std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
+        std_a.style.cssText+=' cursor:pointer;';
+        std.appendChild(std_a);
+      }
+
+      std.style.cssText+=' vertical-align:top;';
+      std.style.cssText+=' min-width:1.1em;';
+      std.style.cssText+=' min-height:23px;';
+
+      div.appendChild(cnt);
+      div.appendChild(std);
+
+      cols[0].appendChild(div);
     }
 
     return true;
