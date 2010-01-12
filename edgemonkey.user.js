@@ -450,10 +450,13 @@ function resolveForumSelect(patt, text)
   m;
   if(m=text.match(re)) {
     res = {forum: 'delphi-forum', match: m, found: m[1]};
-    switch (m[m.length-1].toLowerCase()) {
-      case 'csf': res.forum = 'c-sharp-forum'; break;
-      case 'csl': res.forum = 'c-sharp-library'; break;
-      case 'dl': res.forum = 'delphi-library'; break;
+    if (m.length>2 && !isUndef(m[m.length-1])) {
+      switch (m[m.length-1].toLowerCase()) {
+        case 'csf': res.forum = 'c-sharp-forum'; break;
+        case 'csl': res.forum = 'c-sharp-library'; break;
+        case 'df': res.forum = 'delphi-forum'; break;
+        case 'dl': res.forum = 'delphi-library'; break;
+      }
     }
   }
   return res;
