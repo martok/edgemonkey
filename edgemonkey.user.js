@@ -1357,7 +1357,54 @@ UserManager.prototype = {
       return unescape(m[1]);
     else
       return '';
+  },
+
+  helper_getHLStyleByUserLink: function (user_link) {
+    var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
+    var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
+    var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
+    var postclass_kill = ' emctpl' + 8;
+
+    var user_stalk = EM.Settings.GetValue('topic','user_stalk');
+    var user_killfile = EM.Settings.GetValue('topic','user_killfile');
+    var kftype = EM.Settings.GetValue('topic','killFileType');
+
+    var user_span = queryXPathNode(user_link,"./span");
+    var user_name = user_span.textContent;
+
+    var isSelf = user_name == EM.User.loggedOnUser;
+    var isMod = /color\:/.test(user_link.style.cssText);
+
+    var cssClassAdd = '';
+
+    if (kftype && user_killfile.some(
+        function (e){
+          return e.equals(user_name);
+        })) {
+      cssClassAdd += postclass_kill;
+    }
+
+    //First detect Moderators ...
+    if (postclass_mod && isMod) {
+        cssClassAdd += postclass_mod;
+    }
+
+    // and after this the followed\stalked users, to allow overriding the style properly
+    if (postclass_stalk && user_stalk.some(
+        function (e){
+          return e.equals(user_name);
+        })) {
+      cssClassAdd += postclass_stalk;
+    }
+
+    // at last the logged on user, to allow overriding the style properly
+    if (postclass_me && isSelf) {
+      cssClassAdd += postclass_me;
+    }
+
+    return cssClassAdd;
   }
+
 }
 
 
@@ -2206,52 +2253,6 @@ Pagehacks.prototype = {
       document.overlayWindows.getWindowById('em_searchbox').Close();
   },
 
-  helper_getHLStyleByUserLink: function (user_link) {
-    var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
-    var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
-    var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
-    var postclass_kill = ' emctpl' + 8;
-
-    var user_stalk = EM.Settings.GetValue('topic','user_stalk');
-    var user_killfile = EM.Settings.GetValue('topic','user_killfile');
-    var kftype = EM.Settings.GetValue('topic','killFileType');
-
-    var user_span = queryXPathNode(user_link,"./span");
-    var user_name = user_span.textContent;
-
-    var isSelf = user_name == EM.User.loggedOnUser;
-    var isMod = /color\:/.test(user_link.style.cssText);
-
-    var cssClassAdd = '';
-
-    if (kftype && user_killfile.some(
-        function (e){
-          return e.equals(user_name);
-        })) {
-      cssClassAdd += postclass_kill;
-    }
-
-    //First detect Moderators ...
-    if (postclass_mod && isMod) {
-        cssClassAdd += postclass_mod;
-    }
-
-    // and after this the followed\stalked users, to allow overriding the style properly
-    if (postclass_stalk && user_stalk.some(
-        function (e){
-          return e.equals(user_name);
-        })) {
-      cssClassAdd += postclass_stalk;
-    }
-
-    // at last the logged on user, to allow overriding the style properly
-    if (postclass_me && isSelf) {
-      cssClassAdd += postclass_me;
-    }
-
-    return cssClassAdd;
-  },
-
   TLColourize: function (tltable) {
     var entries = queryXPathNodeSet(tltable,"./tbody/tr");
 
@@ -2263,8 +2264,8 @@ Pagehacks.prototype = {
       var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
       var pcount = queryXPathNode(row,"./td[3]/div/span");
 
-      var t_cssClassAdd = this.helper_getHLStyleByUserLink(tuser_l);
-      var p_cssClassAdd = this.helper_getHLStyleByUserLink(puser_l);
+      var t_cssClassAdd = EM.User.helper_getHLStyleByUserLink(tuser_l);
+      var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
 
       var c_cssClassAdd = '';
       if (pcount.textContent == 0) {
@@ -2692,7 +2693,7 @@ Pagehacks.prototype = {
       var idPost = queryXPathNode(tdProfile, "a[1]").name;
       var strUser = spanUser.textContent;
 
-      var cssClassAdd = this.helper_getHLStyleByUserLink(linkUser);
+      var cssClassAdd = EM.User.helper_getHLStyleByUserLink(linkUser);
 
       if (kftype && user_killfile.some(
           function (e){
