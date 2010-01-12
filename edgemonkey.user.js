@@ -262,7 +262,8 @@ var data = {
 
 function queryXPath(node,xpath){
     //I hate having to always type this crap ...
-    return unsafeWindow.document.evaluate(xpath, node, null, XPathResult.ANY_TYPE, null);
+    var docref = (node.body)?node:node.ownerDocument;
+    return docref.evaluate(xpath, node, null, XPathResult.ANY_TYPE, null);
 }
 
 function queryXPathNode(node, xpath) {
@@ -1359,13 +1360,17 @@ UserManager.prototype = {
       return '';
   },
 
-  helper_getHLStyleByUserLink: function (user_link) {
-    var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
-    var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
-    var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
+  helper_getHLStyleByUserLink: function (user_link, group) {
+    if(isUndef(group)) {
+      group='topic';
+    }
+
+    var postclass_me = ' emctpl' + EM.Settings.GetValue(group,'highlight_me');
+    var postclass_mod = ' emctpl' + EM.Settings.GetValue(group,'highlight_mod');
+    var postclass_stalk = ' emctpl' + EM.Settings.GetValue(group,'highlight_stalk');
     var postclass_kill = ' emctpl' + 8;
 
-    var user_stalk = EM.Settings.GetValue('topic','user_stalk');
+    var user_stalk = EM.Settings.GetValue(group,'user_stalk');
     var user_killfile = EM.Settings.GetValue('topic','user_killfile');
     var kftype = EM.Settings.GetValue('topic','killFileType');
 
@@ -1829,16 +1834,8 @@ ShoutboxAnekdoter.prototype = {
 function ShoutboxWindow() {
   var trs = document.getElementsByTagName('tr');
 
-  var shoutclass_me = 'emctpl' + EM.Settings.GetValue('sb','highlight_me');
-  var shoutclass_mod = 'emctpl' + EM.Settings.GetValue('sb','highlight_mod');
-  var shoutclass_stalk = 'emctpl' + EM.Settings.GetValue('sb','highlight_stalk');
-
-  var user_stalk = EM.Settings.GetValue('sb','user_stalk');
-
   var anek_active = EM.Settings.GetValue('sb','anek_active');
   var pn_link = EM.Settings.GetValue('sb','pnlink_active');
-//  console.log('me: '+shoutclass_me);
-//  console.log('mod: '+shoutclass_mod);
 
   this.shouts = new Array();
   for (var i=0; i<trs.length; i++) {
@@ -1860,24 +1857,9 @@ function ShoutboxWindow() {
       }
     }
     div.className+='intbl';
-    //First detect Moderators ...
-    if (shoutclass_mod) {
-      if (a.style.cssText.match(/color\:/))
-        shout.className+=' ' + shoutclass_mod;
-    }
-    // and after this the followed\stalked users, to allow overriding the style properly
-    if (shoutclass_stalk) {
-      if (user_stalk.some(
-        function (e){
-          return e.equals(shout_user);
-        }))
-        shout.className+=' ' + shoutclass_stalk;
-    }
-    // at last the logged on user, to allow overriding the style properly
-    if (shoutclass_me) {
-      if (shout_user==EM.User.loggedOnUser)
-        shout.className+=' ' + shoutclass_me;
-    }
+
+    shout.className += EM.User.helper_getHLStyleByUserLink(a, 'sb');
+
     std.className = 'incell left';
     div.appendChild(std);
     var cnt = document.createElement('div');
