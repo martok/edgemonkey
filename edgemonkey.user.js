@@ -1354,6 +1354,47 @@ UserManager.prototype = {
   getUIDByProfile: function(href) {
     return this.getUID(this.usernameFromProfile(href));
   },
+  userlinkButtonFromLink: function(doc, user, handler, place, list) {
+    if(isUndef(handler)) {
+      return null;
+    }
+    if(isUndef(user)) {
+      return null;
+    }
+    if(isUndef(doc)) {
+      return null;
+    }
+    if(isUndef(place)) {
+      place = 'sb';
+    }
+    if(isUndef(list)) {
+      list = 'stalk';
+    }
+
+    var list_data = EM.Settings.GetValue(place,'user_'+list);
+
+    var a = doc.createElement('a');
+    if(list.equals('stalk')) {
+      a.textContent = 'E';
+    } else
+    if(list.equals('kill')) {
+      a.textContent = 'X';
+    } else {
+      a.textContent = list;
+    }
+
+    if (list_data.some(
+      function (e){
+        return e.equals(user);
+      })) {
+      a.style.cssText +='font-weight: bold;';
+    }
+
+    //Do the click handling ...
+    addEvent(a, 'click', function(obj, event) { return handler(user); });
+
+    return a;
+  },
   usernameFromProfile: function(href) {
     var m = href.match(/user_(.*)\.html/);
     if (m)
@@ -1856,12 +1897,13 @@ function ShoutboxWindow() {
         tool_html+='P';
     }
     if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
-      tool_html+='<a href="javascript:EM.ShoutWin.ev_stalk(\''+escape(shout_user)+'\')">E</a>';
+      var l_stalk = EM.User.userlinkButtonFromLink(document, shout_user, this.ev_stalk, 'sb', 'stalk');
     }
     if(tool_html!='') {
       tools = document.createElement('span');
       tools.className+=' incell right';
       tools.innerHTML = tool_html;
+      if(l_stalk) tools.appendChild(l_stalk);
       div.appendChild(tools);
     }
   };
