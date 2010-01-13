@@ -2657,6 +2657,22 @@ Pagehacks.prototype = {
       tdProfile.className = tdProfile.className.replace(/Highlight/, '');
       tdPost.className = tdPost.className.replace(/Highlight/, '');
       tdBottom.className = tdBottom.className.replace(/Highlight/, '');
+
+      var user_b = queryXPathNode(tdProfile, "b");
+      var it_div = document.createElement('span');
+      var it_span_user = document.createElement('span');
+      var it_span_marks = document.createElement('span');
+      it_div.className = 'intbl';
+      it_span_user.className = 'incell left';
+      it_span_marks.className = 'gensmall incell right';
+      user_b.parentNode.removeChild(user_b);
+      it_span_user.appendChild(user_b);
+      it_span_marks.innerHTML = '&#x2714';
+      it_div.appendChild(it_span_user);
+      it_div.appendChild(it_span_marks);
+      tdProfile.removeChild(queryXPathNode(tdProfile, "br"));
+      tdProfile.insertBefore(it_div, tdProfile.firstChild);
+
     }
 
     //Leyenfilter
