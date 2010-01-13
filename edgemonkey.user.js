@@ -1377,7 +1377,7 @@ UserManager.prototype = {
     if(list.equals('stalk')) {
       a.textContent = 'E';
     } else
-    if(list.equals('kill')) {
+    if(list.equals('killfile')) {
       a.textContent = 'X';
     } else {
       a.textContent = list;
@@ -2709,7 +2709,10 @@ Pagehacks.prototype = {
       it_span_marks.className = 'gensmall incell right';
       user_b.parentNode.removeChild(user_b);
       it_span_user.appendChild(user_b);
-      it_span_marks.innerHTML = '&#x2714';
+      var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, function(user) {}, 'topic', 'stalk');
+      it_span_marks.appendChild(l_stalk);
+      var l_kill = EM.User.userlinkButtonFromLink(document, strUser, function(user) {}, 'topic', 'killfile');
+      it_span_marks.appendChild(l_kill);
       it_div.appendChild(it_span_user);
       it_div.appendChild(it_span_marks);
       tdProfile.removeChild(queryXPathNode(tdProfile, "br"));
