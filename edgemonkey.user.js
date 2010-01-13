@@ -2314,7 +2314,7 @@ Pagehacks.prototype = {
 
       var isSelf = queryXPathNode(tuser_l, './span').textContent == EM.User.loggedOnUser;
 
-      if(img && isSelf && !img.src.match(/answered/)) {
+      if(img && isSelf && !img.src.match(/answered/) && !img.src.match(/lock/)) {
         var topicid = img.id.match(/^folderFor(\d+)$/);
         var std_a = document.createElement('a');
         std_a.innerHTML = '&#x2714;';
