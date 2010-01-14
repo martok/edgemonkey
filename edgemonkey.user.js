@@ -1377,7 +1377,7 @@ UserManager.prototype = {
     if(list.equals('stalk')) {
       a.textContent = 'E';
     } else
-    if(list.equals('kill')) {
+    if(list.equals('killfile')) {
       a.textContent = 'X';
     } else {
       a.textContent = list;
