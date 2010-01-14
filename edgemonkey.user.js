@@ -1391,6 +1391,7 @@ UserManager.prototype = {
     }
 
     //Do the click handling ...
+    a.href="#";
     addEvent(a, 'click', function(obj, event) { return handler(user); });
 
     return a;
