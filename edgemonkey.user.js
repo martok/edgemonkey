@@ -1396,6 +1396,38 @@ UserManager.prototype = {
 
     return a;
   },
+  ev_stalk: function(user) {
+// don't really know why it gets double-escaped...
+//    user = unescape(user);
+
+    var user_list = EM.Settings.GetValue('sb','user_stalk');
+
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
+    } else {
+      user_list.push(user);
+    }
+
+    EM.Settings.SetValue('sb','user_stalk',user_list);
+    Settings_SaveToDisk();
+    window.location.reload();
+  },
+  ev_kill: function(user) {
+// don't really know why it gets double-escaped...
+//    user = unescape(user);
+
+    var user_list = EM.Settings.GetValue('sb','user_killfile');
+
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
+    } else {
+      user_list.push(user);
+    }
+
+    EM.Settings.SetValue('sb','user_killfile',user_list);
+    Settings_SaveToDisk();
+    window.location.reload();
+  },
   usernameFromProfile: function(href) {
     var m = href.match(/user_(.*)\.html/);
     if (m)
@@ -1898,7 +1930,7 @@ function ShoutboxWindow() {
         tool_html+='P';
     }
     if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
-      var l_stalk = EM.User.userlinkButtonFromLink(document, shout_user, this.ev_stalk, 'sb', 'stalk');
+      var l_stalk = EM.User.userlinkButtonFromLink(document, shout_user, EM.User.ev_stalk, 'sb', 'stalk');
     }
     if(tool_html!='') {
       tools = document.createElement('span');
@@ -1947,23 +1979,6 @@ ShoutboxWindow.prototype = {
     EM.Anekdoter.Anekdote(this.shouts[idx]);
     EM.Anekdoter.focus();
   },
-
-  ev_stalk: function(user) {
-// don't really know why it gets double-escaped...
-//    user = unescape(user);
-
-    var user_list = EM.Settings.GetValue('sb','user_stalk');
-
-    if (user_list.some(function (item) { return item.equals(user); })) {
-      user_list = user_list.filter(function(el) { return !el.equals(user); });
-    } else {
-      user_list.push(user);
-    }
-
-    EM.Settings.SetValue('sb','user_stalk',user_list);
-    Settings_SaveToDisk();
-    window.location.reload();
-  }
 }
 
 function SmileyWindow(target) {
@@ -2710,9 +2725,9 @@ Pagehacks.prototype = {
       it_span_marks.className = 'gensmall incell right';
       user_b.parentNode.removeChild(user_b);
       it_span_user.appendChild(user_b);
-      var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, function(user) {}, 'topic', 'stalk');
+      var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk, 'topic', 'stalk');
       it_span_marks.appendChild(l_stalk);
-      var l_kill = EM.User.userlinkButtonFromLink(document, strUser, function(user) {}, 'topic', 'killfile');
+      var l_kill = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_kill, 'topic', 'killfile');
       it_span_marks.appendChild(l_kill);
       it_div.appendChild(it_span_user);
       it_div.appendChild(it_span_marks);
