@@ -2292,6 +2292,8 @@ Pagehacks.prototype = {
       cols[3].className += p_cssClassAdd;
 
       //Remove the DF Highlighting to ensure proper colors :P
+      var std_own = document.createElement('span');
+      std_own.innerHTML = /Highlight/.test(cols[0].className) ? 'B' : '-';
       cols[0].className = cols[0].className.replace(/Highlight/, '');
       cols[1].className = cols[1].className.replace(/Highlight/, '');
       cols[2].className = cols[2].className.replace(/Highlight/, '');
@@ -2322,6 +2324,10 @@ Pagehacks.prototype = {
         std_a.style.cssText+=' cursor:pointer;';
         std.appendChild(std_a);
       }
+
+      var std_br = document.createElement('br');
+      std.appendChild(std_br);
+      std.appendChild(std_own);
 
       std.style.cssText+=' vertical-align:top;';
       std.style.cssText+=' min-width:1.1em;';
