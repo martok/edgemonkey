@@ -1101,6 +1101,7 @@ SettingsStore.prototype = {
             ['Nein', 0],
             ['Beitrag verkleinern', 1],
             ['Minimal', 2],
+            ['Farblich markieren', 3],
           ])
           );
       addSettingsRow( 'Terrorkartei<br />(Ein Benutzer je Zeile)',createArrayInput('topic_user_killfile',this.GetValue('topic','user_killfile')));
