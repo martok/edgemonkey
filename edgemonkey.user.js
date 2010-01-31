@@ -2311,6 +2311,10 @@ Pagehacks.prototype = {
       cnt.innerHTML = cols[0].innerHTML;
       cols[0].innerHTML = '';
 
+      //Fix for a bug in TUFKAPL source
+      cnt.id = cols[0].id;
+      cols[0].id = '';
+
       var std = document.createElement('span');
       std.className = 'gensmall incell right';
 
