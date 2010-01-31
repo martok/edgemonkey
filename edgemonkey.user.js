@@ -2292,19 +2292,22 @@ Pagehacks.prototype = {
           c_cssClassAdd += ' emctpl' + 7; //Lila
       }
 
-      //Now lets check against the blacklist :P
-      cols[0].className += t_cssClassAdd;
-      cols[1].className += t_cssClassAdd;
-      cols[2].className += c_cssClassAdd;
-      cols[3].className += p_cssClassAdd;
-
       //Remove the DF Highlighting to ensure proper colors :P
       var std_own = document.createElement('span');
       std_own.innerHTML = /Highlight/.test(cols[0].className) ? 'B' : '-';
-      cols[0].className = cols[0].className.replace(/Highlight/, '');
-      cols[1].className = cols[1].className.replace(/Highlight/, '');
-      cols[2].className = cols[2].className.replace(/Highlight/, '');
-      cols[3].className = cols[3].className.replace(/Highlight/, '');
+
+      if(EM.Settings.GetValue('search','moremarkup')) {
+        //Now lets check against the blacklist :P
+        cols[0].className += t_cssClassAdd;
+        cols[1].className += t_cssClassAdd;
+        cols[2].className += c_cssClassAdd;
+        cols[3].className += p_cssClassAdd;
+
+        cols[0].className = cols[0].className.replace(/Highlight/, '');
+        cols[1].className = cols[1].className.replace(/Highlight/, '');
+        cols[2].className = cols[2].className.replace(/Highlight/, '');
+        cols[3].className = cols[3].className.replace(/Highlight/, '');
+      }
 
       //We need to do this here, since we will change HTML later ...
       var img = queryXPathNode(cols[0], './/img');
