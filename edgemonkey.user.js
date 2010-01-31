@@ -1164,8 +1164,8 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('topic','user_stalk', getArray('topic_user_stalk'));
       EM.Settings.SetValue('topic','user_killfile', getArray('topic_user_killfile'));
       EM.Settings.SetValue('topic','killFileType', getArray('topic_killFileType'));
-      EM.Settings.SetValue('topic','button_stalk', getArray('topic_button_stalk'));
-      EM.Settings.SetValue('topic','button_killfile', getArray('topic_button_killfile'));
+      EM.Settings.SetValue('topic','button_stalk', getBool('topic_button_stalk'));
+      EM.Settings.SetValue('topic','button_killfile', getBool('topic_button_killfile'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
