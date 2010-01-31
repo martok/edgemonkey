@@ -1084,7 +1084,6 @@ SettingsStore.prototype = {
       addHeadrow('Ergonomie',2);
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
-      addSettingsRow( 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen', createCheckbox('ph_extsearch', this.GetValue('pagehack','extSearchPage')));
       addSettingsRow( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', createCheckbox('ph_extpost', this.GetValue('pagehack','extPostSubmission')));
       addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
           createSelect('ph_smileyOverlay', this.GetValue('pagehack','smileyOverlay'), [
@@ -1100,6 +1099,7 @@ SettingsStore.prototype = {
       addSettingsRow( 'Deaktivieren des Absenden von Shouts', createCheckbox('ui_disableShouting', this.GetValue('ui','disableShouting')));
 
       addHeadrow('Such-Ansicht',2);
+      addSettingsRow( 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen', createCheckbox('ph_extsearch', this.GetValue('pagehack','extSearchPage')));
       addSettingsRow( 'Zus&auml;tzliche Hervorhebungen bei Suchergebnissen', createCheckbox('search_moremarkup', this.GetValue('search','moremarkup')));
 
       addHeadrow('Thread-Ansicht',2);
