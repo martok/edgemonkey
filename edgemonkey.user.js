@@ -1060,6 +1060,8 @@ SettingsStore.prototype = {
     this.Values['topic.user_stalk']=new Array();
     this.Values['topic.user_killfile']=new Array();
     this.Values['topic.killFileType']=1;
+    this.Values['topic.button_stalk']=true;
+    this.Values['topic.button_killfile']=true;
   },
 
   GetValue: function(sec,key) {
@@ -1100,6 +1102,8 @@ SettingsStore.prototype = {
       addSettingsRow( 'Deaktivieren des Absenden von Shouts', createCheckbox('ui_disableShouting', this.GetValue('ui','disableShouting')));
 
       addHeadrow('Thread-Ansicht',2);
+      addSettingsRow( 'Buttons f&uuml;r Benutzer-Hervorhebung', createCheckbox('topic_button_stalk', this.GetValue('topic','button_stalk')));
+      addSettingsRow( 'Buttons f&uuml;r Benutzer-Ausblendung', createCheckbox('topic_button_killfile', this.GetValue('topic','button_killfile')));
       addSettingsRow( 'Beitr&auml;ge von mir hervorheben',
           createColorSelection('topic_highlight_me',this.GetValue('topic','highlight_me'), false)
           );
@@ -1115,6 +1119,7 @@ SettingsStore.prototype = {
             ['Nein', 0],
             ['Beitrag verkleinern', 1],
             ['Minimal', 2],
+            ['Farblich markieren', 3],
           ])
           );
       addSettingsRow( 'Terrorkartei<br />(Ein Benutzer je Zeile)',createArrayInput('topic_user_killfile',this.GetValue('topic','user_killfile')));
@@ -1174,6 +1179,8 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('topic','user_stalk', getArray('topic_user_stalk'));
       EM.Settings.SetValue('topic','user_killfile', getArray('topic_user_killfile'));
       EM.Settings.SetValue('topic','killFileType', getArray('topic_killFileType'));
+      EM.Settings.SetValue('topic','button_stalk', getBool('topic_button_stalk'));
+      EM.Settings.SetValue('topic','button_killfile', getBool('topic_button_killfile'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
@@ -1368,6 +1375,80 @@ UserManager.prototype = {
   },
   getUIDByProfile: function(href) {
     return this.getUID(this.usernameFromProfile(href));
+  },
+  userlinkButtonFromLink: function(doc, user, handler, place, list) {
+    if(isUndef(handler)) {
+      return null;
+    }
+    if(isUndef(user)) {
+      return null;
+    }
+    if(isUndef(doc)) {
+      return null;
+    }
+    if(isUndef(place)) {
+      place = 'sb';
+    }
+    if(isUndef(list)) {
+      list = 'stalk';
+    }
+
+    var list_data = EM.Settings.GetValue(place,'user_'+list);
+
+    var a = doc.createElement('a');
+    if(list.equals('stalk')) {
+      a.textContent = 'E';
+    } else
+    if(list.equals('killfile')) {
+      a.textContent = 'X';
+    } else {
+      a.textContent = list;
+    }
+
+    if (list_data.some(
+      function (e){
+        return e.equals(user);
+      })) {
+      a.style.cssText +='font-weight: bold;';
+    }
+
+    //Do the click handling ...
+    a.href="#";
+    addEvent(a, 'click', function(obj, event) { return handler(user); });
+
+    return a;
+  },
+  ev_stalk: function(user) {
+// don't really know why it gets double-escaped...
+//    user = unescape(user);
+
+    var user_list = EM.Settings.GetValue('sb','user_stalk');
+
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
+    } else {
+      user_list.push(user);
+    }
+
+    EM.Settings.SetValue('sb','user_stalk',user_list);
+    Settings_SaveToDisk();
+    window.location.reload();
+  },
+  ev_kill: function(user) {
+// don't really know why it gets double-escaped...
+//    user = unescape(user);
+
+    var user_list = EM.Settings.GetValue('sb','user_killfile');
+
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
+    } else {
+      user_list.push(user);
+    }
+
+    EM.Settings.SetValue('sb','user_killfile',user_list);
+    Settings_SaveToDisk();
+    window.location.reload();
   },
   usernameFromProfile: function(href) {
     var m = href.match(/user_(.*)\.html/);
@@ -1871,12 +1952,13 @@ function ShoutboxWindow() {
         tool_html+='P';
     }
     if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
-      tool_html+='<a href="javascript:EM.ShoutWin.ev_stalk(\''+escape(shout_user)+'\')">E</a>';
+      var l_stalk = EM.User.userlinkButtonFromLink(document, shout_user, EM.User.ev_stalk, 'sb', 'stalk');
     }
     if(tool_html!='') {
       tools = document.createElement('span');
       tools.className+=' incell right';
       tools.innerHTML = tool_html;
+      if(l_stalk) tools.appendChild(l_stalk);
       div.appendChild(tools);
     }
   };
@@ -1919,23 +2001,6 @@ ShoutboxWindow.prototype = {
     EM.Anekdoter.Anekdote(this.shouts[idx]);
     EM.Anekdoter.focus();
   },
-
-  ev_stalk: function(user) {
-// don't really know why it gets double-escaped...
-//    user = unescape(user);
-
-    var user_list = EM.Settings.GetValue('sb','user_stalk');
-
-    if (user_list.some(function (item) { return item.equals(user); })) {
-      user_list = user_list.filter(function(el) { return !el.equals(user); });
-    } else {
-      user_list.push(user);
-    }
-
-    EM.Settings.SetValue('sb','user_stalk',user_list);
-    Settings_SaveToDisk();
-    window.location.reload();
-  }
 }
 
 function SmileyWindow(target) {
@@ -2719,6 +2784,29 @@ Pagehacks.prototype = {
       tdProfile.className = tdProfile.className.replace(/Highlight/, '');
       tdPost.className = tdPost.className.replace(/Highlight/, '');
       tdBottom.className = tdBottom.className.replace(/Highlight/, '');
+
+      var user_b = queryXPathNode(tdProfile, "b");
+      var it_div = document.createElement('span');
+      var it_span_user = document.createElement('span');
+      var it_span_marks = document.createElement('span');
+      it_div.className = 'intbl';
+      it_span_user.className = 'incell left';
+      it_span_marks.className = 'gensmall incell right';
+      user_b.parentNode.removeChild(user_b);
+      it_span_user.appendChild(user_b);
+      if(EM.Settings.GetValue('topic','button_stalk')) {
+        var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk, 'topic', 'stalk');
+        it_span_marks.appendChild(l_stalk);
+      }
+      if(EM.Settings.GetValue('topic','button_killfile')) {
+        var l_kill = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_kill, 'topic', 'killfile');
+        it_span_marks.appendChild(l_kill);
+      }
+      it_div.appendChild(it_span_user);
+      it_div.appendChild(it_span_marks);
+      tdProfile.removeChild(queryXPathNode(tdProfile, "br"));
+      tdProfile.insertBefore(it_div, tdProfile.firstChild);
+
     }
 
     //Leyenfilter
