@@ -2490,8 +2490,6 @@ Pagehacks.prototype = {
   },
 
   AddAnsweredLinks: function(){
-    var a=document.getElementById('aAnswerOpen');
-
     var table=EM.Buttons.mainTable.getElementsByClassName('forumline')[1];
     if(!table) return;
     var th=table.getElementsByTagName('th')[0];
@@ -2510,7 +2508,6 @@ Pagehacks.prototype = {
       a2.style.cursor='pointer';
       parent.appendChild(a2);
     }
-    a.innerHTML='Gelöst Modus aktiviert';
   },
 
   FixEmptyResults: function () {
