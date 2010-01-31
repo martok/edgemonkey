@@ -1047,6 +1047,8 @@ SettingsStore.prototype = {
     this.Values['topic.user_stalk']=new Array();
     this.Values['topic.user_killfile']=new Array();
     this.Values['topic.killFileType']=1;
+    this.Values['topic.button_stalk']=true;
+    this.Values['topic.button_killfile']=true;
   },
 
   GetValue: function(sec,key) {
@@ -1086,6 +1088,8 @@ SettingsStore.prototype = {
       addSettingsRow( 'Deaktivieren des Absenden von Shouts', createCheckbox('ui_disableShouting', this.GetValue('ui','disableShouting')));
 
       addHeadrow('Thread-Ansicht',2);
+      addSettingsRow( 'Buttons f&uuml;r Benutzer-Hervorhebung', createCheckbox('topic_button_stalk', this.GetValue('topic','button_stalk')));
+      addSettingsRow( 'Buttons f&uuml;r Benutzer-Ausblendung', createCheckbox('topic_button_killfile', this.GetValue('topic','button_killfile')));
       addSettingsRow( 'Beitr&auml;ge von mir hervorheben',
           createColorSelection('topic_highlight_me',this.GetValue('topic','highlight_me'), false)
           );
@@ -1160,6 +1164,8 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('topic','user_stalk', getArray('topic_user_stalk'));
       EM.Settings.SetValue('topic','user_killfile', getArray('topic_user_killfile'));
       EM.Settings.SetValue('topic','killFileType', getArray('topic_killFileType'));
+      EM.Settings.SetValue('topic','button_stalk', getArray('topic_button_stalk'));
+      EM.Settings.SetValue('topic','button_killfile', getArray('topic_button_killfile'));
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
