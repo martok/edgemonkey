@@ -1052,6 +1052,8 @@ SettingsStore.prototype = {
     this.Values['sb.user_stalk']=new Array();
     this.Values['sb.pnlink_active']=true;
 
+    this.Values['search.moremarkup']=true;
+
     this.Values['topic.highlight_me']=0;
     this.Values['topic.highlight_mod']=0;
     this.Values['topic.highlight_stalk']=0;
@@ -1096,6 +1098,9 @@ SettingsStore.prototype = {
       addHeadrow('Entwickler',2);
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
       addSettingsRow( 'Deaktivieren des Absenden von Shouts', createCheckbox('ui_disableShouting', this.GetValue('ui','disableShouting')));
+
+      addHeadrow('Such-Ansicht',2);
+      addSettingsRow( 'Zus&auml;tzliche Hervorhebungen bei Suchergebnissen', createCheckbox('search_moremarkup', this.GetValue('search','moremarkup')));
 
       addHeadrow('Thread-Ansicht',2);
       addSettingsRow( 'Beitr&auml;ge von mir hervorheben',
@@ -1165,6 +1170,8 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('sb','boldUser', getBool('sb_bolduser'));
       EM.Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
       EM.Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
+
+      EM.Settings.SetValue('search','moremarkup', getBool('search_moremarkup'));
 
       EM.Settings.SetValue('topic','highlight_me', getValue('topic_highlight_me'));
       EM.Settings.SetValue('topic','highlight_mod', getValue('topic_highlight_mod'));
