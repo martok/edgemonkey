@@ -1442,11 +1442,11 @@ UserManager.prototype = {
     Settings_SaveToDisk();
     window.location.reload();
   },
-  ev_kill: function(user) {
+  ev_stalk_t: function(user) {
 // don't really know why it gets double-escaped...
 //    user = unescape(user);
 
-    var user_list = EM.Settings.GetValue('sb','user_killfile');
+    var user_list = EM.Settings.GetValue('topic','user_stalk');
 
     if (user_list.some(function (item) { return item.equals(user); })) {
       user_list = user_list.filter(function(el) { return !el.equals(user); });
@@ -1454,7 +1454,23 @@ UserManager.prototype = {
       user_list.push(user);
     }
 
-    EM.Settings.SetValue('sb','user_killfile',user_list);
+    EM.Settings.SetValue('topic','user_stalk',user_list);
+    Settings_SaveToDisk();
+    window.location.reload();
+  },
+  ev_kill: function(user) {
+// don't really know why it gets double-escaped...
+//    user = unescape(user);
+
+    var user_list = EM.Settings.GetValue('topic','user_killfile');
+
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
+    } else {
+      user_list.push(user);
+    }
+
+    EM.Settings.SetValue('topic','user_killfile',user_list);
     Settings_SaveToDisk();
     window.location.reload();
   },
@@ -2904,7 +2920,7 @@ Pagehacks.prototype = {
       user_b.parentNode.removeChild(user_b);
       it_span_user.appendChild(user_b);
       if(EM.Settings.GetValue('topic','button_stalk')) {
-        var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk, 'topic', 'stalk');
+        var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk_t, 'topic', 'stalk');
         it_span_marks.appendChild(l_stalk);
       }
       if(EM.Settings.GetValue('topic','button_killfile')) {
