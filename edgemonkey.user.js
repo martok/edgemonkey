@@ -2732,10 +2732,14 @@ Pagehacks.prototype = {
       it_span_marks.className = 'gensmall incell right';
       user_b.parentNode.removeChild(user_b);
       it_span_user.appendChild(user_b);
-      var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk, 'topic', 'stalk');
-      it_span_marks.appendChild(l_stalk);
-      var l_kill = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_kill, 'topic', 'killfile');
-      it_span_marks.appendChild(l_kill);
+      if(EM.Settings.GetValue('topic','button_stalk')) {
+        var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk, 'topic', 'stalk');
+        it_span_marks.appendChild(l_stalk);
+      }
+      if(EM.Settings.GetValue('topic','button_killfile')) {
+        var l_kill = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_kill, 'topic', 'killfile');
+        it_span_marks.appendChild(l_kill);
+      }
       it_div.appendChild(it_span_user);
       it_div.appendChild(it_span_marks);
       tdProfile.removeChild(queryXPathNode(tdProfile, "br"));
