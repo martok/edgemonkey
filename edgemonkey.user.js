@@ -2190,7 +2190,7 @@ function Pagehacks() {
   EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
   this.AddCustomStyles();
   if(EM.Settings.GetValue('pagehack','extSearchPage') &&
-    /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
+    /\bsearch\.php(\?(?:mode=results|search_id=.*|search_author=.*)|$)/.test(Location))
   {
     this.FixEmptyResults();
   }
@@ -2219,6 +2219,10 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','answeredLinks') &&
      /\bsearch\.php\?search_id=myopen/.test(Location)) {
     this.AddAnsweredLinks();
+  }
+  if(/\bforum_(\S+_)?\d+\.html|viewforum\.php/.test(Location)) {
+    var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
+    this.TLColourize(resTable, "forum");
   }
 }
 
@@ -2344,17 +2348,22 @@ Pagehacks.prototype = {
     document.overlayWindows.getWindowById('em_searchbox').Close();
   },
 
-  TLColourize: function (tltable) {
+  TLColourize: function (tltable, isForum) {
     var entries = queryXPathNodeSet(tltable,"./tbody/tr");
+    var col_ofs = (isForum)?1:0;
 
-    for(var i = 1; i < entries.length; i++) { //Skip entry 0 (table header)
+    for(var i = 1; i < entries.length - col_ofs; i++) { //Skip entry 0 (table header)
       var row = entries[i];
       var cols = queryXPathNodeSet(row, './td');
 
       var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
-      var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
-      var pcount = queryXPathNode(row,"./td[3]/div/span");
-
+      if (isForum) {
+        var puser_l = queryXPathNode(row,"./td[5]/a[2]");
+        var pcount = queryXPathNode(row,"./td[4]/div");
+      } else {
+        var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
+        var pcount = queryXPathNode(row,"./td[3]/div/span");
+      }
       var t_cssClassAdd = EM.User.helper_getHLStyleByUserLink(tuser_l);
       var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
 
@@ -2380,21 +2389,24 @@ Pagehacks.prototype = {
       std_own.innerHTML = /Highlight/.test(cols[0].className) ? 'B' : '-';
 
       if(EM.Settings.GetValue('search','moremarkup')) {
+        var rowfix = col_ofs?' row'+(2-i%2):'';
+
         //Now lets check against the blacklist :P
         cols[0].className += t_cssClassAdd;
         cols[1].className += t_cssClassAdd;
-        cols[2].className += c_cssClassAdd;
-        cols[3].className += p_cssClassAdd;
+        if (col_ofs) cols[2].className += rowfix + t_cssClassAdd;
+        cols[2+col_ofs].className += rowfix + c_cssClassAdd;
+        cols[3+col_ofs].className += rowfix + p_cssClassAdd;
 
         cols[0].className = cols[0].className.replace(/Highlight/, '');
         cols[1].className = cols[1].className.replace(/Highlight/, '');
-        cols[2].className = cols[2].className.replace(/Highlight/, '');
-        cols[3].className = cols[3].className.replace(/Highlight/, '');
+        if (col_ofs) cols[2].className = cols[2].className.replace(/Highlight/, '');
+        cols[2+col_ofs].className = cols[2+col_ofs].className.replace(/Highlight/, '');
+        cols[3+col_ofs].className = cols[3+col_ofs].className.replace(/Highlight/, '');
       }
 
       //We need to do this here, since we will change HTML later ...
       var img = queryXPathNode(cols[0], './/img');
-
       //Add "Close topic" link ...
       var div = document.createElement('div');
       div.className+='intbl';
