@@ -1756,6 +1756,9 @@ ShoutboxControls.prototype = {
       //Search for improperly started tags ...
       uncleanBBCode |= /\[(?!\w|\/\w|\.{3})/i.test(s);
 
+      //Search for improperly started tags ...
+      uncleanBBCode |= /\[7\w+\]/i.test(s);
+
       if(uncleanBBCode)
       {
         if(!confirm("Dein Shout scheint mit ungültigen oder falsch geschriebenen BBCodes infiziert zu sein. \"Abbrechen\" um dies zu korrigieren.")) {
