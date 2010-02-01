@@ -2106,7 +2106,7 @@ function Pagehacks() {
   EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
   this.AddCustomStyles();
   if(EM.Settings.GetValue('pagehack','extSearchPage') &&
-    /\bsearch\.php\?(?:mode=results|search_id=)/.test(Location))
+    /\bsearch\.php(\?(?:mode=results|search_id=.*)|$)/.test(Location))
   {
     this.FixEmptyResults();
   }
