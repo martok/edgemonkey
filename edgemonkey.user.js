@@ -12,10 +12,21 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.21;
+const ScriptVersion = 0.23;
 
 // @changelog
 /*
+0.23           10-02-01
+  -SB: anekdoter w/Linkification (Martok)
+  -SB: moved Topic+Post+Forum+Search Autotags to new syntax (Martok)
+  -generic header css fix (BenBE)
+  -Topic autoclose buttons (Flamefire, Martok, BenBE)
+  -SB: active list state marked bold (BenBE)
+  -add: user marking and killfile links per post (BenBE)
+  -additional option for killfile action (BenBE)
+  -Colourized search results / forum overview (BenBE, Martok)
+  -fix: some broken XPaths (BenBE)
+
 
 0.21           09-08-07
   -SB: Auto-Tagging (BenBE)
