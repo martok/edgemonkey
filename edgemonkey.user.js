@@ -1756,6 +1756,26 @@ ShoutboxControls.prototype = {
       //Search for improperly started tags ...
       uncleanBBCode |= /\[(?!\w|\/\w|\.{3})/i.test(s);
 
+      if(!uncleanBBCode) {
+        var open = [];
+        s.replace(/(?!\[\.\.\.\])\[(\/)?(\w+)/,
+          function (m,c,t) {
+            alert(m);
+            var ic = ''!=c;
+            if(ic) {
+              if(!open.length) {
+                open.push('+');
+              } else {
+                uncleanBBCode |= t!=open.pop();
+              }
+            } else {
+              open.push(t);
+            }
+            return m;
+          });
+        uncleanBBCode |= !!open.length;
+      }
+
       //Search for improperly started tags ...
       uncleanBBCode |= /\[7\w+\]/i.test(s);
 
