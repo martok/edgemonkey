@@ -1055,6 +1055,7 @@ SettingsStore.prototype = {
     this.Values['ui.useFlatStyle']=false;
     this.Values['ui.betaFeatures']=false;
     this.Values['ui.disableShouting']=false;
+    this.Values['ui.addsid']=true;
 
     this.Values['sb.longInput']=false;
     this.Values['sb.boldUser']=false;
@@ -1109,6 +1110,7 @@ SettingsStore.prototype = {
           ])
           );
       addSettingsRow( '"Meine offenen Fragen" um Inline-Markieren erweitern', createCheckbox('ph_addanswered', this.GetValue('pagehack','answeredLinks')));
+      addSettingsRow( 'Links auf Unterforen mit SessionID versehen', createCheckbox('ui_addsid', this.GetValue('ui','addsid')));
 
       addHeadrow('Entwickler',2);
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
@@ -1179,6 +1181,7 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
       EM.Settings.SetValue('ui','betaFeatures', getBool('ui_betaFeatures'));
       EM.Settings.SetValue('ui','disableShouting', getBool('ui_disableShouting'));
+      EM.Settings.SetValue('ui','addsid', getBool('ui_addsid'));
 
       EM.Settings.SetValue('sb','anek_active', getBool('sb_anek_start'));
       EM.Settings.SetValue('sb','anek_reverse', getBool('sb_anek_rev'));
@@ -2239,6 +2242,9 @@ function Pagehacks() {
     var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
     this.TLColourize(resTable, "forum");
   }
+  if(EM.Settings.GetValue('ui','addsid')) {
+    this.AddLinkSIDs();
+  }
 }
 
 Pagehacks.prototype = {
@@ -2995,6 +3001,26 @@ Pagehacks.prototype = {
       trPost.style.display='';
       var tdSpacer = queryXPathNode(nextNode(trBottom),"td[1]");
       tdSpacer.innerHTML='';
+    }
+  },
+  AddLinkSIDs: function () {
+    var links = EM.Buttons.mainTable.getElementsByTagName('a');
+    for (var i=0; i<links.length; i++) {
+      var hr = links[i];
+      if (hr.className!='postlink') continue;
+      if (/.*\.delphi-forum\.de|.*\.delphi-library\.de|.*\.c-sharp-forum\.de|.*\.c-sharp-library\.de|.*\.entwickler-ecke\.de/.test(hr.host) &&
+          hr.host!=window.location.host &&
+          /\/(viewtopic\.php|viewforum\.php|topic_.*\.html|forum_.*\.html)/.test(hr.pathname)) {
+        var prms = hr.search.substr(1).split('&');
+        for (var j=0; j<prms.length;j++) {
+          if (/^sid=/i.test(prms[j])) {
+            prms.splice(j--,1);
+          }
+        }
+        prms.push('sid='+EM.User.loggedOnSessionId);
+        hr.search='?'+prms.join('&');
+        hr.title='Interner EE-Link (Session wird übernommen)';
+      }
     }
   }
 }
