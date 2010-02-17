@@ -1811,6 +1811,9 @@ ShoutboxControls.prototype = {
                                   encodeURIComponent(re.found)+"]"+re.found+"[/url]";
                         }
                       } break;
+                      case 'K@': {
+                        return before+"[url="+txt+"]*klick*[/url]";
+                      } break;
                     }
                     return $0;
                   });
