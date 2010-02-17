@@ -1498,6 +1498,10 @@ UserManager.prototype = {
       group='topic';
     }
 
+    if (isEmpty(user_link)) {
+      return '';
+    }
+
     var postclass_me = ' emctpl' + EM.Settings.GetValue(group,'highlight_me');
     var postclass_mod = ' emctpl' + EM.Settings.GetValue(group,'highlight_mod');
     var postclass_stalk = ' emctpl' + EM.Settings.GetValue(group,'highlight_stalk');
@@ -2434,7 +2438,7 @@ Pagehacks.prototype = {
       var std = document.createElement('span');
       std.className = 'gensmall incell right';
 
-      var isSelf = queryXPathNode(tuser_l, './span').textContent == EM.User.loggedOnUser;
+      var isSelf = tuser_l && (queryXPathNode(tuser_l, './span').textContent == EM.User.loggedOnUser);
 
       if(img && isSelf && !img.src.match(/answered/) && !img.src.match(/lock/)) {
         var topicid = img.id.match(/^folderFor(\d+)$/);
