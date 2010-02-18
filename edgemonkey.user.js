@@ -3007,10 +3007,10 @@ Pagehacks.prototype = {
     var links = EM.Buttons.mainTable.getElementsByTagName('a');
     for (var i=0; i<links.length; i++) {
       var hr = links[i];
-      if (hr.className!='postlink') continue;
-      if (/.*\.delphi-forum\.de|.*\.delphi-library\.de|.*\.c-sharp-forum\.de|.*\.c-sharp-library\.de|.*\.entwickler-ecke\.de/.test(hr.host) &&
+      if (hr.className=='postlink' &&
+          /.*\.(delphi|c-sharp)-(forum|library)\.de|.*\.entwickler-ecke\.de/.test(hr.host) &&
           hr.host!=window.location.host &&
-          /\/(viewtopic\.php|viewforum\.php|topic_.*\.html|forum_.*\.html)/.test(hr.pathname)) {
+          /^\/(view(topic|forum)\.php|(topic|forum)_.*\.html)/.test(hr.pathname)) {
         var prms = hr.search.substr(1).split('&');
         for (var j=0; j<prms.length;j++) {
           if (/^sid=/i.test(prms[j])) {
@@ -3019,7 +3019,7 @@ Pagehacks.prototype = {
         }
         prms.push('sid='+EM.User.loggedOnSessionId);
         hr.search='?'+prms.join('&');
-        hr.title='Interner EE-Link (Session wird übernommen)';
+        hr.title='EE-Interner Link (Session wird übernommen)';
       }
     }
   }
