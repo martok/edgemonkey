@@ -2740,6 +2740,7 @@ Pagehacks.prototype = {
       tdBottom.className = tdBottom.className.replace(/Highlight/, '');
 
       var user_b = queryXPathNode(tdProfile, "b");
+      var post_idlink = queryXPathNode(tdProfile, "a");
       var it_div = document.createElement('span');
       var it_span_user = document.createElement('span');
       var it_span_marks = document.createElement('span');
@@ -2747,7 +2748,9 @@ Pagehacks.prototype = {
       it_span_user.className = 'incell left';
       it_span_marks.className = 'gensmall incell right';
       user_b.parentNode.removeChild(user_b);
+      post_idlink.parentNode.removeChild(post_idlink);
       it_span_user.appendChild(user_b);
+      it_span_user.insertBefore(post_idlink, user_b);
       if(EM.Settings.GetValue('topic','button_stalk')) {
         var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk_t, 'topic', 'stalk');
         it_span_marks.appendChild(l_stalk);
@@ -2760,7 +2763,6 @@ Pagehacks.prototype = {
       it_div.appendChild(it_span_marks);
       tdProfile.removeChild(queryXPathNode(tdProfile, "br"));
       tdProfile.insertBefore(it_div, tdProfile.firstChild);
-
     }
 
     //Leyenfilter
