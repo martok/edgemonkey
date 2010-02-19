@@ -3011,6 +3011,7 @@ Pagehacks.prototype = {
           /.*\.(delphi|c-sharp)-(forum|library)\.de|.*\.entwickler-ecke\.de/.test(hr.host) &&
           hr.host!=window.location.host &&
           /^\/(view(topic|forum)\.php|(topic|forum)_.*\.html)/.test(hr.pathname)) {
+        var oldsearch = hr.search;
         var prms = hr.search.substr(1).split('&');
         for (var j=0; j<prms.length;j++) {
           if (/^sid=/i.test(prms[j])) {
@@ -3020,6 +3021,24 @@ Pagehacks.prototype = {
         prms.push('sid='+EM.User.loggedOnSessionId);
         hr.search='?'+prms.join('&');
         hr.title='EE-Interner Link (Session wird übernommen)';
+        if(EM.Settings.GetValue('ui','betaFeatures')) {
+          var here = window.location.host.match(/^(.*?)\./);
+          here = here?here[1]:'www';
+          var there = hr.host.replace(/^(.*?)\./,here+'.');
+          var ax = document.createElement('a');
+          hr.parentNode.insertBefore(ax,hr.nextSibling);
+          ax.href = hr.href;
+          ax.host = there;
+          ax.title = 'Auf gleicher Subdomain bleiben';
+          if (window.location.host==there) {
+            // only subdomain would change, but this link doesnt-> no change needed
+            ax.search = oldsearch;
+          } else {
+            ax.title+= ' (Session wird übernommen)';
+          }
+          ax.className='gensmall';
+          ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
+        }
       }
     }
   }
