@@ -411,6 +411,14 @@ if (!String.prototype.trim) String.prototype.trim = function() {
     }
 })();
 
+Array.prototype.uniq = function() {
+  var res = [];
+  this.forEach(function(a) {
+    if (res.indexOf(a)<0) res.push(a);
+  },this);
+  return res;
+}
+
 function encodeLongShout(text)
 {
   var b = '';
@@ -2198,6 +2206,136 @@ SmileyWindow.prototype = {
   }
 }
 
+function PNThreadGrabber(display) {
+  this.Display = display;
+  this.logger= this.Display.Document.createElement('pre');
+  this.Display.Body.appendChild(this.logger);
+  this.DisplayLog('<b>PM Grabber working...</b><br/>');
+  this.DisplayLog('(This may take some time.<br/>'+
+                  ' Firefox may even complain the script hangs.<br/>'+
+                  ' Please allow it to continue.)<br/>');
+}
+
+PNThreadGrabber.prototype = {
+  DisplayLog: function(s) {
+    this.logger.innerHTML+=s;
+  },
+
+  extractPlainTitle: function(t) {
+    var m = t.match(/(Re:\s+)?(.*)/);
+    return m[2] || '';
+  },
+
+  postDatetoJSDate: function(pd) {
+    //"Mo 07.12.09<br>23:17"
+    // good thing DF always returns that and ignores user settings...
+    var d = pd.match(/\S+\s(\d+)\.(\d+)\.(\d+)<\S+>(\d+):(\d+)/);
+    return new Date(2000+parseInt(d[3]), d[2]-1, d[1], d[4], d[5], 0);
+  },
+
+  crawlPMs: function(title, depth) {
+    this.messages = [];
+    ['inbox','sentbox','outbox'].forEach(function(box) {
+      this.DisplayLog('<br/>Grabbing '+box+'... ');
+      st = 0;
+      var lister = new AJAXObject();
+      var host = document.createElement('div');
+      do {
+        this.DisplayLog((st+1)+' ');
+        host.innerHTML = lister.SyncRequest('/privmsg.php?folder='+box+'&start='+st*50, null);
+        var table = queryXPathNode(host, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+        if (!table) break;
+        var rows = queryXPathNodeSet(table, './/tr[./td[starts-with(@id,"folderFor")]]');
+        if (!rows || !rows.length) break;
+        rows.forEach(function(row) {
+          this.messages.push({
+            box: box,
+            read: !queryXPathNode(row, './td[1]/a'),
+            title: queryXPathNode(row, './td[2]/span/a[2]').textContent,
+            postID: queryXPathNode(row, './td[2]/span/a[2]').href.match(/p=(\d+)/)[1],
+            postSpecial: (function(){var a=queryXPathNode(row, './td[2]/span/b'); return a?a.textContent:'';})(),
+            partner: queryXPathNode(row, './td[2]/span[2]/span').textContent,
+            partnerID: (function(){var a=queryXPathNode(row, './td[2]/span[2]/span/a'); return a?a.href.match(/u=(\d+)/)[1]:null;})(),
+            date: this.postDatetoJSDate(queryXPathNode(row,'./td[3]/span').innerHTML)
+          });
+
+        },this);
+        if (++st >= depth) {
+          break;
+        }
+      } while (true);
+    },this);
+    //okay, we have all messages. built thread tree now.
+    this.DisplayLog('<br/>Building tree...');
+    var tmp = {}
+    this.messages.forEach(function(p) {
+      var t = this.extractPlainTitle(p.title);
+      if (!t.match(title)) return;
+      if(tmp[t]) tmp[t].push(p);
+       else tmp[t] = [p];
+    },this);
+    this.threads = [];
+    for (var t in tmp) {
+      this.threads.push({title:t, posts:tmp[t]});
+    }
+    //sort individual threads
+    this.DisplayLog('<br/>Sorting threads...');
+    this.threads.forEach(function(a) {
+      a.posts.sort(function(l,r) {
+        return l.date - r.date;
+      });
+      a.firstDate = a.posts[0].date;
+    },this);
+    //sort whole list
+    this.DisplayLog('<br/>Sorting overview...');
+    this.threads.sort(function(l,r) {
+      return r.firstDate - l.firstDate;
+    });
+    return this.threads;
+    this.DisplayLog('<br/><b>Done.</b>');
+  },
+
+  displayResults: function() {
+    this.Display.Body.removeChild(this.logger);
+    this.table = this.Display.Document.createElement('table');
+    this.Display.Body.appendChild(this.table);
+    this.table.className = 'forumline';
+    this.table.style.cssText = 'width:98%; align:center; margin:5px;';
+    var zebra;
+    this.threads.forEach(function(thread) {
+      var r = this.table.insertRow(-1);
+      var th = document.createElement('th');
+      th.colSpan = 3;
+      th.innerHTML = thread.title.escapeHTML() + ' :: '+ thread.posts.map(function(a) { return a.partner; }).uniq().join(',');
+      r.appendChild(th);
+      zebra = false;
+      thread.posts.forEach(function(post) {
+        var rowClass = zebra ? 'row1' : 'row2';
+        zebra = !zebra;
+
+        var r = this.table.insertRow(-1);
+
+        with(r.insertCell(-1)) {
+          className = rowClass;
+          innerHTML = '<img border="0" align="middle" src="templates/subSilver/images/pm_'+post.box+'.gif">'+
+                      '<span style="font-size: 10px;" class="name">'+
+                        '<a href="profile.php?mode=viewprofile&amp;u='+post.partnerID+
+                        '" class="gensmall">'+post.partner+'</a></span>';
+        }
+        with(r.insertCell(-1)) {
+          className = rowClass;
+          innerHTML = '<span class="topictitle"><a class="topictitle" href="privmsg.php?folder='+post.box+
+                      '&amp;mode=read&amp;p='+post.postID+'">'+post.title+'</a></span>';
+        }
+        with(r.insertCell(-1)) {
+          className = rowClass;
+          innerHTML = '<span class="gensmall">'+post.date.toLocaleString()+'</span>'
+        }
+      },this);
+    },this);
+  }
+}
+
 function Pagehacks() {
   if (EM.Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
@@ -2238,6 +2376,9 @@ function Pagehacks() {
   if(/\bforum_(\S+_)?\d+\.html|viewforum\.php/.test(Location)) {
     var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
     this.TLColourize(resTable, "forum");
+  }
+  if(/\bprivmsg\.php/.test(Location)) {
+    EM.Buttons.addButton('/graphics/Postings.gif','PN-Threads verfolgen','EM.Pagehacks.followPMThreads()','em_followPMThreads');
   }
 }
 
@@ -2995,6 +3136,26 @@ Pagehacks.prototype = {
       trPost.style.display='';
       var tdSpacer = queryXPathNode(nextNode(trBottom),"td[1]");
       tdSpacer.innerHTML='';
+    }
+  },
+  followPMThreads: function() {
+    if (!confirm("Das kann sehr lange dauern, bitte nicht mehr als nötig ausführen!")) return;
+    if (!confirm("No really, don't.")) return;
+    var maxdpt = prompt("Maximale Suchtiefe?", "1");
+    maxdpt = parseInt(maxdpt);
+    if (isNaN(maxdpt)|| maxdpt<1) maxdpt = 1;
+
+    var title = queryXPathNode(EM.Buttons.mainTable,'./tbody/tr[2]/td[1]/div/table/tbody/tr[5]/td[2]/span');
+    var display = new UserWindow('EdgeMonkey :: PN-Threads', 'em_pn_threads',
+            'HEIGHT=400,WIDTH=500,resizable=yes,scrollbars=yes', this.Window);
+    var threads = new PNThreadGrabber(display);
+    if (title) {
+      title = threads.extractPlainTitle(title.textContent);
+    } else {
+      title = '';
+    }
+    if(threads.crawlPMs(title, maxdpt)) {
+      threads.displayResults();
     }
   }
 }
