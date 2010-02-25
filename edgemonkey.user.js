@@ -751,7 +751,7 @@ function UserWindow(title, name,options,previous,body_element) {
     case "undefined": break;
     case "string": bd+=body_element; break;
     case "object": bd+=body_element.innerHTML; break;
-    default:  bd+=body_element.toString;
+    default:  bd+=body_element.toString();
   }
   wnd.document.write(bd+'</body>');
   wnd.document.write('</html>');
