@@ -3046,7 +3046,11 @@ ShoutboxAnekdoter.prototype = {
       sh.reverse();
     }
     cont.innerHTML='[quote="Shoutbox-Anekdote, erstellt '+new Date().toLocaleString()+':"]\n'+sh.map(function(item) {
-      return '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n'+item.shout.escapeHTML();
+      var s = '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n'
+      if (item.color != null)
+        return s+"[color="+item.color+"]"+item.shout.escapeHTML()+"[/color]";
+      else
+        return s+item.shout.escapeHTML();
       }).join("\n\n")+'\n[/quote]';
   },
   convertTag: function(elem,skip) {
@@ -3091,7 +3095,11 @@ ShoutboxAnekdoter.prototype = {
     this.list.push({
       user: item.getElementsByTagName('a')[0].firstChild.innerHTML,
       time: item.getElementsByTagName('span')[2].innerHTML,
-      shout: this.convertTag(item.childNodes[1])
+      shout: this.convertTag(item.childNodes[1]),
+      color:
+        item.className.indexOf("Del") >= 0 ? "red" :
+        item.className.indexOf("Int") >= 0 ? "blue" :
+        null
     });
   },
   Anekdote: function(item) {
