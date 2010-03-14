@@ -1632,6 +1632,8 @@ function ShoutboxControls() {
                   '<img border="0" style="border-left: 1px solid rgb(46, 95, 134); width: 7px; height: 9px;" alt="Smaller" src="./graphics/categorie_up.gif"/></a>'+
                '<a href="#" title="Gr&ouml;&szlig;er" onclick="EM.Shouts.ev_resize(+50); return false;">'+
                   '<img border="0" alt="Move category down" src="./graphics/categorie_down.gif"/></a>';
+  if (EM.Settings.GetValue('sb', 'anek_active'))
+    sp.innerHTML += '<a href="#" onclick="EM.ShoutWin.ev_anekdoteAll(); return false;" style="font-size: 10px; margin: 0 5px;">A</a>';
   ifr.parentNode.appendChild(sp);
   var h=EM.Settings.GetValue('sb','displayHeight');
   if (!isEmpty(h)) ifr.style.height = h+'px';
@@ -1952,12 +1954,19 @@ ShoutboxAnekdoter.prototype = {
     }
     return res.join('');
   },
+  AddAnekdote: function(item) {
+    this.list.push({
+      user: item.getElementsByTagName('a')[0].firstChild.innerHTML,
+      time: item.getElementsByTagName('span')[2].innerHTML,
+      shout: this.convertTag(item.childNodes[1])
+    });
+  },
   Anekdote: function(item) {
-    var o = {user:'',time:'',shout:''};
-    o.user = item.getElementsByTagName('a')[0].firstChild.innerHTML;
-    o.time = item.getElementsByTagName('span')[2].innerHTML;
-    o.shout = this.convertTag(item.childNodes[1]);
-    this.list.push(o);
+    this.AddAnekdote(item)
+    this.UpdateContent();
+  },
+  AnekdoteAll: function(items) {
+    items.forEach(this.AddAnekdote, this)
     this.UpdateContent();
   },
   focus: function() {
@@ -2060,14 +2069,23 @@ ShoutboxWindow.prototype = {
       head.appendChild(style);
     }
   },
-
-  ev_anekdote: function(idx) {
+  EnsureWindow: function() {
     if (!EM.Anekdoter || EM.Anekdoter.Wnd.Window.closed) {
       EM.Anekdoter = new ShoutboxAnekdoter();
     }
+  },
+  ev_anekdote: function(idx) {
+    this.EnsureWindow();
     EM.Anekdoter.Anekdote(this.shouts[idx]);
     EM.Anekdoter.focus();
   },
+  ev_anekdoteAll: function() {
+    this.EnsureWindow();
+    var rev = this.shouts.slice(0);
+    rev.reverse();
+    EM.Anekdoter.AnekdoteAll(rev);
+    EM.Anekdoter.focus();
+  }
 }
 
 function SmileyWindow(target) {
