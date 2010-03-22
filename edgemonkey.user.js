@@ -330,7 +330,8 @@ function isEmpty(what)
 
 function isHTMLElement(what)
 {
-  return !isUndef && what instanceof HTMLElement;
+  return !isUndef(what) &&
+   ((what instanceof HTMLElement) || (what.tagName));
 }
 
 //http://www.infocamp.de/javascript_htmlspecialchars.php
