@@ -5,10 +5,10 @@
 // @description    Krams fuer die Entwickler-Ecke
 // @include        *.entwickler-ecke.de/*
 // @include        *.c-sharp-forum.de/*
-// @include        *.delphi-library.de/*
+// @include        *.c-sharp-library.de/*
 // @include        *.delphi-forum.de/*
+// @include        *.delphi-library.de/*
 // @include        *.delphiforum.de/*
-// @include        *.c-sharp-library/*
 // @exclude
 // ==/UserScript==
 
