@@ -1060,6 +1060,7 @@ SettingsStore.prototype = {
     this.Values['pagehack.extSearchPage']=true;
     this.Values['pagehack.extPostSubmission']=true;
     this.Values['pagehack.quickProfMenu']=true;
+    this.Values['pagehack.quickLoginMenu']=true;
     this.Values['pagehack.quickSearchMenu']=true;
     this.Values['pagehack.smileyOverlay']=1;
     this.Values['pagehack.answeredLinks']=true;
@@ -1068,6 +1069,7 @@ SettingsStore.prototype = {
     this.Values['ui.useFlatStyle']=false;
     this.Values['ui.betaFeatures']=false;
     this.Values['ui.disableShouting']=false;
+    this.Values['ui.addsid']=true;
 
     this.Values['sb.longInput']=false;
     this.Values['sb.boldUser']=false;
@@ -1112,6 +1114,7 @@ SettingsStore.prototype = {
 
       addHeadrow('Ergonomie',2);
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
+      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Login', createCheckbox('ph_ddlogin', this.GetValue('pagehack','quickLoginMenu')));
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
       addSettingsRow( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', createCheckbox('ph_extpost', this.GetValue('pagehack','extPostSubmission')));
       addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
@@ -1122,6 +1125,7 @@ SettingsStore.prototype = {
           ])
           );
       addSettingsRow( '"Meine offenen Fragen" um Inline-Markieren erweitern', createCheckbox('ph_addanswered', this.GetValue('pagehack','answeredLinks')));
+      addSettingsRow( 'Links auf Unterforen mit SessionID versehen', createCheckbox('ui_addsid', this.GetValue('ui','addsid')));
 
       addHeadrow('Entwickler',2);
       addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
@@ -1181,6 +1185,7 @@ SettingsStore.prototype = {
     with (EM.Settings.Window.OptionsGenerator) {
       EM.Settings.SetValue('pagehack','monospace', getBool('ph_mono'));
       EM.Settings.SetValue('pagehack','quickProfMenu', getBool('ph_ddmyedge'));
+      EM.Settings.SetValue('pagehack','quickLoginMenu', getBool('ph_ddlogin'));
       EM.Settings.SetValue('pagehack','quickSearchMenu', getBool('ph_ddsearch'));
       EM.Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
       EM.Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
@@ -1192,6 +1197,7 @@ SettingsStore.prototype = {
       EM.Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
       EM.Settings.SetValue('ui','betaFeatures', getBool('ui_betaFeatures'));
       EM.Settings.SetValue('ui','disableShouting', getBool('ui_disableShouting'));
+      EM.Settings.SetValue('ui','addsid', getBool('ui_addsid'));
 
       EM.Settings.SetValue('sb','anek_active', getBool('sb_anek_start'));
       EM.Settings.SetValue('sb','anek_reverse', getBool('sb_anek_rev'));
@@ -1761,6 +1767,29 @@ ShoutboxControls.prototype = {
       //Search for improperly started tags ...
       uncleanBBCode |= /\[(?!\w|\/\w|\.{3})/i.test(s);
 
+      if(!uncleanBBCode) {
+        var open = [];
+        s.replace(/(?!\[\.\.\.\])\[(\/)?(\w+)/,
+          function (m,c,t) {
+            alert(m);
+            var ic = ''!=c;
+            if(ic) {
+              if(!open.length) {
+                open.push('+');
+              } else {
+                uncleanBBCode |= t!=open.pop();
+              }
+            } else {
+              open.push(t);
+            }
+            return m;
+          });
+        uncleanBBCode |= !!open.length;
+      }
+
+      //Search for improperly started tags ...
+      uncleanBBCode |= /\[7\w+\]/i.test(s);
+
       if(uncleanBBCode)
       {
         if(!confirm("Dein Shout scheint mit ungültigen oder falsch geschriebenen BBCodes infiziert zu sein. \"Abbrechen\" um dies zu korrigieren.")) {
@@ -1815,6 +1844,9 @@ ShoutboxControls.prototype = {
                           return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
                                   encodeURIComponent(re.found)+"]"+re.found+"[/url]";
                         }
+                      } break;
+                      case 'K@': {
+                        return before+"[url="+txt+"]*klick*[/url]";
                       } break;
                     }
                     return $0;
@@ -2236,6 +2268,9 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','quickProfMenu')) {
     this.AddQuickProfileMenu();
   }
+  if(EM.Settings.GetValue('pagehack','quickLoginMenu')) {
+    this.AddQuickLoginMenu();
+  }
   if(EM.Settings.GetValue('pagehack','quickSearchMenu')) {
     this.AddQuickSearchMenu();
   }
@@ -2255,6 +2290,9 @@ function Pagehacks() {
   if(/\bforum_(\S+_)?\d+\.html|viewforum\.php/.test(Location)) {
     var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
     this.TLColourize(resTable, "forum");
+  }
+  if(EM.Settings.GetValue('ui','addsid')) {
+    this.AddLinkSIDs();
   }
 }
 
@@ -2744,6 +2782,11 @@ Pagehacks.prototype = {
     }
   },
 
+  AddQuickLoginMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
+    link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
+  },
+
   AddQuickSearchMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
     link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
@@ -2797,6 +2840,47 @@ Pagehacks.prototype = {
         );
 
     w.ContentArea.appendChild(tbl);
+
+    return false;
+  },
+
+  QuickLoginMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom+10);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,320,108,'','em_QLM');
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+    var sg = new SettingsGenerator(tbl, unsafeWindow.document);
+
+    sg.addHeadrow(("" != EM.User.loggedOnSessionId) ? "Benutzerwechsel" : "Anmeldung", 2);
+    sg.addSettingsRow(
+        '<span class="gen">Mitgliedsname:</span>',
+        '<input type="text" value="" maxlength="40" size="25" name="username">'
+        );
+    sg.zebra = false;
+    sg.addSettingsRow(
+        '<span class="gen">Kennwort:</span>',
+        '<input type="password" maxlength="32" size="25" name="password">'
+        );
+    sg.zebra = false;
+    sg.addSettingsRow(
+        '<span class="gen"><label for="autologin">Angemeldet bleiben:</label></span>',
+        '<input type="checkbox" id="autologin" name="autologin">'
+        );
+    sg.addFootrow('<input type="hidden" value="" name="redirect"><input type="submit" value="Login" class="mainoption" name="login">', 2);
+
+    var f = unsafeWindow.document.createElement('form');
+    f.name = "loginForm";
+    f.method = "post";
+    f.target = "_top";
+    f.action="login.php";
+
+    f.appendChild(tbl);
+    w.ContentArea.appendChild(f);
 
     return false;
   },
@@ -2955,6 +3039,7 @@ Pagehacks.prototype = {
       tdBottom.className = tdBottom.className.replace(/Highlight/, '');
 
       var user_b = queryXPathNode(tdProfile, "b");
+      var post_idlink = queryXPathNode(tdProfile, "a");
       var it_div = document.createElement('span');
       var it_span_user = document.createElement('span');
       var it_span_marks = document.createElement('span');
@@ -2962,7 +3047,9 @@ Pagehacks.prototype = {
       it_span_user.className = 'incell left';
       it_span_marks.className = 'gensmall incell right';
       user_b.parentNode.removeChild(user_b);
+      post_idlink.parentNode.removeChild(post_idlink);
       it_span_user.appendChild(user_b);
+      it_span_user.insertBefore(post_idlink, user_b);
       if(EM.Settings.GetValue('topic','button_stalk')) {
         var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk_t, 'topic', 'stalk');
         it_span_marks.appendChild(l_stalk);
@@ -2975,7 +3062,6 @@ Pagehacks.prototype = {
       it_div.appendChild(it_span_marks);
       tdProfile.removeChild(queryXPathNode(tdProfile, "br"));
       tdProfile.insertBefore(it_div, tdProfile.firstChild);
-
     }
 
     //Leyenfilter
@@ -3012,6 +3098,45 @@ Pagehacks.prototype = {
       trPost.style.display='';
       var tdSpacer = queryXPathNode(nextNode(trBottom),"td[1]");
       tdSpacer.innerHTML='';
+    }
+  },
+  AddLinkSIDs: function () {
+    var links = EM.Buttons.mainTable.getElementsByTagName('a');
+    for (var i=0; i<links.length; i++) {
+      var hr = links[i];
+      if (hr.className=='postlink' &&
+          /.*\.(delphi|c-sharp)-(forum|library)\.de|.*\.entwickler-ecke\.de/.test(hr.host) &&
+          hr.host!=window.location.host &&
+          /^\/(view(topic|forum)\.php|(topic|forum)_.*\.html)/.test(hr.pathname)) {
+        var oldsearch = hr.search;
+        var prms = hr.search.substr(1).split('&');
+        for (var j=0; j<prms.length;j++) {
+          if (/^sid=/i.test(prms[j])) {
+            prms.splice(j--,1);
+          }
+        }
+        prms.push('sid='+EM.User.loggedOnSessionId);
+        hr.search='?'+prms.join('&');
+        hr.title='EE-Interner Link (Session wird übernommen)';
+        if(EM.Settings.GetValue('ui','betaFeatures')) {
+          var here = window.location.host.match(/^(.*?)\./);
+          here = here?here[1]:'www';
+          var there = hr.host.replace(/^(.*?)\./,here+'.');
+          var ax = document.createElement('a');
+          hr.parentNode.insertBefore(ax,hr.nextSibling);
+          ax.href = hr.href;
+          ax.host = there;
+          ax.title = 'Auf gleicher Subdomain bleiben';
+          if (window.location.host==there) {
+            // only subdomain would change, but this link doesnt-> no change needed
+            ax.search = oldsearch;
+          } else {
+            ax.title+= ' (Session wird übernommen)';
+          }
+          ax.className='gensmall';
+          ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
+        }
+      }
     }
   }
 }
