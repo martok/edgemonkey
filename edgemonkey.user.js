@@ -1038,7 +1038,13 @@ function SettingsStore() {
   ]);
   this.AddCategory('Entwickler', [
     this.AddSetting( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', 'ui.betaFeatures', 'bool', false),
-    this.AddSetting( 'Deaktivieren des Absenden von Shouts', 'ui.disableShouting', 'bool', false)
+    this.AddSetting( 'Deaktivieren des Absenden von Shouts', 'ui.disableShouting', 'bool', false),
+    this.AddSetting( 'Bei ge&auml;nderten Links auf gleicher Subdomain bleiben', 'ui.addsidSubdomain', [
+          ['Deaktiviert', 0],
+          ['Nur aktuelle', 1],
+          ['Aktuelle [Original]', 2],
+          ['Original [Aktuelle]', 3],
+        ], 2)
   ]);
 
   this.AddCategory('Such-Ansicht', [
@@ -3078,23 +3084,54 @@ Pagehacks.prototype = {
         prms.push('sid='+EM.User.loggedOnSessionId);
         hr.search='?'+prms.join('&');
         hr.title='EE-Interner Link (Session wird übernommen)';
-        if(EM.Settings.GetValue('ui','betaFeatures')) {
+        if(EM.Settings.GetValue('ui','betaFeatures') && EM.Settings.GetValue('ui','addsidSubdomain')) {
+          function makeLinkBtn(after, href) {
+            var ax = document.createElement('a');
+            ax.className='gensmall';
+            ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
+            after.parentNode.insertBefore(ax,after.nextSibling);
+            ax.href = href;
+            return ax;
+          }
+
           var here = window.location.host.match(/^(.*?)\./);
           here = here?here[1]:'www';
           var there = hr.host.replace(/^(.*?)\./,here+'.');
-          var ax = document.createElement('a');
-          hr.parentNode.insertBefore(ax,hr.nextSibling);
-          ax.href = hr.href;
-          ax.host = there;
-          ax.title = 'Auf gleicher Subdomain bleiben';
-          if (window.location.host==there) {
-            // only subdomain would change, but this link doesnt-> no change needed
-            ax.search = oldsearch;
-          } else {
-            ax.title+= ' (Session wird übernommen)';
+          switch (EM.Settings.GetValue('ui','addsidSubdomain')) {
+            case '1': {
+              hr.host = there;
+              hr.title = 'Auf gleicher Subdomain bleiben';
+              if (window.location.host==there) {
+                // only subdomain would change, but this link doesnt-> no change needed
+                hr.search = oldsearch;
+              } else {
+                hr.title+= ' (Session wird übernommen)';
+              }
+            }; break;
+            case '2': {
+              var ax = makeLinkBtn(hr, hr.href);
+              ax.title = hr.title;
+              hr.host = there;
+              hr.title = 'Auf gleicher Subdomain bleiben';
+              if (window.location.host==there) {
+                // only subdomain would change, but this link doesnt-> no change needed
+                hr.search = oldsearch;
+              } else {
+                hr.title+= ' (Session wird übernommen)';
+              }
+            }; break;
+            case '3': {
+              var ax = makeLinkBtn(hr, hr.href);
+              ax.host = there;
+              ax.title = 'Auf gleicher Subdomain bleiben';
+              if (window.location.host==there) {
+                // only subdomain would change, but this link doesnt-> no change needed
+                ax.search = oldsearch;
+              } else {
+                ax.title+= ' (Session wird übernommen)';
+              }
+            } ; break;
           }
-          ax.className='gensmall';
-          ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
         }
       }
     }
