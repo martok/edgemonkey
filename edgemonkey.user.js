@@ -1749,7 +1749,7 @@ ShoutboxControls.prototype = {
             }
             return m;
           });
-        uncleanBBCode |= 0!=open.length;
+        uncleanBBCode |= !!open.length;
       }
 
       //Search for improperly started tags ...
