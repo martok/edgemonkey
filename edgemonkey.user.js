@@ -2844,25 +2844,37 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QLM');
+    var w = new OverlayWindow(coords.x,coords.y,320,187,'','em_QLM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
     var sg = new SettingsGenerator(tbl, unsafeWindow.document);
 
-    sg.addHeadrow("Login", 2);
+    sg.addHeadrow(false ? "Benutzerwechsel" : "Anmeldung", 2);
     sg.addSettingsRow(
-        "Benutzername:",
-        '<input type="text" name="username" />'
+        '<span class="gen">Mitgliedsname:</span>',
+        '<input type="text" value="" maxlength="40" size="25" name="username">'
         );
     sg.zebra = false;
     sg.addSettingsRow(
-        "Passwort:",
-        '<input type="password" name="password" />'
+        '<span class="gen">Kennwort:</span>',
+        '<input type="password" maxlength="32" size="25" name="password">'
         );
-    sg.addHeadrow("Hier kommt dann noch ein Button!", 2);
+    sg.zebra = false;
+    sg.addSettingsRow(
+        '<span class="gen"><label for="autologin">Angemeldet bleiben:</label></span>',
+        '<input type="checkbox" id="autologin" name="autologin">'
+        );
+    sg.addFootrow('<input type="hidden" value="" name="redirect"><input type="submit" value="Login" class="mainoption" name="login"><br><span class="gensmall"><a class="gensmall" href="profile.php?mode=sendpassword">Ich habe mein Kennwort vergessen!</a></span>', 2);
 
-    w.ContentArea.appendChild(tbl);
+    var f = unsafeWindow.document.createElement('form');
+    f.name = "loginForm";
+    f.method = "post";
+    f.target = "_top";
+    f.action="login.php";
+
+    f.appendChild(tbl);
+    w.ContentArea.appendChild(f);
 
     return false;
   },
