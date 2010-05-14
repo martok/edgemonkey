@@ -2778,6 +2778,11 @@ Pagehacks.prototype = {
     }
   },
 
+  AddQuickLoginMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[4]/table/tbody/tr/td/a[img][1]");
+    link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
+  },
+
   AddQuickSearchMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
     link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
