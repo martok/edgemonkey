@@ -556,6 +556,18 @@ SettingsGenerator.prototype = {
     r.appendChild(th);
     this.tbl.zebra = false;
   },
+  addFootrow: function (content, colspan)
+  {
+    var r = this.tbl.insertRow(-1);
+    var c = document.createElement('td');
+    r.appendChild(c);
+    c.colSpan = colspan;
+    c.className = 'catBottom';
+    c.style.cssText = 'text-align:center;';
+    c.innerHTML = content;
+    this.tbl.zebra = false;
+    return c;
+  },
   addSettingsRow: function (caption, innerHTML) {
     var rowClass = this.tbl.zebra ? 'row1' : 'row2';
     this.tbl.zebra = !this.tbl.zebra;
@@ -1048,6 +1060,7 @@ SettingsStore.prototype = {
     this.Values['pagehack.extSearchPage']=true;
     this.Values['pagehack.extPostSubmission']=true;
     this.Values['pagehack.quickProfMenu']=true;
+    this.Values['pagehack.quickLoginMenu']=true;
     this.Values['pagehack.quickSearchMenu']=true;
     this.Values['pagehack.smileyOverlay']=1;
     this.Values['pagehack.answeredLinks']=true;
@@ -1101,6 +1114,7 @@ SettingsStore.prototype = {
 
       addHeadrow('Ergonomie',2);
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
+      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Login', createCheckbox('ph_ddlogin', this.GetValue('pagehack','quickLoginMenu')));
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
       addSettingsRow( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', createCheckbox('ph_extpost', this.GetValue('pagehack','extPostSubmission')));
       addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
@@ -1171,6 +1185,7 @@ SettingsStore.prototype = {
     with (EM.Settings.Window.OptionsGenerator) {
       EM.Settings.SetValue('pagehack','monospace', getBool('ph_mono'));
       EM.Settings.SetValue('pagehack','quickProfMenu', getBool('ph_ddmyedge'));
+      EM.Settings.SetValue('pagehack','quickLoginMenu', getBool('ph_ddlogin'));
       EM.Settings.SetValue('pagehack','quickSearchMenu', getBool('ph_ddsearch'));
       EM.Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
       EM.Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
@@ -1245,36 +1260,22 @@ SettingsStore.prototype = {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
             'HEIGHT=400,WIDTH=500,resizable=yes,scrollbars=yes', this.Window);
     this.FillDialog();
-//    var tbl = this.Window.Document.createElement('table');
-    var tbl = this.Window.OptionsTable;
-    var row = tbl.insertRow(-1);
-    with (row) {
-      var c = document.createElement('td');
-      row.appendChild(c);
-      c.colSpan = 2;
-      c.className = 'catBottom';
-      c.style.cssText = 'text-align:center;';
-      c.innerHTML = '&nbsp;';
-      c.innerHTML += '<input type="button" class="mainoption" value="Speichern">';
-      c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schlie&szlig;en">';
-      c.innerHTML += '&nbsp;';
-      var i = c.getElementsByTagName('input');
+    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+      innerHTML = '&nbsp;';
+      innerHTML += '<input type="button" class="mainoption" value="Speichern">';
+      innerHTML += '&nbsp;&nbsp;';
+      innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schlie&szlig;en">';
+      innerHTML += '&nbsp;';
+      var i = getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_SaveDialog);
     }
-    var row = tbl.insertRow(-1);
-    with (row) {
-      var c = document.createElement('td');
-      row.appendChild(c);
-      c.colSpan = 2;
-      c.className = 'catBottom';
-      c.style.cssText = 'text-align:center;';
-      c.innerHTML = '&nbsp;';
-      c.innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
-      c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" value="User-Cache l&ouml;schen" class="liteoption">';
-      c.innerHTML += '&nbsp;';
-      var i = c.getElementsByTagName('input');
+    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+      innerHTML = '&nbsp;';
+      innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
+      innerHTML += '&nbsp;&nbsp;';
+      innerHTML += '<input type="button" value="User-Cache l&ouml;schen" class="liteoption">';
+      innerHTML += '&nbsp;';
+      var i = getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_ClearAll);
       addEvent(i[1], 'click', this.ev_ClearUIDCache);
     }
@@ -2267,6 +2268,9 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','quickProfMenu')) {
     this.AddQuickProfileMenu();
   }
+  if(EM.Settings.GetValue('pagehack','quickLoginMenu')) {
+    this.AddQuickLoginMenu();
+  }
   if(EM.Settings.GetValue('pagehack','quickSearchMenu')) {
     this.AddQuickSearchMenu();
   }
@@ -2778,6 +2782,11 @@ Pagehacks.prototype = {
     }
   },
 
+  AddQuickLoginMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
+    link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
+  },
+
   AddQuickSearchMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
     link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
@@ -2831,6 +2840,47 @@ Pagehacks.prototype = {
         );
 
     w.ContentArea.appendChild(tbl);
+
+    return false;
+  },
+
+  QuickLoginMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom+10);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,320,108,'','em_QLM');
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+    var sg = new SettingsGenerator(tbl, unsafeWindow.document);
+
+    sg.addHeadrow(("" != EM.User.loggedOnSessionId) ? "Benutzerwechsel" : "Anmeldung", 2);
+    sg.addSettingsRow(
+        '<span class="gen">Mitgliedsname:</span>',
+        '<input type="text" value="" maxlength="40" size="25" name="username">'
+        );
+    sg.zebra = false;
+    sg.addSettingsRow(
+        '<span class="gen">Kennwort:</span>',
+        '<input type="password" maxlength="32" size="25" name="password">'
+        );
+    sg.zebra = false;
+    sg.addSettingsRow(
+        '<span class="gen"><label for="autologin">Angemeldet bleiben:</label></span>',
+        '<input type="checkbox" id="autologin" name="autologin">'
+        );
+    sg.addFootrow('<input type="hidden" value="" name="redirect"><input type="submit" value="Login" class="mainoption" name="login">', 2);
+
+    var f = unsafeWindow.document.createElement('form');
+    f.name = "loginForm";
+    f.method = "post";
+    f.target = "_top";
+    f.action="login.php";
+
+    f.appendChild(tbl);
+    w.ContentArea.appendChild(f);
 
     return false;
   },
