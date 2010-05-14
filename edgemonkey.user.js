@@ -2779,7 +2779,7 @@ Pagehacks.prototype = {
   },
 
   AddQuickLoginMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[4]/table/tbody/tr/td/a[img][1]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
     link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
   },
 
@@ -2841,7 +2841,7 @@ Pagehacks.prototype = {
   },
 
   QuickLoginMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[4]/table/tbody/tr/td/a[img][1]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
     var bcr = link.getBoundingClientRect();
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
@@ -2850,18 +2850,19 @@ Pagehacks.prototype = {
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
+    var sg = new SettingsGenerator(tbl, unsafeWindow.document);
 
-    tbl.addHeadrow("Login", 2);
-    tbl.addSettingsRow(
+    sg.addHeadrow("Login", 2);
+    sg.addSettingsRow(
         "Benutzername:",
         '<input type="text" name="username" />'
         );
-    tbl.zebra = false;
-    tbl.addSettingsRow(
+    sg.zebra = false;
+    sg.addSettingsRow(
         "Passwort:",
         '<input type="password" name="password" />'
         );
-    tbl.addHeadrow("Hier kommt dann noch ein Button!", 2);
+    sg.addHeadrow("Hier kommt dann noch ein Button!", 2);
 
     w.ContentArea.appendChild(tbl);
 
