@@ -1758,9 +1758,9 @@ ShoutboxControls.prototype = {
 
       if(!uncleanBBCode) {
         var open = [];
-        s.replace(/(?!\[\.\.\.\])\[(\/)?(\w+)/,
-          function (m,c,t) {
-            var ic = ''!=c;
+        s.replace(/(?!\[\.\.\.\])\[(\/)?(\w+)/g,
+          function (m,c,t){
+            var ic = undefined!=c;
             if(ic) {
               if(!open.length) {
                 open.push('+');
@@ -1772,7 +1772,7 @@ ShoutboxControls.prototype = {
             }
             return m;
           });
-        uncleanBBCode |= !!open.length;
+        uncleanBBCode |= 0!=open.length;
       }
 
       //Search for improperly started tags ...
