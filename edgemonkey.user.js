@@ -1760,7 +1760,6 @@ ShoutboxControls.prototype = {
         var open = [];
         s.replace(/(?!\[\.\.\.\])\[(\/)?(\w+)/,
           function (m,c,t) {
-            alert(m);
             var ic = ''!=c;
             if(ic) {
               if(!open.length) {
