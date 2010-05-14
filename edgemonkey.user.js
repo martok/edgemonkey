@@ -2844,13 +2844,13 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,320,187,'','em_QLM');
+    var w = new OverlayWindow(coords.x,coords.y,320,108,'','em_QLM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
     var sg = new SettingsGenerator(tbl, unsafeWindow.document);
 
-    sg.addHeadrow(false ? "Benutzerwechsel" : "Anmeldung", 2);
+    sg.addHeadrow(("" != EM.User.loggedOnSessionId) ? "Benutzerwechsel" : "Anmeldung", 2);
     sg.addSettingsRow(
         '<span class="gen">Mitgliedsname:</span>',
         '<input type="text" value="" maxlength="40" size="25" name="username">'
@@ -2865,7 +2865,7 @@ Pagehacks.prototype = {
         '<span class="gen"><label for="autologin">Angemeldet bleiben:</label></span>',
         '<input type="checkbox" id="autologin" name="autologin">'
         );
-    sg.addFootrow('<input type="hidden" value="" name="redirect"><input type="submit" value="Login" class="mainoption" name="login"><br><span class="gensmall"><a class="gensmall" href="profile.php?mode=sendpassword">Ich habe mein Kennwort vergessen!</a></span>', 2);
+    sg.addFootrow('<input type="hidden" value="" name="redirect"><input type="submit" value="Login" class="mainoption" name="login">', 2);
 
     var f = unsafeWindow.document.createElement('form');
     f.name = "loginForm";
