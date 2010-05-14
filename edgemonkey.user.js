@@ -556,6 +556,18 @@ SettingsGenerator.prototype = {
     r.appendChild(th);
     this.tbl.zebra = false;
   },
+  addFootrow: function (content, colspan)
+  {
+    var r = this.tbl.insertRow(-1);
+    var c = document.createElement('td');
+    r.appendChild(c);
+    c.colSpan = colspan;
+    c.className = 'catBottom';
+    c.style.cssText = 'text-align:center;';
+    c.innerHTML = content;
+    this.tbl.zebra = false;
+    return c;
+  },
   addSettingsRow: function (caption, innerHTML) {
     var rowClass = this.tbl.zebra ? 'row1' : 'row2';
     this.tbl.zebra = !this.tbl.zebra;
@@ -1242,36 +1254,22 @@ SettingsStore.prototype = {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
             'HEIGHT=400,WIDTH=500,resizable=yes,scrollbars=yes', this.Window);
     this.FillDialog();
-//    var tbl = this.Window.Document.createElement('table');
-    var tbl = this.Window.OptionsTable;
-    var row = tbl.insertRow(-1);
-    with (row) {
-      var c = document.createElement('td');
-      row.appendChild(c);
-      c.colSpan = 2;
-      c.className = 'catBottom';
-      c.style.cssText = 'text-align:center;';
-      c.innerHTML = '&nbsp;';
-      c.innerHTML += '<input type="button" class="mainoption" value="Speichern">';
-      c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schlie&szlig;en">';
-      c.innerHTML += '&nbsp;';
-      var i = c.getElementsByTagName('input');
+    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+      innerHTML = '&nbsp;';
+      innerHTML += '<input type="button" class="mainoption" value="Speichern">';
+      innerHTML += '&nbsp;&nbsp;';
+      innerHTML += '<input type="button" class="liteoption" onclick="window.close()" value="Schlie&szlig;en">';
+      innerHTML += '&nbsp;';
+      var i = getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_SaveDialog);
     }
-    var row = tbl.insertRow(-1);
-    with (row) {
-      var c = document.createElement('td');
-      row.appendChild(c);
-      c.colSpan = 2;
-      c.className = 'catBottom';
-      c.style.cssText = 'text-align:center;';
-      c.innerHTML = '&nbsp;';
-      c.innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
-      c.innerHTML += '&nbsp;&nbsp;';
-      c.innerHTML += '<input type="button" value="User-Cache l&ouml;schen" class="liteoption">';
-      c.innerHTML += '&nbsp;';
-      var i = c.getElementsByTagName('input');
+    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+      innerHTML = '&nbsp;';
+      innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
+      innerHTML += '&nbsp;&nbsp;';
+      innerHTML += '<input type="button" value="User-Cache l&ouml;schen" class="liteoption">';
+      innerHTML += '&nbsp;';
+      var i = getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_ClearAll);
       addEvent(i[1], 'click', this.ev_ClearUIDCache);
     }
