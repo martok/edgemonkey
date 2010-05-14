@@ -2829,6 +2829,34 @@ Pagehacks.prototype = {
     return false;
   },
 
+  QuickLoginMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[4]/table/tbody/tr/td/a[img][1]");
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom+10);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QLM');
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+
+    tbl.addHeadrow("Login", 2);
+    tbl.addSettingsRow(
+        "Benutzername:",
+        '<input type="text" name="username" />'
+        );
+    tbl.zebra = false;
+    tbl.addSettingsRow(
+        "Passwort:",
+        '<input type="password" name="password" />'
+        );
+    tbl.addHeadrow("Hier kommt dann noch ein Button!", 2);
+
+    w.ContentArea.appendChild(tbl);
+
+    return false;
+  },
+
   QuickSearchMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
     var bcr = link.getBoundingClientRect();
