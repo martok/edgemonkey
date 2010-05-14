@@ -1048,6 +1048,7 @@ SettingsStore.prototype = {
     this.Values['pagehack.extSearchPage']=true;
     this.Values['pagehack.extPostSubmission']=true;
     this.Values['pagehack.quickProfMenu']=true;
+    this.Values['pagehack.quickLoginMenu']=true;
     this.Values['pagehack.quickSearchMenu']=true;
     this.Values['pagehack.smileyOverlay']=1;
     this.Values['pagehack.answeredLinks']=true;
@@ -1100,6 +1101,7 @@ SettingsStore.prototype = {
 
       addHeadrow('Ergonomie',2);
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
+      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Login', createCheckbox('ph_ddlogin', this.GetValue('pagehack','quickLoginMenu')));
       addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
       addSettingsRow( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', createCheckbox('ph_extpost', this.GetValue('pagehack','extPostSubmission')));
       addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
@@ -1169,6 +1171,7 @@ SettingsStore.prototype = {
     with (EM.Settings.Window.OptionsGenerator) {
       EM.Settings.SetValue('pagehack','monospace', getBool('ph_mono'));
       EM.Settings.SetValue('pagehack','quickProfMenu', getBool('ph_ddmyedge'));
+      EM.Settings.SetValue('pagehack','quickLoginMenu', getBool('ph_ddlogin'));
       EM.Settings.SetValue('pagehack','quickSearchMenu', getBool('ph_ddsearch'));
       EM.Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
       EM.Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
@@ -2263,6 +2266,9 @@ function Pagehacks() {
   }
   if(EM.Settings.GetValue('pagehack','quickProfMenu')) {
     this.AddQuickProfileMenu();
+  }
+  if(EM.Settings.GetValue('pagehack','quickLoginMenu')) {
+    this.AddQuickLoginMenu();
   }
   if(EM.Settings.GetValue('pagehack','quickSearchMenu')) {
     this.AddQuickSearchMenu();
