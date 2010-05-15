@@ -1015,6 +1015,65 @@ function SettingsStore() {
     else return what;
   }
 
+  this.Categories = [];
+
+  this.AddCategory('Design',[
+    this.AddSetting('Codebl&ouml;cke als monospace anzeigen','pagehack.monospace', 'bool', true),
+    this.AddSetting( 'Schlagschatten unter Popup-Fenstern', 'ui.showDropShadow', 'bool', true),
+    this.AddSetting( 'Nutze ein flacheres Layout f&uuml;r Formulare', 'ui.useFlatStyle', 'bool', false),
+    this.AddSetting( 'Maximalbreite von Bildern erzwingen', 'pagehack.imgMaxWidth', 'bool', false),
+  ]);
+  this.AddCategory('Ergonomie', [
+    this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', 'pagehack.quickProfMenu', 'bool', true),
+    this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
+    this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
+    this.AddSetting( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', 'pagehack.extPostSubmission', 'bool', true),
+    this.AddSetting( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen', 'pagehack.smileyOverlay',[
+          ['Nein', 0],
+          ['Ja, verschiebbar', 1],
+          ['Ja, fest', 2],
+        ], 1),
+    this.AddSetting( '"Meine offenen Fragen" um Inline-Markieren erweitern', 'pagehack.answeredLinks', 'bool', true),
+    this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true)
+  ]);
+  this.AddCategory('Entwickler', [
+    this.AddSetting( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', 'ui.betaFeatures', 'bool', false),
+    this.AddSetting( 'Deaktivieren des Absenden von Shouts', 'ui.disableShouting', 'bool', false)
+  ]);
+
+  this.AddCategory('Such-Ansicht', [
+    this.AddSetting( 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen', 'pagehack.extSearchPage', 'bool', false),
+    this.AddSetting( 'Zus&auml;tzliche Hervorhebungen bei Suchergebnissen', 'search.moremarkup', 'bool', true)
+  ]);
+
+  this.AddCategory('Thread-Ansicht', [
+    this.AddSetting( 'Buttons f&uuml;r Benutzer-Hervorhebung', 'topic.button_stalk', 'bool', true),
+    this.AddSetting( 'Buttons f&uuml;r Benutzer-Ausblendung', 'topic.button_killfile', 'bool', true),
+    this.AddSetting( 'Beitr&auml;ge von mir hervorheben', 'topic.highlight_me', 'color', 0),
+    this.AddSetting( 'Beitr&auml;ge von ausgew&auml;hlten Nutzern hervorheben','topic.highlight_stalk', 'color', 0),
+    this.AddSetting( 'Beitr&auml;ge von Moderatoren/Admins hervorheben','topic.highlight_mod', 'color', 0),
+    this.AddSetting( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)','topic.user_stalk', 'list', []),
+    this.AddSetting( 'Benutzer ausblenden','topic.killFileType', [
+          ['Nein', 0],
+          ['Beitrag verkleinern', 1],
+          ['Minimal', 2],
+          ['Farblich markieren', 3]
+        ], 1),
+    this.AddSetting( 'Terrorkartei<br />(Ein Benutzer je Zeile)','topic.user_killfile', 'list', [])
+  ]);
+
+  this.AddCategory('Shoutbox', [
+    this.AddSetting( 'Eingabefeld vergr&ouml;&szlig;ern', 'sb.longInput', 'bool', false),
+    this.AddSetting( 'Shoutenden Username hervorheben', 'sb.boldUser', 'bool', false),
+    this.AddSetting( 'Shoutbox-Anekdoter aktivieren', 'sb.anek_active', 'bool', false),
+    this.AddSetting( 'Anekdoten oben einf&uuml;gen', 'sb.anek_reverse', 'bool', true),
+    this.AddSetting( 'Shouts von mir hervorheben<br />(nur mit Auto-Login)', 'sb.highlight_me', 'color', 0),
+    this.AddSetting( 'Shouts von ausgew&auml;hlten Nutzern hervorheben', 'sb.highlight_stalk', 'color', 0),
+    this.AddSetting( 'Shouts von Moderatoren/Admins hervorheben', 'sb.highlight_mod', 'color', 0),
+    this.AddSetting( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_stalk', 'list', []),
+    this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true)
+  ]);
+
   this.RestoreDefaults();
   this.LoadFromDisk();
   var co = document.cookie.split(';');
@@ -1053,44 +1112,20 @@ SettingsStore.prototype = {
     }
   },
 
+  AddCategory: function(title, settings) {
+    this.Categories.push({title: title, settings: settings});
+  },
+
+  AddSetting: function(description, key, type, standard) {
+    return {desc: description, key: key, type: type, standard: standard};
+  },
   RestoreDefaults: function() {
     this.Values = new Object();
-    this.Values['pagehack.monospace']=true;
-    this.Values['pagehack.imgMaxWidth']=false;
-    this.Values['pagehack.extSearchPage']=true;
-    this.Values['pagehack.extPostSubmission']=true;
-    this.Values['pagehack.quickProfMenu']=true;
-    this.Values['pagehack.quickLoginMenu']=true;
-    this.Values['pagehack.quickSearchMenu']=true;
-    this.Values['pagehack.smileyOverlay']=1;
-    this.Values['pagehack.answeredLinks']=true;
-
-    this.Values['ui.showDropShadow']=true;
-    this.Values['ui.useFlatStyle']=false;
-    this.Values['ui.betaFeatures']=false;
-    this.Values['ui.disableShouting']=false;
-    this.Values['ui.addsid']=true;
-
-    this.Values['sb.longInput']=false;
-    this.Values['sb.boldUser']=false;
-    this.Values['sb.anek_active']=true;
-    this.Values['sb.anek_reverse']=true;
-    this.Values['sb.highlight_me']=0;
-    this.Values['sb.highlight_mod']=0;
-    this.Values['sb.highlight_stalk']=0;
-    this.Values['sb.user_stalk']=new Array();
-    this.Values['sb.pnlink_active']=true;
-
-    this.Values['search.moremarkup']=true;
-
-    this.Values['topic.highlight_me']=0;
-    this.Values['topic.highlight_mod']=0;
-    this.Values['topic.highlight_stalk']=0;
-    this.Values['topic.user_stalk']=new Array();
-    this.Values['topic.user_killfile']=new Array();
-    this.Values['topic.killFileType']=1;
-    this.Values['topic.button_stalk']=true;
-    this.Values['topic.button_killfile']=true;
+    this.Categories.forEach(function(c){
+      c.settings.forEach(function(s) {
+        this.Values[s.key] = s.standard;
+      }, this);
+    }, this);
   },
 
   GetValue: function(sec,key) {
@@ -1106,75 +1141,23 @@ SettingsStore.prototype = {
     tbl.style.cssText = 'width:98%; align:center; margin:5px;';
     var sg = new SettingsGenerator(tbl, this.Window.Document);
     with (sg) {
-      addHeadrow('Design',2);
-      addSettingsRow('Codebl&ouml;cke als monospace anzeigen', createCheckbox('ph_mono', this.GetValue('pagehack','monospace')));
-      addSettingsRow( 'Schlagschatten unter Popup-Fenstern', createCheckbox('ui_dropshadow', this.GetValue('ui','showDropShadow')));
-      addSettingsRow( 'Nutze ein flacheres Layout f&uuml;r Formulare', createCheckbox('ui_flatstyle', this.GetValue('ui', 'useFlatStyle')));
-      addSettingsRow( 'Maximalbreite von Bildern erzwingen', createCheckbox('ph_imgmaxwidth', this.GetValue('pagehack','imgMaxWidth')));
-
-      addHeadrow('Ergonomie',2);
-      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', createCheckbox('ph_ddmyedge', this.GetValue('pagehack','quickProfMenu')));
-      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r Login', createCheckbox('ph_ddlogin', this.GetValue('pagehack','quickLoginMenu')));
-      addSettingsRow( 'Dropdown-Men&uuml; f&uuml;r die Suche', createCheckbox('ph_ddsearch', this.GetValue('pagehack','quickSearchMenu')));
-      addSettingsRow( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', createCheckbox('ph_extpost', this.GetValue('pagehack','extPostSubmission')));
-      addSettingsRow( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen',
-          createSelect('ph_smileyOverlay', this.GetValue('pagehack','smileyOverlay'), [
-            ['Nein', 0],
-            ['Ja, verschiebbar', 1],
-            ['Ja, fest', 2],
-          ])
-          );
-      addSettingsRow( '"Meine offenen Fragen" um Inline-Markieren erweitern', createCheckbox('ph_addanswered', this.GetValue('pagehack','answeredLinks')));
-      addSettingsRow( 'Links auf Unterforen mit SessionID versehen', createCheckbox('ui_addsid', this.GetValue('ui','addsid')));
-
-      addHeadrow('Entwickler',2);
-      addSettingsRow( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', createCheckbox('ui_betaFeatures', this.GetValue('ui','betaFeatures')));
-      addSettingsRow( 'Deaktivieren des Absenden von Shouts', createCheckbox('ui_disableShouting', this.GetValue('ui','disableShouting')));
-
-      addHeadrow('Such-Ansicht',2);
-      addSettingsRow( 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen', createCheckbox('ph_extsearch', this.GetValue('pagehack','extSearchPage')));
-      addSettingsRow( 'Zus&auml;tzliche Hervorhebungen bei Suchergebnissen', createCheckbox('search_moremarkup', this.GetValue('search','moremarkup')));
-
-      addHeadrow('Thread-Ansicht',2);
-      addSettingsRow( 'Buttons f&uuml;r Benutzer-Hervorhebung', createCheckbox('topic_button_stalk', this.GetValue('topic','button_stalk')));
-      addSettingsRow( 'Buttons f&uuml;r Benutzer-Ausblendung', createCheckbox('topic_button_killfile', this.GetValue('topic','button_killfile')));
-      addSettingsRow( 'Beitr&auml;ge von mir hervorheben',
-          createColorSelection('topic_highlight_me',this.GetValue('topic','highlight_me'), false)
-          );
-      addSettingsRow( 'Beitr&auml;ge von ausgew&auml;hlten Nutzern hervorheben<br />',
-          createColorSelection('topic_highlight_stalk',this.GetValue('topic','highlight_stalk'), false)
-          );
-      addSettingsRow( 'Beitr&auml;ge von Moderatoren/Admins hervorheben',
-          createColorSelection('topic_highlight_mod',this.GetValue('topic','highlight_mod'), false)
-          );
-      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)',createArrayInput('topic_user_stalk',this.GetValue('topic','user_stalk')));
-      addSettingsRow( 'Benutzer ausblenden',
-          createSelect('topic_killFileType', this.GetValue('topic','killFileType'), [
-            ['Nein', 0],
-            ['Beitrag verkleinern', 1],
-            ['Minimal', 2],
-            ['Farblich markieren', 3],
-          ])
-          );
-      addSettingsRow( 'Terrorkartei<br />(Ein Benutzer je Zeile)',createArrayInput('topic_user_killfile',this.GetValue('topic','user_killfile')));
-
-      addHeadrow('Shoutbox',2);
-      addSettingsRow( 'Eingabefeld vergr&ouml;&szlig;ern', createCheckbox('sb_longinput', this.GetValue('sb','longInput')));
-      addSettingsRow( 'Shoutenden Username hervorheben', createCheckbox('sb_bolduser', this.GetValue('sb','boldUser')));
-      addSettingsRow( 'Shoutbox-Anekdoter aktivieren', createCheckbox('sb_anek_start', this.GetValue('sb','anek_active')));
-      addSettingsRow( 'Anekdoten oben einf&uuml;gen', createCheckbox('sb_anek_rev', this.GetValue('sb','anek_reverse')));
-      addSettingsRow( 'Shouts von mir hervorheben<br />(nur mit Auto-Login)',
-          createColorSelection('sb_highlight_me',this.GetValue('sb','highlight_me'), false)
-          );
-      addSettingsRow( 'Shouts von ausgew&auml;hlten Nutzern hervorheben<br />',
-          createColorSelection('sb_highlight_stalk',this.GetValue('sb','highlight_stalk'), false)
-          );
-      addSettingsRow( 'Shouts von Moderatoren/Admins hervorheben',
-          createColorSelection('sb_highlight_mod',this.GetValue('sb','highlight_mod'), false)
-          );
-      addSettingsRow( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)',createArrayInput('sb_user_stalk',this.GetValue('sb','user_stalk')));
-      addSettingsRow( 'Zeige Link zum Schreiben einer PN an Benutzer',createCheckbox('sb_pnlink', this.GetValue('sb','pnlink_active')));
-
+      this.Categories.forEach(function(c){
+        addHeadrow(c.title, 2);
+        c.settings.forEach(function(s) {
+          var html;
+          var nm = s.key.replace('.','_');
+          switch(s.type) {
+            case 'bool': html = createCheckbox(nm, this.Values[s.key]); break;
+            case 'color': html = createColorSelection(nm, this.Values[s.key], false); break;
+            case 'list': html = createArrayInput(nm, this.Values[s.key]); break;
+            default: if (s.type instanceof Array) {
+              html = createSelect(nm, this.Values[s.key], s.type);
+            } else
+              html='::('+s.type+')';
+          };
+          addSettingsRow(s.desc, html);
+        }, this);
+      }, this);
     }
     this.Window.OptionsTable = tbl;
     this.Window.OptionsGenerator = sg;
@@ -1183,42 +1166,19 @@ SettingsStore.prototype = {
 
   ev_SaveDialog: function(evt) {
     with (EM.Settings.Window.OptionsGenerator) {
-      EM.Settings.SetValue('pagehack','monospace', getBool('ph_mono'));
-      EM.Settings.SetValue('pagehack','quickProfMenu', getBool('ph_ddmyedge'));
-      EM.Settings.SetValue('pagehack','quickLoginMenu', getBool('ph_ddlogin'));
-      EM.Settings.SetValue('pagehack','quickSearchMenu', getBool('ph_ddsearch'));
-      EM.Settings.SetValue('pagehack','extSearchPage', getBool('ph_extsearch'));
-      EM.Settings.SetValue('pagehack','extPostSubmission', getBool('ph_extpost'));
-      EM.Settings.SetValue('pagehack','imgMaxWidth', getBool('ph_imgmaxwidth'));
-      EM.Settings.SetValue('pagehack','smileyOverlay', getValue('ph_smileyOverlay'));
-      EM.Settings.SetValue('pagehack','answeredLinks', getBool('ph_addanswered'));
-
-      EM.Settings.SetValue('ui','showDropShadow', getBool('ui_dropshadow'));
-      EM.Settings.SetValue('ui','useFlatStyle', getBool('ui_flatstyle'));
-      EM.Settings.SetValue('ui','betaFeatures', getBool('ui_betaFeatures'));
-      EM.Settings.SetValue('ui','disableShouting', getBool('ui_disableShouting'));
-      EM.Settings.SetValue('ui','addsid', getBool('ui_addsid'));
-
-      EM.Settings.SetValue('sb','anek_active', getBool('sb_anek_start'));
-      EM.Settings.SetValue('sb','anek_reverse', getBool('sb_anek_rev'));
-      EM.Settings.SetValue('sb','highlight_me', getValue('sb_highlight_me'));
-      EM.Settings.SetValue('sb','highlight_mod', getValue('sb_highlight_mod'));
-      EM.Settings.SetValue('sb','highlight_stalk', getValue('sb_highlight_stalk'));
-      EM.Settings.SetValue('sb','longInput', getBool('sb_longinput'));
-      EM.Settings.SetValue('sb','boldUser', getBool('sb_bolduser'));
-      EM.Settings.SetValue('sb','user_stalk', getArray('sb_user_stalk'));
-      EM.Settings.SetValue('sb','pnlink_active', getBool('sb_pnlink'));
-
-      EM.Settings.SetValue('search','moremarkup', getBool('search_moremarkup'));
-
-      EM.Settings.SetValue('topic','highlight_me', getValue('topic_highlight_me'));
-      EM.Settings.SetValue('topic','highlight_mod', getValue('topic_highlight_mod'));
-      EM.Settings.SetValue('topic','highlight_stalk', getValue('topic_highlight_stalk'));
-      EM.Settings.SetValue('topic','user_stalk', getArray('topic_user_stalk'));
-      EM.Settings.SetValue('topic','user_killfile', getArray('topic_user_killfile'));
-      EM.Settings.SetValue('topic','killFileType', getArray('topic_killFileType'));
-      EM.Settings.SetValue('topic','button_stalk', getBool('topic_button_stalk'));
-      EM.Settings.SetValue('topic','button_killfile', getBool('topic_button_killfile'));
+      EM.Settings.Categories.forEach(function(c){
+        c.settings.forEach(function(s) {
+          var nm = s.key.replace('.','_');
+          switch(s.type) {
+            case 'bool': EM.Settings.Values[s.key] = getBool(nm); break;
+            case 'color': EM.Settings.Values[s.key] = getValue(nm); break;
+            case 'list': EM.Settings.Values[s.key] = getArray(nm); break;
+            default: if (s.type instanceof Array) {
+              EM.Settings.Values[s.key] = getValue(nm);
+            }
+          };
+        }, this);
+      }, this);
     }
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
