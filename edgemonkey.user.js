@@ -2818,6 +2818,9 @@ Pagehacks.prototype = {
     var w = new OverlayWindow(coords.x,coords.y,320,108,'','em_QLM');
     w.InitDropdown();
 
+    var Eru = unsafeWindow.document.location;
+    var redirectLink = Eru.pathname.replace(/^\//, '') + Eru.search.replace(/sid=[0-9a-f]+/ig, '').replace(/([\?&])&/g, '\1') + Eru.hash;
+
     var tbl = w.CreateMenu();
     var sg = new SettingsGenerator(tbl, unsafeWindow.document);
 
@@ -2836,7 +2839,7 @@ Pagehacks.prototype = {
         '<span class="gen"><label for="autologin">Angemeldet bleiben:</label></span>',
         '<input type="checkbox" id="autologin" name="autologin">'
         );
-    sg.addFootrow('<input type="hidden" value="" name="redirect"><input type="submit" value="Login" class="mainoption" name="login">', 2);
+    sg.addFootrow('<input type="hidden" value="'+encodeURI(redirectLink)+'" name="redirect"><input type="submit" value="Login" class="mainoption" name="login">', 2);
 
     var f = unsafeWindow.document.createElement('form');
     f.name = "loginForm";
