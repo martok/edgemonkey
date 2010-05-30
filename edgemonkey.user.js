@@ -3200,6 +3200,12 @@ function upgradeSettings(){
 
 function initEdgeApe() {
   //No upgrade from inside any popup
+  try {
+    //Work around Firefox Security by Obscurity
+    isEmpty(window.opener);
+  } catch(foo) {
+    window.opener = null;
+  }
   if(isEmpty(window.opener) && (window.parent==window) )
   {
     upgradeSettings();
