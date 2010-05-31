@@ -3049,7 +3049,7 @@ Pagehacks.prototype = {
     //Leyenfilter
   },
   ShowHiddenPosts: function(rel) {
-    var trPost = queryXPathNode(unsafeWindow.document, '//a[@name='+rel+']/../..');
+    var trPost = queryXPathNode(unsafeWindow.document, '//a[@name='+rel+']/../../../..');
     var trBottom = nextNode(trPost);
     var kftype = EM.Settings.GetValue('topic','killFileType');
 
