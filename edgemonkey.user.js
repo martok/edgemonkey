@@ -3140,6 +3140,96 @@ Pagehacks.prototype = {
   }
 }
 
+function UpdateMonkey() {
+    this.state = 0;
+}
+UpdateMonkey.prototype = {
+    performRequest: function(method, url, headers, data) {
+        if(isUndef(method)) method = 'GET';
+        if(isUndef(headers))
+            headers = {
+                'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+                'Accept': '*'
+            };
+        if(isUndef(data)) data = '';
+
+        GM_xmlhttpRequest({
+            method: method,
+            url: url,
+            headers: headers,
+            data: data,
+            onload: function(responseDetails) {
+                updateEngine(1,1,responseDetails);
+            },
+            onerror: function(responseDetails) {
+                updateEngine(1,0,responseDetails);
+            },
+            onreadystatechange: function(responseDetails) {
+                updateEngine(0,responseDetails.readyState,responseDetails);
+            }
+        });
+    },
+
+    doState: function(newState) {
+        this.state = newState;
+        switch(this.state) {
+            case 0:
+                this.performRequest('http://github.com/api/v2/json/repos/show/martok/edgemonkey/tags');
+                break;
+            case 1:
+                this.performRequest('http://github.com/api/v2/json/repos/show/martok/edgemonkey/branches');
+                break;
+            case 2:
+                console.log('UpdateMonkey can haz cheezeburger?');
+                break;
+            default:
+                //Invalid state!
+                //RESET the state maschine!
+                console.log('UpdateMonkey bailed out in state ' + this.state);
+                this.state = 0;
+        }
+    },
+
+    updateEngine: function(stage, success, response) {
+        console.log('================================');
+        console.log('UpdateMonkey eating bananas in state: ' + this.state);
+        console.log('UpdateMonkey at stage ' + stage + ' with as little success as ' + success + ' politicians');
+        console.log('UpdateMonkey haz responz liek:');
+        console.dir(response);
+        console.log('--------------------------------');
+        switch(this.state) {
+            case 0:
+                if(1 == stage) {
+                    console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                    if(success) {
+                        this.doState(1);
+                    }
+                }
+                break;
+            case 1:
+                if(1 == stage) {
+                    console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                    if(success) {
+                        this.doState(2);
+                    }
+                }
+                break;
+            default:
+                console.log('Invalid UpdateMonkey state ... feed more or other bananas!');
+        }
+        console.log('================================');
+    },
+
+    checkUpdate: function() {
+        this.doState(0);
+    }
+}
+
+function checkUpdate(){
+    EM.Updater = new UpdateMonkey();
+    EM.Updater.checkUpdate();
+}
+
 function upgradeSettings(){
   var upgraded = false;
 
@@ -3203,6 +3293,8 @@ function initEdgeApe() {
   if(isEmpty(window.opener) && (window.parent==window) )
   {
     upgradeSettings();
+
+    checkUpdate();
   }
 
   if (Location.match(/shoutbox_view.php/)) {
