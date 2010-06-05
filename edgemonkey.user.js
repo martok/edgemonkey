@@ -3143,6 +3143,7 @@ Pagehacks.prototype = {
 function UpdateMonkey() {
     this.state = 0;
 }
+UpdateMonkey.prototype.updateEngine = function(stage, success, response) {}; //Telling JS something it doesn't believe me without telling it directly
 UpdateMonkey.prototype = {
     performRequest: function(method, url, headers, data) {
         if(isUndef(method)) method = 'GET';
@@ -3152,6 +3153,7 @@ UpdateMonkey.prototype = {
                 'Accept': '*'
             };
         if(isUndef(data)) data = '';
+        var o = this;
 
         GM_xmlhttpRequest({
             method: method,
@@ -3159,13 +3161,13 @@ UpdateMonkey.prototype = {
             headers: headers,
             data: data,
             onload: function(responseDetails) {
-                updateEngine(1,1,responseDetails);
+                o.updateEngine(1,1,responseDetails);
             },
             onerror: function(responseDetails) {
-                updateEngine(1,0,responseDetails);
+                o.updateEngine(1,0,responseDetails);
             },
             onreadystatechange: function(responseDetails) {
-                updateEngine(0,responseDetails.readyState,responseDetails);
+                o.updateEngine(0,responseDetails.readyState,responseDetails);
             }
         });
     },
@@ -3174,10 +3176,10 @@ UpdateMonkey.prototype = {
         this.state = newState;
         switch(this.state) {
             case 0:
-                this.performRequest('http://github.com/api/v2/json/repos/show/martok/edgemonkey/tags');
+                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/tags');
                 break;
             case 1:
-                this.performRequest('http://github.com/api/v2/json/repos/show/martok/edgemonkey/branches');
+                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/branches');
                 break;
             case 2:
                 console.log('UpdateMonkey can haz cheezeburger?');
@@ -3194,14 +3196,15 @@ UpdateMonkey.prototype = {
         console.log('================================');
         console.log('UpdateMonkey eating bananas in state: ' + this.state);
         console.log('UpdateMonkey at stage ' + stage + ' with as little success as ' + success + ' politicians');
-        console.log('UpdateMonkey haz responz liek:');
-        console.dir(response);
+        //console.log('UpdateMonkey haz responz liek:');
+        //console.dir(response);
         console.log('--------------------------------');
         switch(this.state) {
             case 0:
                 if(1 == stage) {
                     console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                     if(success) {
+                        console.dir(JSON.parse(response.responseText));
                         this.doState(1);
                     }
                 }
@@ -3210,6 +3213,7 @@ UpdateMonkey.prototype = {
                 if(1 == stage) {
                     console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                     if(success) {
+                        console.dir(JSON.parse(response.responseText));
                         this.doState(2);
                     }
                 }
