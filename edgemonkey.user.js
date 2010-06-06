@@ -1080,6 +1080,34 @@ function SettingsStore() {
     this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true)
   ]);
 
+  this.AddCategory('UpdateMonkey', [
+    this.AddSetting( 'Automatisches Update aktivieren', 'update.enable', 'bool', false),
+    this.AddSetting( 'Art zu installierender Updates','update.update_type', [
+          ['Stable Releases (Release Tags)', 0],
+          ['Testing Releases (Master Branch)', 1],
+          ['Unstable Releases (Custom Branch)', 2]
+        ], 0),
+    this.AddSetting( 'Quelle für Updates','update.source_repo', [
+          ['BenBE', 'BenBE'],
+          ['Kha', 'Kha'],
+          ['martok', 'martok']
+        ], 'martok'),
+    this.AddSetting( 'Source Branch (Nur bei Unstable Releases)','update.source_branch', [
+          ['master', 'master']
+        ], 'master'),
+    this.AddSetting( 'Zeit zwischen Update-Checks','update.check_every', [
+          ['30 Minuten', 1800],
+          ['60 Minuten', 3600],
+          ['2 Stunden', 7200],
+          ['3 Stunden', 10800],
+          ['6 Stunden', 21600],
+          ['12 Stunden', 43200],
+          ['24 Stunden', 86400],
+          ['7 Tage', 86400*7],
+          ['14 Tage', 86400*14],
+        ], 86400)
+  ]);
+
   this.RestoreDefaults();
   this.LoadFromDisk();
   var co = document.cookie.split(';');
