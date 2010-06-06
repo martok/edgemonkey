@@ -3141,7 +3141,9 @@ Pagehacks.prototype = {
 }
 
 function UpdateMonkey() {
-    this.state = 0;
+    this.state = 'init';
+    this.defaultUser = 'martok';
+    this.defaultRepo = 'edgemonkey';
     this.network = [];
     this.branches = [];
     this.tags = [];
@@ -3174,18 +3176,26 @@ UpdateMonkey.prototype = {
             }
         });
     },
+    performGHAPIQueryRepo: function (method,user,repo) {
+        if(isUndef(method)) method = 'network';
+        if(isUndef(user)) user = this.defaultUser;
+        if(isUndef(repo)) repo = this.defaultRepo;
+        console.log('Retreiving ' + method + ' for repository ' + repo + ' of user ' + user);
+        this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/'+user+'/'+repo+'/'+method);
+    },
 
     doState: function(newState) {
+        console.log('UpdateMonkey is switching state from ' + this.state + ' to ' + newState);
         this.state = newState;
         switch(this.state) {
             case 0:
-                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/network');
+                this.performGHAPIQueryRepo('network');
                 break;
             case 1:
-                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/branches');
+                this.performGHAPIQueryRepo('branches');
                 break;
             case 2:
-                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/tags');
+                this.performGHAPIQueryRepo('tags');
                 break;
             case 3:
                 console.log('UpdateMonkey can haz cheezeburger?');
@@ -3199,12 +3209,11 @@ UpdateMonkey.prototype = {
     },
 
     updateEngine: function(stage, success, response) {
-        console.log('================================');
-        console.log('UpdateMonkey eating bananas in state: ' + this.state);
-        console.log('UpdateMonkey at stage ' + stage + ' with as little success as ' + success + ' politicians');
+        //console.log('================================');
+        console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
         //console.log('UpdateMonkey haz responz liek:');
         //console.dir(response);
-        console.log('--------------------------------');
+        //console.log('--------------------------------');
         switch(this.state) {
             case 0:
                 if(1 == stage) {
@@ -3251,7 +3260,7 @@ UpdateMonkey.prototype = {
             default:
                 console.log('Invalid UpdateMonkey state ... feed more or other bananas!');
         }
-        console.log('================================');
+        //console.log('================================');
     },
 
     checkUpdate: function() {
