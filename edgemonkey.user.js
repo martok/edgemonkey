@@ -3142,6 +3142,9 @@ Pagehacks.prototype = {
 
 function UpdateMonkey() {
     this.state = 0;
+    this.network = [];
+    this.branches = [];
+    this.tags = [];
 }
 UpdateMonkey.prototype.updateEngine = function(stage, success, response) {}; //Telling JS something it doesn't believe me without telling it directly
 UpdateMonkey.prototype = {
@@ -3176,12 +3179,15 @@ UpdateMonkey.prototype = {
         this.state = newState;
         switch(this.state) {
             case 0:
-                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/tags');
+                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/network');
                 break;
             case 1:
                 this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/branches');
                 break;
             case 2:
+                this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/martok/edgemonkey/tags');
+                break;
+            case 3:
                 console.log('UpdateMonkey can haz cheezeburger?');
                 break;
             default:
@@ -3204,7 +3210,12 @@ UpdateMonkey.prototype = {
                 if(1 == stage) {
                     console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                     if(success) {
-                        console.dir(JSON.parse(response.responseText));
+                        var tmp = JSON.parse(response.responseText);
+                        console.dir(tmp);
+                        if (isUndef(tmp.network)) {
+                            break;
+                        }
+                        this.network = tmp.network;
                         this.doState(1);
                     }
                 }
@@ -3213,8 +3224,27 @@ UpdateMonkey.prototype = {
                 if(1 == stage) {
                     console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                     if(success) {
-                        console.dir(JSON.parse(response.responseText));
+                        var tmp = JSON.parse(response.responseText);
+                        console.dir(tmp);
+                        if (isUndef(tmp.branches)) {
+                            break;
+                        }
+                        this.branches = tmp.branches;
                         this.doState(2);
+                    }
+                }
+                break;
+            case 2:
+                if(1 == stage) {
+                    console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                    if(success) {
+                        var tmp = JSON.parse(response.responseText);
+                        console.dir(tmp);
+                        if (isUndef(tmp.tags)) {
+                            break;
+                        }
+                        this.tags = tmp.tags;
+                        this.doState(3);
                     }
                 }
                 break;
