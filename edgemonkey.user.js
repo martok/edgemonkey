@@ -1044,6 +1044,8 @@ function SettingsStore() {
           ['Nur aktuelle', 1],
           ['Aktuelle [Original]', 2],
           ['Original [Aktuelle]', 3],
+          ['[Aktuelle] Original', 4],
+          ['[Original] Aktuelle', 5],
         ], 2)
   ]);
 
@@ -1749,7 +1751,7 @@ ShoutboxControls.prototype = {
             }
             return m;
           });
-        uncleanBBCode |= 0!=open.length;
+        uncleanBBCode |= !!open.length;
       }
 
       //Search for improperly started tags ...
@@ -3069,13 +3071,18 @@ Pagehacks.prototype = {
     }
   },
   AddLinkSIDs: function () {
-    var links = EM.Buttons.mainTable.getElementsByTagName('a');
+    var lk = EM.Buttons.mainTable.getElementsByTagName('a');
+    //copy dynamic list to static array
+    var links = [];
+    for (var i=0; i<lk.length; i++) {
+      links.push(lk[i]);
+    }
     for (var i=0; i<links.length; i++) {
       var hr = links[i];
       if (hr.className=='postlink' &&
           /.*\.(delphi|c-sharp)-(forum|library)\.de|.*\.entwickler-ecke\.de/.test(hr.host) &&
           hr.host!=window.location.host &&
-          /^\/(view(topic|forum)\.php|(topic|forum)_.*\.html)/.test(hr.pathname)) {
+          /^\/(view(topic|forum)\.php|search\.php|(topic|forum)_.*\.html)/.test(hr.pathname)) {
         var oldsearch = hr.search;
         var prms = hr.search.substr(1).split('&');
         for (var j=0; j<prms.length;j++) {
@@ -3087,11 +3094,16 @@ Pagehacks.prototype = {
         hr.search='?'+prms.join('&');
         hr.title='EE-Interner Link (Session wird übernommen)';
         if(EM.Settings.GetValue('ui','betaFeatures') && EM.Settings.GetValue('ui','addsidSubdomain')) {
-          function makeLinkBtn(after, href) {
+          function makeLinkBtn(link, href, before) {
+            if(isUndef(before)) before = false;
             var ax = document.createElement('a');
             ax.className='gensmall';
             ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
-            after.parentNode.insertBefore(ax,after.nextSibling);
+            if(before) {
+              link.parentNode.insertBefore(ax,link);
+            } else {
+              link.parentNode.insertBefore(ax,link.nextSibling);
+            }
             ax.href = href;
             return ax;
           }
@@ -3099,40 +3111,47 @@ Pagehacks.prototype = {
           var here = window.location.host.match(/^(.*?)\./);
           here = here?here[1]:'www';
           var there = hr.host.replace(/^(.*?)\./,here+'.');
-          switch (EM.Settings.GetValue('ui','addsidSubdomain')) {
-            case '1': {
+          var text_samedomain = 'Auf gleicher Subdomain bleiben';
+          var text_samesession = ' (Session wird übernommen)';
+          var settingVal = 1*EM.Settings.GetValue('ui','addsidSubdomain');
+          switch (settingVal) {
+            case 1: {
               hr.host = there;
-              hr.title = 'Auf gleicher Subdomain bleiben';
+              hr.title = text_samedomain;
               if (window.location.host==there) {
                 // only subdomain would change, but this link doesnt-> no change needed
                 hr.search = oldsearch;
               } else {
-                hr.title+= ' (Session wird übernommen)';
+                hr.title+= text_samesession;
               }
             }; break;
-            case '2': {
-              var ax = makeLinkBtn(hr, hr.href);
+            case 2:
+            case 5: {
+              var ax = makeLinkBtn(hr, hr.href, 5 == settingVal);
               ax.title = hr.title;
               hr.host = there;
-              hr.title = 'Auf gleicher Subdomain bleiben';
+              hr.title = text_samedomain;
               if (window.location.host==there) {
                 // only subdomain would change, but this link doesnt-> no change needed
                 hr.search = oldsearch;
               } else {
-                hr.title+= ' (Session wird übernommen)';
+                hr.title+= text_samesession;
               }
             }; break;
-            case '3': {
-              var ax = makeLinkBtn(hr, hr.href);
+            case 3:
+            case 4: {
+              var ax = makeLinkBtn(hr, hr.href, 4 == settingVal);
               ax.host = there;
-              ax.title = 'Auf gleicher Subdomain bleiben';
+              ax.title = text_samedomain;
               if (window.location.host==there) {
                 // only subdomain would change, but this link doesnt-> no change needed
                 ax.search = oldsearch;
               } else {
-                ax.title+= ' (Session wird übernommen)';
+                ax.title+= text_samesession;
               }
             } ; break;
+            default:
+              alert(settingVal + (typeof settingVal));
           }
         }
       }
@@ -3200,6 +3219,12 @@ function upgradeSettings(){
 
 function initEdgeApe() {
   //No upgrade from inside any popup
+  try {
+    //Work around Firefox Security by Obscurity
+    isEmpty(window.opener);
+  } catch(foo) {
+    window.opener = null;
+  }
   if(isEmpty(window.opener) && (window.parent==window) )
   {
     upgradeSettings();
