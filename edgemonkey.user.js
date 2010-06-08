@@ -3073,7 +3073,7 @@ Pagehacks.prototype = {
       if (hr.className=='postlink' &&
           /.*\.(delphi|c-sharp)-(forum|library)\.de|.*\.entwickler-ecke\.de/.test(hr.host) &&
           hr.host!=window.location.host &&
-          /^\/(view(topic|forum)\.php|(topic|forum)_.*\.html)/.test(hr.pathname)) {
+          /^\/(view(topic|forum)\.php|search\.php|(topic|forum)_.*\.html)/.test(hr.pathname)) {
         var oldsearch = hr.search;
         var prms = hr.search.substr(1).split('&');
         for (var j=0; j<prms.length;j++) {
