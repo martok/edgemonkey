@@ -3097,38 +3097,40 @@ Pagehacks.prototype = {
           var here = window.location.host.match(/^(.*?)\./);
           here = here?here[1]:'www';
           var there = hr.host.replace(/^(.*?)\./,here+'.');
+          var text_samedomain = 'Auf gleicher Subdomain bleiben';
+          var text_samesession = ' (Session wird übernommen)';
           switch (EM.Settings.GetValue('ui','addsidSubdomain')) {
             case '1': {
               hr.host = there;
-              hr.title = 'Auf gleicher Subdomain bleiben';
+              hr.title = text_samedomain;
               if (window.location.host==there) {
                 // only subdomain would change, but this link doesnt-> no change needed
                 hr.search = oldsearch;
               } else {
-                hr.title+= ' (Session wird übernommen)';
+                hr.title+= text_samesession;
               }
             }; break;
             case '2': {
               var ax = makeLinkBtn(hr, hr.href);
               ax.title = hr.title;
               hr.host = there;
-              hr.title = 'Auf gleicher Subdomain bleiben';
+              hr.title = text_samedomain;
               if (window.location.host==there) {
                 // only subdomain would change, but this link doesnt-> no change needed
                 hr.search = oldsearch;
               } else {
-                hr.title+= ' (Session wird übernommen)';
+                hr.title+= text_samesession;
               }
             }; break;
             case '3': {
               var ax = makeLinkBtn(hr, hr.href);
               ax.host = there;
-              ax.title = 'Auf gleicher Subdomain bleiben';
+              ax.title = text_samedomain;
               if (window.location.host==there) {
                 // only subdomain would change, but this link doesnt-> no change needed
                 ax.search = oldsearch;
               } else {
-                ax.title+= ' (Session wird übernommen)';
+                ax.title+= text_samesession;
               }
             } ; break;
           }
