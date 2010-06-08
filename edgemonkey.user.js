@@ -1044,6 +1044,8 @@ function SettingsStore() {
           ['Nur aktuelle', 1],
           ['Aktuelle [Original]', 2],
           ['Original [Aktuelle]', 3],
+          ['[Aktuelle] Original', 4],
+          ['[Original] Aktuelle', 5],
         ], 2)
   ]);
 
@@ -3085,11 +3087,17 @@ Pagehacks.prototype = {
         hr.search='?'+prms.join('&');
         hr.title='EE-Interner Link (Session wird übernommen)';
         if(EM.Settings.GetValue('ui','betaFeatures') && EM.Settings.GetValue('ui','addsidSubdomain')) {
-          function makeLinkBtn(after, href) {
+          function makeLinkBtn(after, href, before) {
+            if(isUndef(before)) before = false;
             var ax = document.createElement('a');
             ax.className='gensmall';
             ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
             after.parentNode.insertBefore(ax,after.nextSibling);
+            if(before) {
+//              document.window.setTimeout(1, function() {
+//                after.parentNode.insertBefore(after,ax.nextSibling);
+//              });
+            }
             ax.href = href;
             return ax;
           }
@@ -3099,8 +3107,9 @@ Pagehacks.prototype = {
           var there = hr.host.replace(/^(.*?)\./,here+'.');
           var text_samedomain = 'Auf gleicher Subdomain bleiben';
           var text_samesession = ' (Session wird übernommen)';
-          switch (EM.Settings.GetValue('ui','addsidSubdomain')) {
-            case '1': {
+          var settingVal = 1*EM.Settings.GetValue('ui','addsidSubdomain');
+          switch (settingVal) {
+            case 1: {
               hr.host = there;
               hr.title = text_samedomain;
               if (window.location.host==there) {
@@ -3110,8 +3119,9 @@ Pagehacks.prototype = {
                 hr.title+= text_samesession;
               }
             }; break;
-            case '2': {
-              var ax = makeLinkBtn(hr, hr.href);
+            case 2:
+            case 5: {
+              var ax = makeLinkBtn(hr, hr.href, 5 == settingVal);
               ax.title = hr.title;
               hr.host = there;
               hr.title = text_samedomain;
@@ -3122,8 +3132,9 @@ Pagehacks.prototype = {
                 hr.title+= text_samesession;
               }
             }; break;
-            case '3': {
-              var ax = makeLinkBtn(hr, hr.href);
+            case 3:
+            case 4: {
+              var ax = makeLinkBtn(hr, hr.href, 4 == settingVal);
               ax.host = there;
               ax.title = text_samedomain;
               if (window.location.host==there) {
@@ -3133,6 +3144,8 @@ Pagehacks.prototype = {
                 ax.title+= text_samesession;
               }
             } ; break;
+            default:
+              alert(settingVal + (typeof settingVal));
           }
         }
       }
