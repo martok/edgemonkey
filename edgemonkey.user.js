@@ -3096,6 +3096,7 @@ Pagehacks.prototype = {
             if(isUndef(before)) before = false;
             var ax = document.createElement('a');
             ax.className='gensmall';
+            ax.target=link.target;
             ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
             link.parentNode.insertBefore(ax,before?link:link.nextSibling);
             ax.href = href;
