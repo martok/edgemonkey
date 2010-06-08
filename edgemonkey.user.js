@@ -3069,7 +3069,12 @@ Pagehacks.prototype = {
     }
   },
   AddLinkSIDs: function () {
-    var links = EM.Buttons.mainTable.getElementsByTagName('a');
+    var lk = EM.Buttons.mainTable.getElementsByTagName('a');
+    //copy dynamic list to static array
+    var links = [];
+    for (var i=0; i<lk.length; i++) {
+      links.push(lk[i]);
+    }
     for (var i=0; i<links.length; i++) {
       var hr = links[i];
       if (hr.className=='postlink' &&
@@ -3087,16 +3092,15 @@ Pagehacks.prototype = {
         hr.search='?'+prms.join('&');
         hr.title='EE-Interner Link (Session wird übernommen)';
         if(EM.Settings.GetValue('ui','betaFeatures') && EM.Settings.GetValue('ui','addsidSubdomain')) {
-          function makeLinkBtn(after, href, before) {
+          function makeLinkBtn(link, href, before) {
             if(isUndef(before)) before = false;
             var ax = document.createElement('a');
             ax.className='gensmall';
             ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
-            after.parentNode.insertBefore(ax,after.nextSibling);
             if(before) {
-//              document.window.setTimeout(1, function() {
-//                after.parentNode.insertBefore(after,ax.nextSibling);
-//              });
+              link.parentNode.insertBefore(ax,link);
+            } else {
+              link.parentNode.insertBefore(ax,link.nextSibling);
             }
             ax.href = href;
             return ax;
