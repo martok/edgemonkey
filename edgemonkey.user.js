@@ -540,6 +540,83 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
 }
 
 
+function CacheMonkey(){
+    this.data = [];
+
+    function load(){
+        this.data = EM.Settings.load_field('cachemonkey',this.data);
+    }
+
+    function store(){
+        EM.Settings.store_field('cachemonkey',this.data);
+    }
+
+    function checkCurrent(value){
+        return (new Date().getTime()/1000) > (val.lr + val.et);
+    }
+}
+
+CacheMonkey.prototype = {
+    clear: function(name) {
+        this.data[name] = [];
+        this.store();
+    },
+
+    clearAll: function() {
+        this.data = [];
+        this.store();
+    },
+
+    get: function(name, key) {
+        var cacheData = this.data[name];
+        if(isUndef(cacheData)) {
+            return {
+                lastRefresh:null;
+                expireTimeout:0;
+                current:false;
+                data:null;
+                };
+        }
+        var val = cacheData[key];
+        if(isUndef(val)) {
+            return {
+                lastRefresh:null;
+                expireTimeout:0;
+                current:false;
+                data:null;
+                };
+        }
+        return {
+            lastRefresh:val.lr;
+            expireTimeout:val.et;
+            current:this.checkCurrent(val);
+            data:val.data;
+            };
+    },
+
+    put: function(name, key, value, timeout) {
+        if(isUndef(timeout)) timeout=86400;
+        var cacheData = this.data[name];
+        if(isUndef(cacheData)) {
+            cacheData = [];
+        }
+        var val = cacheData[key];
+        if(isUndef(val)) {
+            val = {
+                lr:new Data().getTime()/1000;
+                et:timeout;
+                data:null;
+                };
+        }
+        val.lr = new Data().getTime()/1000;
+        val.et = timeout;
+        val.data = value;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    }
+};
+
 function SettingsGenerator(table, doc)
 {
   this.tbl = table;
