@@ -571,46 +571,57 @@ CacheMonkey.prototype = {
         var cacheData = this.data[name];
         if(isUndef(cacheData)) {
             return {
-                lastRefresh:null;
-                expireTimeout:0;
-                current:false;
-                data:null;
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
                 };
         }
         var val = cacheData[key];
         if(isUndef(val)) {
             return {
-                lastRefresh:null;
-                expireTimeout:0;
-                current:false;
-                data:null;
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
                 };
         }
         return {
-            lastRefresh:val.lr;
-            expireTimeout:val.et;
-            current:this.checkCurrent(val);
-            data:val.data;
+            lastRefresh:val.lr,
+            expireTimeout:val.et,
+            current:this.checkCurrent(val),
+            data:val.data
             };
     },
 
     put: function(name, key, value, timeout) {
-        if(isUndef(timeout)) timeout=86400;
         var cacheData = this.data[name];
         if(isUndef(cacheData)) {
             cacheData = [];
         }
         var val = cacheData[key];
         if(isUndef(val)) {
-            val = {
-                lr:new Data().getTime()/1000;
-                et:timeout;
-                data:null;
-                };
+            val = {lr:0, et:isUndef(timeout)?86400:timeout, data:null};
+        } else if(!isUndef(timeout)) {
+            val.et = timeout;
         }
         val.lr = new Data().getTime()/1000;
-        val.et = timeout;
         val.data = value;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    touch: function(name, key) {
+        var cacheData = this.data[name];
+        if(isUndef(cacheData)) {
+            cacheData = [];
+        }
+        var val = cacheData[key];
+        if(isUndef(val)) {
+            val = {lr:0, et:86400, data:null};
+        }
+        val.lr = new Data().getTime()/1000;
         cacheData[key] = val;
         this.data[name] = cacheData;
         this.store();
