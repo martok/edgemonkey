@@ -543,22 +543,22 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
 function CacheMonkey(){
     this.data = [];
 
-    function load(){
-        this.data = EM.Settings.load_field('cachemonkey',this.data);
-    }
-
-    function store(){
-        EM.Settings.store_field('cachemonkey',this.data);
-    }
-
-    function checkCurrent(value){
-        return (new Date().getTime()/1000) > (val.lr + val.et);
-    }
-
     this.load();
 }
 
 CacheMonkey.prototype = {
+    load: function(){
+        this.data = EM.Settings.load_field('cachemonkey',this.data);
+    },
+
+    store: function(){
+        EM.Settings.store_field('cachemonkey',this.data);
+    },
+
+    checkCurrent: function(value){
+        return (new Date().getTime()/1000) > (val.lr + val.et);
+    },
+
     clear: function(name) {
         this.data[name] = [];
         this.store();
