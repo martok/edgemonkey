@@ -541,7 +541,7 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
 
 
 function CacheMonkey(){
-    this.data = [];
+    this.data = {};
 
     this.load();
 }
@@ -560,12 +560,12 @@ CacheMonkey.prototype = {
     },
 
     clear: function(name) {
-        this.data[name] = [];
+        this.data[name] = {};
         this.store();
     },
 
     clearAll: function() {
-        this.data = [];
+        this.data = {};
         this.store();
     },
 
@@ -599,7 +599,7 @@ CacheMonkey.prototype = {
     put: function(name, key, value, timeout) {
         var cacheData = this.data[name];
         if(isUndef(cacheData)) {
-            cacheData = [];
+            cacheData = {};
         }
         var val = cacheData[key];
         if(isUndef(val)) {
