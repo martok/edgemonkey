@@ -3476,8 +3476,6 @@ function initEdgeApe() {
   if(isEmpty(window.opener) && (window.parent==window) )
   {
     upgradeSettings();
-
-    checkUpdate();
   }
 
   if (Location.match(/shoutbox_view.php/)) {
@@ -3496,6 +3494,11 @@ function initEdgeApe() {
     EM.Shouts = new ShoutboxControls();
 
     EM.Cache = new CacheMonkey();
+  }
+
+  if(isEmpty(window.opener) && (window.parent==window) )
+  {
+    checkUpdate();
   }
 }
 
