@@ -554,6 +554,8 @@ function CacheMonkey(){
     function checkCurrent(value){
         return (new Date().getTime()/1000) > (val.lr + val.et);
     }
+
+    this.load();
 }
 
 CacheMonkey.prototype = {
@@ -3329,6 +3331,8 @@ function initEdgeApe() {
     }
     EM.Pagehacks = new Pagehacks();
     EM.Shouts = new ShoutboxControls();
+
+    EM.Cache = new CacheMonkey();
   }
 }
 
@@ -3350,6 +3354,7 @@ if (SOP_ok && !isEmpty(unsafeWindow.parent.EM)) {
   EM.User = new UserManager();
   unsafeWindow.EM = EM;
 }
+
 Ajax = new AJAXObject();
 Location = window.location.href;
 
