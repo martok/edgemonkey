@@ -541,32 +541,53 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
 
 
 function CacheMonkey(){
-    this.data = [];
-
-    function load(){
-        this.data = EM.Settings.load_field('cachemonkey',this.data);
-    }
-
-    function store(){
-        EM.Settings.store_field('cachemonkey',this.data);
-    }
-
-    function checkCurrent(value){
-        return (new Date().getTime()/1000) > (val.lr + val.et);
-    }
+    this.data = {};
 
     this.load();
 }
 
 CacheMonkey.prototype = {
+    load: function(){
+        this.data = EM.Settings.load_field('cachemonkey',this.data);
+    },
+
+    store: function(){
+        EM.Settings.store_field('cachemonkey',this.data);
+    },
+
+    checkCurrent: function(value){
+        return (new Date().getTime()/1000) > (value.lr + value.et);
+    },
+
     clear: function(name) {
-        this.data[name] = [];
+        this.data[name] = {};
         this.store();
     },
 
     clearAll: function() {
-        this.data = [];
+        this.data = {};
         this.store();
+    },
+
+    clean: function() {
+        var cacheData = this.data[name];
+        if(isUndef(cacheData)) {
+            return;
+        }
+        for(var key in cacheData) {
+            var value = this.get(name, key);
+            if(!value.current && (new Date().getTime()/1000) > (value.lr + 5 * value.et)) {
+                delete cacheData[key];
+            }
+        }
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    cleanAll: function(name) {
+        for(var name in this.data) {
+            this.clean(name);
+        }
     },
 
     get: function(name, key) {
@@ -599,7 +620,7 @@ CacheMonkey.prototype = {
     put: function(name, key, value, timeout) {
         var cacheData = this.data[name];
         if(isUndef(cacheData)) {
-            cacheData = [];
+            cacheData = {};
         }
         var val = cacheData[key];
         if(isUndef(val)) {
