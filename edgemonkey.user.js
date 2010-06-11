@@ -569,6 +569,27 @@ CacheMonkey.prototype = {
         this.store();
     },
 
+    clean: function() {
+        var cacheData = this.data[name];
+        if(isUndef(cacheData)) {
+            return;
+        }
+        for(var key in cacheData) {
+            var value = this.get(name, key);
+            if(!value.current) {
+                delete cacheData[key];
+            }
+        }
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    cleanAll: function(name) {
+        for(var name in this.data) {
+            this.clean(name);
+        }
+    },
+
     get: function(name, key) {
         var cacheData = this.data[name];
         if(isUndef(cacheData)) {
