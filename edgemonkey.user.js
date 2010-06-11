@@ -556,7 +556,7 @@ CacheMonkey.prototype = {
     },
 
     checkCurrent: function(value){
-        return (new Date().getTime()/1000) > (val.lr + val.et);
+        return (new Date().getTime()/1000) > (value.lr + value.et);
     },
 
     clear: function(name) {
@@ -576,7 +576,7 @@ CacheMonkey.prototype = {
         }
         for(var key in cacheData) {
             var value = this.get(name, key);
-            if(!value.current) {
+            if(!value.current && (new Date().getTime()/1000) > (value.lr + 5 * value.et)) {
                 delete cacheData[key];
             }
         }
