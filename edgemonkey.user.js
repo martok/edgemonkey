@@ -2393,6 +2393,8 @@ Pagehacks.prototype = {
       var row = entries[i];
       var cols = queryXPathNodeSet(row, './td');
 
+      if (cols.length<2 && cols.length && cols[0].className=='catHead') // looks like single post mode
+        break;                                                          // TODO: switch processing mode
       var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
       if (isForum) {
         var puser_l = queryXPathNode(row,"./td[5]/a[2]");
