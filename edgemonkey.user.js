@@ -1162,13 +1162,13 @@ SettingsStore.prototype = {
           e = queryXPathNode(e,'./td[2]/div/*');
           var w = this.Window;
           if (s.events.onChange) {
-            e.addEventListener('change',function(e) { s.events.onChange(w,e); },true);
+            e.addEventListener('change',function(e) { s.events.onChange(e.target,w,e); },true);
           }
           if (s.events.onExit) {
-            e.addEventListener('blur',function(e) { s.events.onExit(w,e); },true);
+            e.addEventListener('blur',function(e) { s.events.onExit(e.target,w,e); },true);
           }
           if (s.events.onEnter) {
-            e.addEventListener('focus',function(e) { s.events.onEnter(w,e); },true);
+            e.addEventListener('focus',function(e) { s.events.onEnter(e.target,w,e); },true);
           }
         }, this);
       }, this);
