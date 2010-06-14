@@ -626,14 +626,17 @@ SettingsGenerator.prototype = {
   createArrayInput: function (name, arr) {
     return '<textarea name="'+name+'">'+arr.map(function(e) {return new String(e).escapeHTML(3)}).join("\n")+'</textarea>';
   },
+  getControl: function(name) {
+    return this.Document.getElementsByName(name)[0];
+  },
   getBool: function(name) {
-    return this.Document.getElementsByName(name)[0].checked;
+    return this.getControl(name).checked;
   },
   getValue: function(name) {
-    return this.Document.getElementsByName(name)[0].value;
+    return this.getControl(name).value;
   },
   getArray: function(name) {
-    return this.Document.getElementsByName(name)[0].value.split("\n").map(function(e) { return e.trim() });
+    return this.getControl(name).value.split("\n").map(function(e) { return e.trim() });
   }
 }
 
@@ -1116,8 +1119,8 @@ SettingsStore.prototype = {
     this.Categories.push({title: title, settings: settings});
   },
 
-  AddSetting: function(description, key, type, standard) {
-    return {desc: description, key: key, type: type, standard: standard};
+  AddSetting: function(description, key, type, standard, events) {
+    return {desc: description, key: key, type: type, standard: standard, events:events||{}};
   },
   RestoreDefaults: function() {
     this.Values = new Object();
@@ -1155,7 +1158,18 @@ SettingsStore.prototype = {
             } else
               html='::('+s.type+')';
           };
-          addSettingsRow(s.desc, html);
+          var e = addSettingsRow(s.desc, html);
+          e = queryXPathNode(e,'./td[2]/div/*');
+          var w = this.Window;
+          if (s.events.onChange) {
+            e.addEventListener('change',function(e) { s.events.onChange(w,e); },true);
+          }
+          if (s.events.onExit) {
+            e.addEventListener('blur',function(e) { s.events.onExit(w,e); },true);
+          }
+          if (s.events.onEnter) {
+            e.addEventListener('focus',function(e) { s.events.onEnter(w,e); },true);
+          }
         }, this);
       }, this);
     }
@@ -1240,6 +1254,14 @@ SettingsStore.prototype = {
       addEvent(i[1], 'click', this.ev_ClearUIDCache);
     }
     this.Window.Body.appendChild(tbl);
+  },
+
+  getControl: function (name) {
+    if (this.Window && !this.Window.Window.closed) {
+      var nm = name.replace('.','_');
+      this.Window.OptionsGenerator.getControl(nm);
+    }
+    return null;
   }
 }
 
