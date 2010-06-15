@@ -556,7 +556,7 @@ CacheMonkey.prototype = {
     },
 
     checkCurrent: function(value){
-        return (new Date().getTime()/1000) > (value.lr + value.et);
+        return (new Date().getTime()/1000) < (value.lr + value.et);
     },
 
     clear: function(name) {
