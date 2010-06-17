@@ -2363,6 +2363,8 @@ Pagehacks.prototype = {
         Ajax.AsyncRequest('posting.php?mode=markanswered&t='+topic+'&p='+p[2],undefined,null,
       	  function(content) {
             img.src=template+'folder_answered.gif';
+    	    var link=document.getElementById('answerLink'+topic);
+	        if(link) link.parentNode.removeChild(link);
         });
       });
   },
