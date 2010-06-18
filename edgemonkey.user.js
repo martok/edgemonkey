@@ -3319,46 +3319,99 @@ Pagehacks.prototype = {
 
 function UpdateMonkey() {
     this.state = 'init';
-    this.defaultUser = 'martok';
-    this.defaultRepo = 'edgemonkey';
     this.network = [];
     this.branches = [];
     this.tags = [];
+
+    this.stack = [];
+    this.running = false;
+
+    this.ghapi = {
+        parent: this,
+        defaultUser : 'martok',
+        defaultRepo : 'edgemonkey',
+
+        request: function(method, url, headers, data, cb, cbdata) {
+            if(isUndef(method)) method = 'GET';
+            if(isUndef(headers))
+                headers = {
+                    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+                    'Accept': '*'
+                };
+            if(isUndef(data)) data = '';
+            if(isUndef(cb)) cb = this.updateEngine;
+
+            GM_xmlhttpRequest({
+                method: method,
+                url: url,
+                headers: headers,
+                data: data,
+                onload: function(rd) {
+                    cb(1,1,rd,cbdata);
+                },
+                onerror: function(rd) {
+                    cb(1,0,rd,cbdata);
+                },
+                onreadystatechange: function(rd) {
+                    cb(0,rd.readyState,rd,cbdata);
+                }
+            });
+        },
+        queryRepo: function (method,user,repo,cb,cbdata) {
+            if(isUndef(method)) method = 'network';
+            if(isUndef(user)) user = this.defaultUser;
+            if(isUndef(repo)) repo = this.defaultRepo;
+            console.log('Retreiving ' + method + ' for repository ' + repo + ' of user ' + user);
+            this.request('GET', 'http://github.com/api/v2/json/repos/show/'+user+'/'+repo+'/'+method,cb,cbdata);
+        },
+        queryCommit: function (commit,user,repo,cb,cbdata) {
+            if(isUndef(commit)) commit = 'HEAD';
+            if(isUndef(user)) user = this.defaultUser;
+            if(isUndef(repo)) repo = this.defaultRepo;
+            console.log('Retreiving commit ' + commit + ' for repository ' + repo + ' of user ' + user);
+            this.request('GET', 'http://github.com/api/v2/json/commit/show/'+user+'/'+repo+'/'+commit,cb,cbdata);
+        }
+    };
 }
 UpdateMonkey.prototype.updateEngine = function(stage, success, response) {}; //Telling JS something it doesn't believe me without telling it directly
 UpdateMonkey.prototype = {
-    performRequest: function(method, url, headers, data) {
-        if(isUndef(method)) method = 'GET';
-        if(isUndef(headers))
-            headers = {
-                'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-                'Accept': '*'
+    actionPush: function(actionProc,checkProc,doneProc,data) {
+        var action = {
+            perform:actionProc,
+            check:checkProc,
+            done:doneProc,
+            data:data
             };
-        if(isUndef(data)) data = '';
-        var o = this;
-
-        GM_xmlhttpRequest({
-            method: method,
-            url: url,
-            headers: headers,
-            data: data,
-            onload: function(responseDetails) {
-                o.updateEngine(1,1,responseDetails);
-            },
-            onerror: function(responseDetails) {
-                o.updateEngine(1,0,responseDetails);
-            },
-            onreadystatechange: function(responseDetails) {
-                o.updateEngine(0,responseDetails.readyState,responseDetails);
-            }
-        });
+        this.stack.push(action);
+        this.actionPerform();
     },
-    performGHAPIQueryRepo: function (method,user,repo) {
-        if(isUndef(method)) method = 'network';
-        if(isUndef(user)) user = this.defaultUser;
-        if(isUndef(repo)) repo = this.defaultRepo;
-        console.log('Retreiving ' + method + ' for repository ' + repo + ' of user ' + user);
-        this.performRequest('GET', 'http://github.com/api/v2/json/repos/show/'+user+'/'+repo+'/'+method);
+    actionPop: function() {
+        if(!this.stack.Length){
+            return null;
+        }
+        return this.stack.shift();
+    },
+    actionPerform: function() {
+        if(this.running) {
+            return;
+        }
+        var action = this.actionPop();
+        if(isUndef(action)) {
+            console.log('UpdateMonkey can haz cheezeburger?');
+            return;
+        }
+        if(!action.check(action)) {
+            console.log('UpdateMonkey rescheduling ... feed more or other bananas!');
+            this.actionPerform();
+            this.stack.push(action);
+            return;
+        }
+        this.running = true;
+        action.perform(action);
+    },
+    actionDone:function() {
+        this.running = false;
+        actionPerform();
     },
 
     doState: function(newState) {
@@ -3366,16 +3419,15 @@ UpdateMonkey.prototype = {
         this.state = newState;
         switch(this.state) {
             case 0:
-                this.performGHAPIQueryRepo('network');
+                this.ghapi.queryRepo('network', null, null, this.updateEngine);
                 break;
             case 1:
-                this.performGHAPIQueryRepo('branches');
+                this.ghapi.queryRepo('branches', null, null, this.updateEngine);
                 break;
             case 2:
-                this.performGHAPIQueryRepo('tags');
+                this.ghapi.queryRepo('tags', null, null, this.updateEngine);
                 break;
             case 3:
-                console.log('UpdateMonkey can haz cheezeburger?');
                 break;
             default:
                 //Invalid state!
@@ -3385,63 +3437,192 @@ UpdateMonkey.prototype = {
         }
     },
 
-    updateEngine: function(stage, success, response) {
-        //console.log('================================');
-        console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
-        //console.log('UpdateMonkey haz responz liek:');
-        //console.dir(response);
-        //console.log('--------------------------------');
-        switch(this.state) {
-            case 0:
-                if(1 == stage) {
-                    console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
-                    if(success) {
-                        var tmp = JSON.parse(response.responseText);
-                        console.dir(tmp);
-                        if (isUndef(tmp.network)) {
-                            break;
-                        }
-                        this.network = tmp.network;
-                        this.doState(1);
-                    }
-                }
-                break;
-            case 1:
-                if(1 == stage) {
-                    console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
-                    if(success) {
-                        var tmp = JSON.parse(response.responseText);
-                        console.dir(tmp);
-                        if (isUndef(tmp.branches)) {
-                            break;
-                        }
-                        this.branches = tmp.branches;
-                        this.doState(2);
-                    }
-                }
-                break;
-            case 2:
-                if(1 == stage) {
-                    console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
-                    if(success) {
-                        var tmp = JSON.parse(response.responseText);
-                        console.dir(tmp);
-                        if (isUndef(tmp.tags)) {
-                            break;
-                        }
-                        this.tags = tmp.tags;
-                        this.doState(3);
-                    }
-                }
-                break;
-            default:
-                console.log('Invalid UpdateMonkey state ... feed more or other bananas!');
-        }
-        //console.log('================================');
+    checkNetwork: function() {
+        var skynet = EM.Cache.get('updatemonkey.networks', 'main');
+        return skynet.current;
     },
 
+    failMonkeyMessage:function(msg) {
+        console.log('UpdateMonkey failed liek crazy: ' + msg);
+    },
+
+    updateCommit: function(user,repo,commit) {
+        this.actionPush(
+            function(a) {
+                var commitinfo = EM.Cache.get('updatemonkey.commits', a.data.commit);
+                if(!commitinfo.current) {
+                    this.ghapi.queryCommit(a.data.commit,a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    console.dir(tmp);
+                                    if (isUndef(tmp.commit)) {
+                                        this.failMonkeyMessage('Commit request returned no commit information!');
+                                        break;
+                                    }
+                                    EM.Cache.put('updatemonkey.commits', a.data.commit, tmp.commit);
+                                    this.commits[a.data.commit] = tmp.commit;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                }
+                this.commits[a.data.commit] = commitinfo.data;
+                a.done(a);
+            },
+            function(a) {
+                return true;
+            },
+            function(a) {
+                this.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo,
+                commit:commit
+            }
+        );
+    },
+
+    updateBranches: function(user,repo) {
+        this.actionPush(
+            function(a) {
+                var branches = EM.Cache.get('updatemonkey.branches', a.data.user+'#'+a.data.repo);
+                if(!branches.current) {
+                    this.ghapi.queryRepo('branches',a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    console.dir(tmp);
+                                    if (isUndef(tmp.branches)) {
+                                        this.failMonkeyMessage('Branch List request returned no branch information!');
+                                        break;
+                                    }
+                                    EM.Cache.put('updatemonkey.branches', a.data.user+'#'+a.data.repo, tmp.branches);
+                                    this.branches = tmp.branches;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                }
+                this.branches = branches.data;
+                a.done(a);
+            },
+            function(a) {
+                return this.checkNetwork();
+            },
+            function(a) {
+                for(var branch in this.branches) {
+                    this.updateCommit(a.data.user,a.data.repo,this.branches[branch]);
+                }
+                this.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo
+            }
+        );
+    },
+
+    updateTags: function(user,repo) {
+        this.actionPush(
+            function(a) {
+                var tags = EM.Cache.get('updatemonkey.tags', a.data.user+'#'+a.data.repo);
+                if(!tags.current) {
+                    this.ghapi.queryRepo('tags',a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    console.dir(tmp);
+                                    if (isUndef(tmp.tags)) {
+                                        this.failMonkeyMessage('Tag List request returned no tag information!');
+                                        break;
+                                    }
+                                    EM.Cache.put('updatemonkey.tags', a.data.user+'#'+a.data.repo, tmp.tags);
+                                    this.tags = tmp.tags;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                }
+                this.tags = tags.data;
+                a.done(a);
+            },
+            function(a) {
+                return this.checkNetwork();
+            },
+            function(a) {
+                for(var tag in this.tags) {
+                    this.updateCommit(a.data.user,a.data.repo,this.tags[tag]);
+                }
+                this.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo
+            }
+        );
+    },
+
+    updateNetwork: function() {
+        this.actionPush(
+            function(a) {
+                var skynet = EM.Cache.get('updatemonkey.networks', 'main');
+                if(!skynet.current) {
+                    this.ghapi.queryRepo('network',null,null,
+                        function(stage,success,response) {
+                            console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    console.dir(tmp);
+                                    if (isUndef(tmp.network)) {
+                                        this.failMonkeyMessage('Network request returned no network information!');
+                                        break;
+                                    }
+                                    EM.Cache.put('updatemonkey.networks', 'main', tmp.network);
+                                    this.network = tmp.network;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                }
+                this.network = skynet.data;
+                a.done(a);
+            },
+            function(a) {
+                return true;
+            },
+            function(a) {
+                console.dir(this.network);
+                this.network.forEach(
+                    function(e) {
+                        this.updateBranches(e.owner,e.name);
+                        this.updateTags(e.owner,e.name);
+                    }
+                );
+                this.actionDone(a);
+            },
+            null
+        );
+    },
     checkUpdate: function() {
-        this.doState(0);
+        this.updateNetwork();
+        this.actionPush();
     }
 }
 
