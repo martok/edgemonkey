@@ -1034,7 +1034,13 @@ function SettingsStore() {
           ['Ja, fest', 2],
         ], 1),
     this.AddSetting( '"Meine offenen Fragen" um Inline-Markieren erweitern', 'pagehack.answeredLinks', 'bool', true),
-    this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true)
+    this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true),
+    this.AddSetting( 'Automatisch auf neue PNs pr&uuml;fen', 'pageghack.pnautocheck',[
+          ['Nein', 0],
+          ['5 Minuten', 5],
+          ['10 Minuten', 10],
+          ['15 Minuten', 15]
+        ], 0)
   ]);
   this.AddCategory('Entwickler', [
     this.AddSetting( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', 'ui.betaFeatures', 'bool', false),
@@ -2261,6 +2267,10 @@ function Pagehacks() {
   if(EM.Settings.GetValue('ui','addsid')) {
     this.AddLinkSIDs();
   }
+  if(EM.Settings.GetValue('pageghack','pnautocheck')) {
+    var min = EM.Settings.GetValue('pageghack','pnautocheck');
+    window.setInterval('EM.Pagehacks.checkPMAuto()', min * 60000);
+  }
 }
 
 Pagehacks.prototype = {
@@ -2279,6 +2289,18 @@ Pagehacks.prototype = {
             a[i].style.cssText+=' cursor:pointer';
             addEvent(a[i],'click',function() {div.Window.Close(); return false;});
           } else a[i].removeAttribute('target');
+        }
+      });
+  },
+
+  checkPMAuto: function() {
+    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,null,
+      function(html) {
+        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(html)) {
+          // no PNs, but nobody would want to know that
+        } else {
+          //do something (later)
+          //window.open('/privmsg.php?mode=newpm', '_phpbbprivmsg', 'HEIGHT=225,resizable=yes,WIDTH=400');
         }
       });
   },
