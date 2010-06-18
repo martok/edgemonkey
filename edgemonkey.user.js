@@ -3450,6 +3450,7 @@ UpdateMonkey.prototype = {
                             }
                         }
                     );
+                    return;
                 }
                 obj.commits[a.data.commit] = commitinfo.data;
                 a.done(a);
@@ -3494,6 +3495,7 @@ UpdateMonkey.prototype = {
                             }
                         }
                     );
+                    return;
                 }
                 obj.branches = branches.data;
                 a.done(a);
@@ -3540,6 +3542,7 @@ UpdateMonkey.prototype = {
                             }
                         }
                     );
+                    return;
                 }
                 obj.tags = tags.data;
                 a.done(a);
@@ -3586,6 +3589,7 @@ UpdateMonkey.prototype = {
                             }
                         }
                     );
+                    return;
                 }
                 obj.network = skynet.data;
                 a.done(a);
