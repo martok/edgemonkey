@@ -999,6 +999,7 @@ OverlayWindow.prototype = {
     if (this.evgmousedown) removeGlobalEvent('mousedown',this.evgmousedown,true);
 
     document.overlayWindows.remove(this);
+    if (this.OnClose) this.OnClose(this);
   },
   BringToFront: function() {
     return bringToFront(this.Outer);
@@ -1592,15 +1593,43 @@ Notifier.prototype = {
       this.fadeTimer = window.setTimeout('EM.Notifier.fade()', 10);
     }
   },
-  notify: function(icon,title,detail) {
+  notify: function(icon,title,detail,uniquename,replace) {
     if (typeof detail=='string') {
       var k=document.createElement('div');
       k.innerHTML=detail;
       detail=k;
     }
+    if (isUndef(uniquename)) {
+      uniquename=null;
+    } else {
+      uniquename='em_notification_'+uniquename;
+    }
+    if (isUndef(replace)) {
+      replace=false;
+    }
     detail.style.cssText='display:none';
     this.fadeIn();
-    var f = document.createElement('li');
+    var f;
+    if (uniquename) {
+      f = document.getElementById(uniquename);
+      if (replace) {
+        var g = f;
+        if (g) {
+          g.parentNode.removeChild(g);
+        }
+        f = document.createElement('li');
+        if(g) g.follow=f;
+      } else {
+        if (f)
+          return;
+        else
+          f = document.createElement('li');
+      }
+    } else {
+      f = document.createElement('li');
+      uniquename='em_notification_'+Math.floor(Math.random()*100000);
+    }
+    f.id=uniquename;
     f.style.cssText='float:left;display:inline;overflow:hidden;height:20px';
     f.innerHTML = '<a><img border="0" style="width: 19px; height: 18px;" src="'+icon+'" alt="'+title+'" class="navbar">'+title+'</a>';
     f.appendChild(detail);
@@ -1628,7 +1657,7 @@ Notifier.prototype = {
     }
   },
   popup: function(e) {
-    var a = e.lastElementChild.cloneNode(true);
+    var a = e.lastElementChild;
     var coords = new Point(e.getBoundingClientRect().left, e.getBoundingClientRect().bottom);
     coords.TranslateWindow();
     var w = new OverlayWindow(coords.x,coords.y,300,180,'','em_notificationpopup');
@@ -1640,11 +1669,17 @@ Notifier.prototype = {
     c.style.cssText='height:16px;width:16px;float:right;cursor:pointer';
     c.src=data.close;
     var t=this;
-    addEvent(c,'click',function() {t.remove(e); w.Close(); return false;});
+    addEvent(c,'click',function() {t.remove(e.id); w.Close(); return false;});
 
     w.ContentArea.appendChild(a);
+    w.OnClose = function(wi) {
+      var el=document.getElementById(e.id);
+      if (el && el.children.length==1) el.appendChild(wi.ContentArea.lastElementChild);
+    }
   },
   remove: function(e) {
+    if (typeof e=='string')
+      e=document.getElementById(e);
     this.List.removeChild(e);
     if (!this.List.children.length) {
       this.fadeOut();
@@ -2420,13 +2455,21 @@ Pagehacks.prototype = {
   },
 
   checkPMAuto: function() {
-    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,null,
-      function(html) {
-        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(html)) {
+    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,document.createElement('div'),
+      function(div) {
+        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(div.innerHTML)) {
           // no PNs, but nobody would want to know that
         } else {
-          //do something (later)
-          //window.open('/privmsg.php?mode=newpm', '_phpbbprivmsg', 'HEIGHT=225,resizable=yes,WIDTH=400');
+          var a=div.getElementsByTagName('a');
+          for(i=0;i<a.length;i++) {
+            if (a[i].href.match(/window\.close/)) {
+              a[i].parentNode.removeChild(a[i]);
+            } else a[i].removeAttribute('target');
+          }
+          div=queryXPathNode(div, './/table[@class=\'forumline\']');
+          div.className='';
+          EM.Notifier.notify('/graphics/Portal-PM.gif','PN eingetroffen',div,'pnarrived',true);
+          div.style.cssText='height:100%';
         }
       });
   },
