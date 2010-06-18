@@ -3370,7 +3370,7 @@ function UpdateMonkey() {
             if(isEmpty(user)) user = this.defaultUser;
             if(isEmpty(repo)) repo = this.defaultRepo;
             console.log('Retreiving commit ' + commit + ' for repository ' + repo + ' of user ' + user);
-            this.request('GET', 'http://github.com/api/v2/json/commit/show/'+user+'/'+repo+'/'+commit,null,null,cb,cbdata);
+            this.request('GET', 'http://github.com/api/v2/json/commits/show/'+user+'/'+repo+'/'+commit,null,null,cb,cbdata);
         }
     };
 }
