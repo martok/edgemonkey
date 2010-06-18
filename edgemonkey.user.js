@@ -262,7 +262,8 @@ var data = {
 
 function queryXPath(node,xpath){
     //I hate having to always type this crap ...
-    return unsafeWindow.document.evaluate(xpath, node, null, XPathResult.ANY_TYPE, null);
+    var docref = (node.body)?node:node.ownerDocument;
+    return docref.evaluate(xpath, node, null, XPathResult.ANY_TYPE, null);
 }
 
 function queryXPathNode(node, xpath) {
@@ -1265,6 +1266,7 @@ function ButtonBar() {
 
   this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
   //man könnte auch XPath nehmen... :P
+  this.navTable.style.cssText += "z-index: 1; position:relative;";
 
   var cont = this.navTable.getElementsByTagName('tbody')[0];
 
@@ -1371,7 +1373,58 @@ UserManager.prototype = {
       return unescape(m[1]);
     else
       return '';
+  },
+
+  helper_getHLStyleByUserLink: function (user_link, group) {
+    if(isUndef(group)) {
+      group='topic';
+    }
+
+    var postclass_me = ' emctpl' + EM.Settings.GetValue(group,'highlight_me');
+    var postclass_mod = ' emctpl' + EM.Settings.GetValue(group,'highlight_mod');
+    var postclass_stalk = ' emctpl' + EM.Settings.GetValue(group,'highlight_stalk');
+    var postclass_kill = ' emctpl' + 8;
+
+    var user_stalk = EM.Settings.GetValue(group,'user_stalk');
+    var user_killfile = EM.Settings.GetValue('topic','user_killfile');
+    var kftype = EM.Settings.GetValue('topic','killFileType');
+
+    var user_span = queryXPathNode(user_link,"./span");
+    var user_name = user_span.textContent;
+
+    var isSelf = user_name == EM.User.loggedOnUser;
+    var isMod = /color\:/.test(user_link.style.cssText);
+
+    var cssClassAdd = '';
+
+    if (kftype && user_killfile.some(
+        function (e){
+          return e.equals(user_name);
+        })) {
+      cssClassAdd += postclass_kill;
+    }
+
+    //First detect Moderators ...
+    if (postclass_mod && isMod) {
+        cssClassAdd += postclass_mod;
+    }
+
+    // and after this the followed\stalked users, to allow overriding the style properly
+    if (postclass_stalk && user_stalk.some(
+        function (e){
+          return e.equals(user_name);
+        })) {
+      cssClassAdd += postclass_stalk;
+    }
+
+    // at last the logged on user, to allow overriding the style properly
+    if (postclass_me && isSelf) {
+      cssClassAdd += postclass_me;
+    }
+
+    return cssClassAdd;
   }
+
 }
 
 
@@ -1796,16 +1849,8 @@ ShoutboxAnekdoter.prototype = {
 function ShoutboxWindow() {
   var trs = document.getElementsByTagName('tr');
 
-  var shoutclass_me = 'emctpl' + EM.Settings.GetValue('sb','highlight_me');
-  var shoutclass_mod = 'emctpl' + EM.Settings.GetValue('sb','highlight_mod');
-  var shoutclass_stalk = 'emctpl' + EM.Settings.GetValue('sb','highlight_stalk');
-
-  var user_stalk = EM.Settings.GetValue('sb','user_stalk');
-
   var anek_active = EM.Settings.GetValue('sb','anek_active');
   var pn_link = EM.Settings.GetValue('sb','pnlink_active');
-//  console.log('me: '+shoutclass_me);
-//  console.log('mod: '+shoutclass_mod);
 
   this.shouts = new Array();
   for (var i=0; i<trs.length; i++) {
@@ -1827,24 +1872,9 @@ function ShoutboxWindow() {
       }
     }
     div.className+='intbl';
-    //First detect Moderators ...
-    if (shoutclass_mod) {
-      if (a.style.cssText.match(/color\:/))
-        shout.className+=' ' + shoutclass_mod;
-    }
-    // and after this the followed\stalked users, to allow overriding the style properly
-    if (shoutclass_stalk) {
-      if (user_stalk.some(
-        function (e){
-          return e.equals(shout_user);
-        }))
-        shout.className+=' ' + shoutclass_stalk;
-    }
-    // at last the logged on user, to allow overriding the style properly
-    if (shoutclass_me) {
-      if (shout_user==EM.User.loggedOnUser)
-        shout.className+=' ' + shoutclass_me;
-    }
+
+    shout.className += EM.User.helper_getHLStyleByUserLink(a, 'sb');
+
     std.className = 'incell left';
     div.appendChild(std);
     var cnt = document.createElement('div');
@@ -2222,7 +2252,99 @@ Pagehacks.prototype = {
         }
       });
       document.overlayWindows.getWindowById('em_searchbox').Close();
-   },
+  },
+
+  TLColourize: function (tltable) {
+    var entries = queryXPathNodeSet(tltable,"./tbody/tr");
+
+    for(var i = 1; i < entries.length; i++) { //Skip entry 0 (table header)
+      var row = entries[i];
+      var cols = queryXPathNodeSet(row, './td');
+
+      var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
+      var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
+      var pcount = queryXPathNode(row,"./td[3]/div/span");
+
+      var t_cssClassAdd = EM.User.helper_getHLStyleByUserLink(tuser_l);
+      var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
+
+      var c_cssClassAdd = '';
+      if (pcount.textContent == 0) {
+          c_cssClassAdd += ' emctpl' + 1; //Red
+      } else if (pcount.textContent < 3) {
+          c_cssClassAdd += ' emctpl' + 2; //Orange
+      } else if (pcount.textContent < 10) {
+          c_cssClassAdd += ' emctpl' + 3; //Yellow
+      } else if (pcount.textContent < 40) {
+          c_cssClassAdd += ' emctpl' + 4; //Green
+      } else if (pcount.textContent < 100) {
+          c_cssClassAdd += ' emctpl' + 5; //Blue
+      } else if (pcount.textContent < 500) {
+          c_cssClassAdd += ' emctpl' + 6; //Magenta
+      } else {
+          c_cssClassAdd += ' emctpl' + 7; //Lila
+      }
+
+      //Now lets check against the blacklist :P
+      cols[0].className += t_cssClassAdd;
+      cols[1].className += t_cssClassAdd;
+      cols[2].className += c_cssClassAdd;
+      cols[3].className += p_cssClassAdd;
+
+      //Remove the DF Highlighting to ensure proper colors :P
+      var std_own = document.createElement('span');
+      std_own.innerHTML = /Highlight/.test(cols[0].className) ? 'B' : '-';
+      cols[0].className = cols[0].className.replace(/Highlight/, '');
+      cols[1].className = cols[1].className.replace(/Highlight/, '');
+      cols[2].className = cols[2].className.replace(/Highlight/, '');
+      cols[3].className = cols[3].className.replace(/Highlight/, '');
+
+      //We need to do this here, since we will change HTML later ...
+      var img = queryXPathNode(cols[0], './/img');
+
+      //Add "Close topic" link ...
+      var div = document.createElement('div');
+      div.className+='intbl';
+
+      var cnt = document.createElement('span');
+      cnt.className = 'incell left';
+      cnt.innerHTML = cols[0].innerHTML;
+      cols[0].innerHTML = '';
+
+      //Fix for a bug in TUFKAPL source
+      cnt.id = cols[0].id;
+      cols[0].id = '';
+
+      var std = document.createElement('span');
+      std.className = 'gensmall incell right';
+
+      var isSelf = queryXPathNode(tuser_l, './span').textContent == EM.User.loggedOnUser;
+
+      if(img && isSelf && !img.src.match(/answered/) && !img.src.match(/lock/)) {
+        var topicid = img.id.match(/^folderFor(\d+)$/);
+        var std_a = document.createElement('a');
+        std_a.innerHTML = '&#x2714;';
+        std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
+        std_a.style.cssText+=' cursor:pointer;';
+        std.appendChild(std_a);
+      }
+
+      var std_br = document.createElement('br');
+      std.appendChild(std_br);
+      std.appendChild(std_own);
+
+      std.style.cssText+=' vertical-align:top;';
+      std.style.cssText+=' min-width:1.1em;';
+      std.style.cssText+=' min-height:23px;';
+
+      div.appendChild(cnt);
+      div.appendChild(std);
+
+      cols[0].appendChild(div);
+    }
+
+    return true;
+  },
 
   SmileyWin: function(target) {
     new SmileyWindow(target);
@@ -2393,13 +2515,20 @@ Pagehacks.prototype = {
   FixEmptyResults: function () {
     if (!EM.Buttons.mainTable) return;
     var sp = EM.Buttons.mainTable.getElementsByTagName('span');
+    var noresult = false;
     for (var i=0; i<sp.length; i++) {
       if (sp[i].firstChild.textContent.match( /Keine Beitr.*?ge entsprechen Deinen Kriterien./ )) {
         sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zur&uuml;ck zum Suchformular</a>';
         sp[i].innerHTML+='<br><br><a href="/index.php">Zur&uuml;ck zum Index</a>';
+        noresult = true;
         break;
       }
     }
+    if(noresult) return;
+
+    //TLColourize hack:
+    var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td/div/table[2]");
+    this.TLColourize(resTable);
   },
 
   FixPostingDialog: function () {
@@ -2644,11 +2773,6 @@ Pagehacks.prototype = {
     var tbl = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table[1]");
     var tr = queryXPathNodeSet(tbl, "tbody/tr");
 
-    var postclass_me = ' emctpl' + EM.Settings.GetValue('topic','highlight_me');
-    var postclass_mod = ' emctpl' + EM.Settings.GetValue('topic','highlight_mod');
-    var postclass_stalk = ' emctpl' + EM.Settings.GetValue('topic','highlight_stalk');
-
-    var user_stalk = EM.Settings.GetValue('topic','user_stalk');
     var user_killfile = EM.Settings.GetValue('topic','user_killfile');
     var kftype = EM.Settings.GetValue('topic','killFileType');
     for(var i = 1; i < tr.length - 1; i += 3) {
@@ -2660,10 +2784,7 @@ Pagehacks.prototype = {
       var idPost = queryXPathNode(tdProfile, "a[1]").name;
       var strUser = spanUser.textContent;
 
-      var isSelf = strUser == EM.User.loggedOnUser;
-      var isMod = /color\:/.test(linkUser.style.cssText);
-
-      var cssClassAdd = '';
+      var cssClassAdd = EM.User.helper_getHLStyleByUserLink(linkUser);
 
       if (kftype && user_killfile.some(
           function (e){
@@ -2686,27 +2807,6 @@ Pagehacks.prototype = {
           tdSpacer.className+=' gensmall';
           tdSpacer.innerHTML='<b>'+strUser+'</b>: Post ausgeblendet. <a href="#'+idPost+'" onclick="EM.Pagehacks.ShowHiddenPosts('+idPost+')">Anzeigen</a>';
         }
-      }
-
-      //First detect Moderators ...
-      if (postclass_mod) {
-        if (isMod)
-          cssClassAdd += postclass_mod;
-      }
-
-      // and after this the followed\stalked users, to allow overriding the style properly
-      if (postclass_stalk) {
-        if (user_stalk.some(
-          function (e){
-            return e.equals(strUser);
-          }))
-          cssClassAdd += postclass_stalk;
-      }
-
-      // at last the logged on user, to allow overriding the style properly
-      if (postclass_me) {
-        if (isSelf)
-          cssClassAdd += postclass_me;
       }
 
       //Now lets check against the blacklist :P
