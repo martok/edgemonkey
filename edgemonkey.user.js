@@ -325,12 +325,12 @@ function isUndef(what)
 
 function isEmpty(what)
 {
-  return isUndef(what) || null==what;
+  return isUndef(what) || (null==what);
 }
 
 function isHTMLElement(what)
 {
-  return !isUndef(what) &&
+  return !isEmpty(what) &&
    ((what instanceof HTMLElement) || (what.tagName));
 }
 
