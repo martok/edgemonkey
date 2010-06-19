@@ -1599,36 +1599,26 @@ Notifier.prototype = {
       k.innerHTML=detail;
       detail=k;
     }
-    if (isUndef(uniquename)) {
-      uniquename=null;
-    } else {
-      uniquename='em_notification_'+uniquename;
-    }
     if (isUndef(replace)) {
       replace=false;
     }
+    if (isUndef(uniquename)) {
+      uniquename=Math.floor(Math.random()*1E6);
+    }
+    uniquename='em_notification_'+uniquename;
+
     detail.style.cssText='display:none';
     this.fadeIn();
-    var f;
-    if (uniquename) {
-      f = document.getElementById(uniquename);
+
+    var f = document.getElementById(uniquename);
+    if (f) {
       if (replace) {
-        var g = f;
-        if (g) {
-          g.parentNode.removeChild(g);
-        }
-        f = document.createElement('li');
-        if(g) g.follow=f;
+        f.parentNode.removeChild(f);
       } else {
-        if (f)
-          return;
-        else
-          f = document.createElement('li');
+        return;
       }
-    } else {
-      f = document.createElement('li');
-      uniquename='em_notification_'+Math.floor(Math.random()*100000);
     }
+    f = document.createElement('li');
     f.id=uniquename;
     f.style.cssText='float:left;display:inline;overflow:hidden;height:20px';
     f.innerHTML = '<a><img border="0" style="width: 19px; height: 18px;" src="'+icon+'" alt="'+title+'" class="navbar">'+title+'</a>';
