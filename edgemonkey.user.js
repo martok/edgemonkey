@@ -3757,7 +3757,11 @@ UpdateMonkey.prototype = {
 				console.log(commit);
 
 				if(!isEmpty(commit)) {
-					alert(commit);
+					console.log(a.data.installed);
+					if(commit != a.data.installed) {
+						console.log('UpdateMonkey haz njuz!');
+						//EM.Settings.SetValue('update','installed',commit);
+					}
 				}
 
                 a.done(a);
