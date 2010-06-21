@@ -2467,6 +2467,8 @@ Pagehacks.prototype = {
       var row = entries[i];
       var cols = queryXPathNodeSet(row, './td');
 
+      if (cols.length<2 && cols.length && cols[0].className=='catHead') // looks like single post mode
+        break;                                                          // TODO: switch processing mode
       var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
       if (isForum) {
         var puser_l = queryXPathNode(row,"./td[5]/a[2]");
@@ -2540,6 +2542,7 @@ Pagehacks.prototype = {
         var topicid = img.id.match(/^folderFor(\d+)$/);
         var std_a = document.createElement('a');
         std_a.innerHTML = '&#x2714;';
+        std_a.id = 'answerLink'+topicid[1];
         std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
         std_a.style.cssText+=' cursor:pointer;';
         std.appendChild(std_a);
@@ -2701,6 +2704,8 @@ Pagehacks.prototype = {
         Ajax.AsyncRequest('posting.php?mode=markanswered&t='+topic+'&p='+p[2],undefined,null,
       	  function(content) {
             img.src=template+'folder_answered.gif';
+    	    var link=document.getElementById('answerLink'+topic);
+	        if(link) link.parentNode.removeChild(link);
         });
       });
   },
