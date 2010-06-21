@@ -1596,8 +1596,124 @@ UserManager.prototype = {
 
 }
 
+function ShoutboxReplacer(){
+	//suchString, Replacement, WortGrenzen, CaseSensitive
+	this.replacements = new Array(
+		"benbe", "BenBE",true,false,
+		"cih", "ich",true,false,
+		"mrg", ":mrgreen:",true,false,
+		/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/, ":mrgreen:",true,false,
+		"mrgreen", ":mrgreen:",true,false,
+		":+mrgreen:+", ":mrgreen:",true,false,
+		"FIF", "Fragen in's Forum :mahn:",true,false,
+		"SIWO", "Suche ist weiter oben :mahn:",true,false,
+		//Wall-Hack
+		":wall:", ":autsch:",true,false,
+		//Wikipedia Link support
+		/\[\[(\w\w):(\w+)\|(.*?)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]",true,false,
+		/\[\[(\w+)\|(.*?)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]",true,false,
+		/\[\[(\w\w):(\w+)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]",true,false,
+		/\[\[(\w+)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]",true,false,
+		/RFC\s?0*((?!0)\d+)/, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]",true,false,
+		//Implement /me-Tags ;-)
+		/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false,
+		//User-Tag-Verlinkung
+		"@GTA", "[user=\"GTA-Place\"]GTA-Place[/user]",true,false,
+		"@TUFKAPL", "[user=\"Christian S.\"]TUFKAPL[/user]",true,false,
+		"@Wolle", "[user=\"Wolle92\"]Wolle92[/user]",true,false
+		);
+	this.fixedReplacements=this.length();
+	this.allowedTextChars="\\w\\-=@\\(\\)\\[\\]\\{\\}äöüÄÖÜß";
+	this.REText="["+this.allowedTextChars+"]";
+	this.REnoText="[^"+this.allowedTextChars+"]";
+	this.load();
+}
+
+ShoutboxReplacer.prototype = {
+	regexp_toString: function (regE){
+		if(regE instanceof RegExp){
+			var s=regE.toString();
+			s=s.substr(1,s.lastIndexOf('/')-1);
+			return s;
+		}else return regE;
+	},
+	
+	do_replace: function (str){
+		var regExp,s,replacement;
+		for(var i=0;i<this.length();i++){
+			replacement=this.get(i);
+			if(replacement.length<4) continue;
+			s=this.regexp_toString(replacement[0]);
+			if(replacement[2]) s="\\b"+s+"(?=$|"+this.REnoText+")";
+			if(replacement[3]) regExp=new RegExp(s,"g");
+			else regExp=new RegExp(s,"gi");
+			str=str.replace(regExp,replacement[1]);
+		}
+		return str;
+	},
+	
+	getSearchString: function (index){
+		if(index<0 || index>=this.length()) return "";
+		return this.regexp_toString(this.replacements[index*4]);
+	},
+	
+	findSearchString: function (sSearch){
+		sSearch=this.regexp_toString(sSearch);
+		for(var i=0; i<this.length(); i++){
+			if(this.getSearchString(i)==sSearch) return i;
+		}
+		return -1;
+	},
+	
+	length: function (){
+		return Math.floor(this.replacements.length/4);
+	},
+	
+	get: function (index){
+		if(index<0 || index>=this.length()) return new Array();
+		index*=4;
+		return this.replacements.slice(index,index+4);
+	},
+	
+	add: function (sSearch,sReplace,useWordbounds,caseSensitive,doSave){
+		if(isUndef(sSearch) || isUndef(sReplace)) return;
+		var index=this.findSearchString(sSearch);
+		if(index<0){
+			//add new
+			index=this.length();
+		}else if(index<this.fixedReplacements) return; //Don't overwrite standart
+		index*=4;
+		this.replacements[index]=sSearch;
+		this.replacements[index+1]=sReplace;
+		this.replacements[index+2]=(useWordbounds!=false); //standart is true
+		this.replacements[index+3]=(caseSensitive==true); //standart is false
+		if(doSave!=false) this.save();
+	},
+	
+	remove: function (sSearch){
+		var index=this.findSearchString(sSearch);
+		if(index>=0){
+			this.replacements.splice(index*4,4);
+			this.save();
+		}
+	},
+	
+	load: function (){
+		var newEntries=EM.Settings.load_field('sb-replacements');
+		if(isUndef(newEntries)) return;
+		for(var i=0; i<newEntries.length-3; i+=4){
+			this.add(newEntries[i],newEntries[i+1],newEntries[i+2],newEntries[i+3],false);
+		}
+	},
+	
+	save: function (){
+		EM.Settings.store_field('sb-replacements',this.replacements);
+	}
+}
 
 function ShoutboxControls() {
+  this.replacer=new ShoutboxReplacer();
+  
   this.shout_obj = document.getElementById('sidebar_shoutbox');
 
   this.get_iframe = function () {
@@ -1769,18 +1885,9 @@ ShoutboxControls.prototype = {
 
   ev_sb_post: function (evt) {
     var s = EM.Shouts.form_text.value;
-    s = s.replace(/\bbenbe\b/gi, "BenBE");
-    s = s.replace(/\bcih\b/g, "ich");
-    s = s.replace(/\bnciht\b/g, "nicht");
-    s = s.replace(/\bmrg\b/gi, ":mrgreen:");
-    s = s.replace(/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/gi, ":mrgreen:");
-    s = s.replace(/\bmrgreen\b/gi, ":mrgreen:");
-    s = s.replace(/:+mrgreen:+/gi, ":mrgreen:");
-    s = s.replace(/\bFIF\b/g, "Fragen in's Forum :mahn:");
-    s = s.replace(/\bSIWO\b/g, "Suche ist weiter oben :mahn:");
-
-    //Wall-Hack
-    s = s.replace(/:wall:/g, ":autsch:");
+	
+	//replace some stuff
+    s=this.replacer.do_replace(s);
 
     //Check for references to the branch
     if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
@@ -1789,12 +1896,6 @@ ShoutboxControls.prototype = {
         return false;
       }
     }
-
-    //Wikipedia Link Support ...
-    s = s.replace(/\[\[(\w\w):(\w+)\|(.*?)\]\]/gi, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]");
-    s = s.replace(/\[\[(\w+)\|(.*?)\]\]/gi, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]");
-    s = s.replace(/\[\[(\w\w):(\w+)\]\]/gi, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]");
-    s = s.replace(/\[\[(\w+)\]\]/gi, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]");
 
     //Check for brackets in the shout (possible BBCodes
     if(/[\[\]]/i.test(s)) {
@@ -1846,11 +1947,6 @@ ShoutboxControls.prototype = {
       }
     }
 
-    //User-Tag-Verlinkung
-    s = s.replace(/^@(GTA):/g, "[user=\"GTA-Place\"]GTA-Place[/user]:");
-    s = s.replace(/^@(TUFKAPL):/g, "[user=\"Christian S.\"]TUFKAPL[/user]:");
-    s = s.replace(/^@(Wolle):/g, "[user=\"Wolle92\"]Wolle92[/user]:");
-
     //AutoTagging
     s = s.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
                   function($0,before,cmd,brace,free) {
@@ -1892,13 +1988,8 @@ ShoutboxControls.prototype = {
                     }
                     return $0;
                   });
+				  
     s = s.replace(/@@/g, '@');
-
-    s = s.replace(/\bRFC\s?0*((?!0)\d+)\b/g, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]");
-
-
-    //Implement /me-Tags (if present) ;-)
-    s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
 
     EM.Shouts.form_text.value = s;
 
