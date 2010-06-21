@@ -1335,8 +1335,8 @@ function ButtonBar() {
   }
 
   if(isUndef(this.mainTable) || null == this.mainTable) {
-    this.container = {appendChild:function(a){},innerHTML:''};
-    return;
+	this.container = {appendChild:function(a){},innerHTML:''};
+	return;
   }
 
   this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
@@ -2321,7 +2321,7 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
-  if(/\bviewtopic\.php|\btopic_/.test(Location)) {
+  if(/\bviewtopic\.php|\btopic_|posting\.php\?mode=topicreview/.test(Location)) {
     this.HighlightPosts();
   }
   if(EM.Settings.GetValue('pagehack','answeredLinks') &&
@@ -2329,8 +2329,10 @@ function Pagehacks() {
     this.AddAnsweredLinks();
   }
   if(/\bforum_(\S+_)?\d+\.html|viewforum\.php/.test(Location)) {
-    var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
-    this.TLColourize(resTable, "forum");
+	if(EM.Buttons.mainTable){
+		var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
+		this.TLColourize(resTable, "forum");
+	}
   }
   if(EM.Settings.GetValue('ui','addsid')) {
     this.AddLinkSIDs();
@@ -2711,6 +2713,7 @@ Pagehacks.prototype = {
   },
 
   AddAnsweredLinks: function(){
+    if (!EM.Buttons.mainTable) return;
     var table=EM.Buttons.mainTable.getElementsByClassName('forumline')[1];
     if(!table) return;
     var th=table.getElementsByTagName('th')[0];
@@ -2762,7 +2765,10 @@ Pagehacks.prototype = {
     //Get the Information Table
     sp = queryXPathNode(sp, "tbody/tr[2]/td/div/table");
     console.log(sp);
-
+    if(isUndef(t) || null == t) {
+      return;
+    }
+	
     var t = queryXPathNode(sp, "tbody/tr[1]/th/b");
     console.log(t);
     if(isUndef(t) || null == t) {
@@ -2822,7 +2828,7 @@ Pagehacks.prototype = {
   AddQuickProfileMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
     var linkText = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[3]/a[1]");
-
+	if(link==null) return;
     if('Meine Ecke' == linkText.textContent) {
       link.setAttribute('onclick','return EM.Pagehacks.QuickProfileMenu()');
     }
@@ -2830,16 +2836,19 @@ Pagehacks.prototype = {
 
   AddQuickLoginMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
+	if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
   },
 
   AddQuickSearchMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
+	if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
   },
 
   QuickProfileMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
+	if(link==null) return;
     var bcr = link.getBoundingClientRect();
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
@@ -3039,6 +3048,7 @@ Pagehacks.prototype = {
 
   HighlightPosts: function() {
     var tbl = queryXPathNode(unsafeWindow.document, "/html/body/table[2]/tbody/tr[2]/td/div/table[1]");
+	if(tbl==null) return;
     var tr = queryXPathNodeSet(tbl, "tbody/tr");
 
     var user_killfile = EM.Settings.GetValue('topic','user_killfile');
@@ -3048,11 +3058,11 @@ Pagehacks.prototype = {
       var tdPost = queryXPathNode(tr[i], "td[2]");
       var tdBottom = queryXPathNode(tr[i+1], "td[1]");
       var linkUser = queryXPathNode(tdProfile, "b/a[1]");
-      var spanUser = queryXPathNode(linkUser, "span[1]");
-      var idPost = queryXPathNode(tdProfile, "a[1]").name;
-      var strUser = spanUser.textContent;
+	  var spanUser = queryXPathNode(linkUser, "span[1]");
+	  var idPost = queryXPathNode(tdProfile, "a[1]").name;
 
-      var cssClassAdd = EM.User.helper_getHLStyleByUserLink(linkUser);
+      var strUser = spanUser.textContent;
+	  var cssClassAdd = EM.User.helper_getHLStyleByUserLink(linkUser);
 
       if (kftype && user_killfile.some(
           function (e){
@@ -3150,6 +3160,7 @@ Pagehacks.prototype = {
     }
   },
   AddLinkSIDs: function () {
+    if (!EM.Buttons.mainTable) return;
     var lk = EM.Buttons.mainTable.getElementsByTagName('a');
     //copy dynamic list to static array
     var links = [];
