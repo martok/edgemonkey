@@ -3733,7 +3733,8 @@ UpdateMonkey.prototype = {
 						var mostcurrent = new Date(0);
 		                for(var tag in obj.tags[repo]) {
 		                	c = obj.tags[repo][tag];
-		                	var rev_date = new Date().setISO8601(obj.commits[c].committed_date);
+		                	var rev_date = new Date();
+		                	rev_date.setISO8601(obj.commits[c].committed_date);
 		                    if(rev_date > mostcurrent) {
 		                    	commit = c;
 		                    	mostcurrent = rev_date;
