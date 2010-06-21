@@ -1278,10 +1278,10 @@ function SettingsStore() {
           ['Unstable Releases (Custom Branch)', 2]
         ], 0),
     this.AddSetting( 'Quelle für Updates','update.source_repo', [
-          ['BenBE', 'BenBE'],
-          ['Kha', 'Kha'],
-          ['martok', 'martok']
-        ], 'martok'),
+          ['BenBE', 'BenBE#edgemonkey'],
+          ['Kha', 'Kha#edgemonkey'],
+          ['martok', 'martok#edgemonkey']
+        ], 'martok#edgemonkey'),
     this.AddSetting( 'Source Branch (Nur bei Unstable Releases)','update.source_branch', [
           ['master', 'master']
         ], 'master'),
@@ -3406,6 +3406,15 @@ function UpdateMonkey() {
     this.stack = [];
     this.running = false;
 
+    this.settings = {
+		enabled: EM.Settings.GetValue('update','enable'),
+		installed: EM.Settings.GetValue('update','installed'),
+		updateType: EM.Settings.GetValue('update','update_type'),
+		updateSource: EM.Settings.GetValue('update','source_repo'),
+		updateBranch: EM.Settings.GetValue('update','source_branch'),
+		updateTimeout: EM.Settings.GetValue('update','check_every')
+	};
+
     this.ghapi = {
         parent: this,
         defaultUser : 'martok',
@@ -3568,7 +3577,7 @@ UpdateMonkey.prototype = {
                                         return;
                                     }
                                     EM.Cache.put('updatemonkey.branches', a.data.user+'#'+a.data.repo, tmp.branches);
-                                    obj.branches = tmp.branches;
+                                    obj.branches[a.data.user+'#'+a.data.repo] = tmp.branches;
                                     a.done(a);
                                 }
                             }
@@ -3576,15 +3585,16 @@ UpdateMonkey.prototype = {
                     );
                     return;
                 }
-                obj.branches = branches.data;
+                obj.branches[a.data.user+'#'+a.data.repo] = branches.data;
                 a.done(a);
             },
             function(a) {
                 return obj.checkNetwork();
             },
             function(a) {
-                for(var branch in obj.branches) {
-                    obj.updateCommit(a.data.user,a.data.repo,obj.branches[branch]);
+            	var branches = obj.branches[a.data.user+'#'+a.data.repo];
+                for(var branch in branches) {
+                    obj.updateCommit(a.data.user,a.data.repo,branches[branch]);
                 }
                 obj.actionDone(a);
             },
@@ -3615,7 +3625,7 @@ UpdateMonkey.prototype = {
                                         return;
                                     }
                                     EM.Cache.put('updatemonkey.tags', a.data.user+'#'+a.data.repo, tmp.tags);
-                                    obj.tags = tmp.tags;
+                                    obj.tags[a.data.user+'#'+a.data.repo] = tmp.tags;
                                     a.done(a);
                                 }
                             }
@@ -3623,15 +3633,16 @@ UpdateMonkey.prototype = {
                     );
                     return;
                 }
-                obj.tags = tags.data;
+                obj.tags[a.data.user+'#'+a.data.repo] = tags.data;
                 a.done(a);
             },
             function(a) {
                 return obj.checkNetwork();
             },
             function(a) {
-                for(var tag in obj.tags) {
-                    obj.updateCommit(a.data.user,a.data.repo,obj.tags[tag]);
+            	var tags = obj.tags[a.data.user+'#'+a.data.repo];
+                for(var tag in tags) {
+                    obj.updateCommit(a.data.user,a.data.repo,tags[tag]);
                 }
                 obj.actionDone(a);
             },
@@ -3689,8 +3700,113 @@ UpdateMonkey.prototype = {
             null
         );
     },
+
+    checkUpdateAvail: function() {
+        console.log('update');
+        var obj = this;
+        this.actionPush(
+            function(a) {
+//    this.settings = {
+//		enabled: EM.Settings.GetValue('update','enable'),
+//		installed: EM.Settings.GetValue('update','installed'),
+//		updateType: EM.Settings.GetValue('update','update_type'),
+//		updateSource: EM.Settings.GetValue('update','source_repo'),
+//		updateBranch: EM.Settings.GetValue('update','source_branch'),
+//		updateTimeout: EM.Settings.GetValue('update','check_every')
+//	};
+            	//Check the cache for the various commits we need ...
+				var mode = 1*a.data.updateType;
+				var repo = a.data.updateSource;
+				var branch = a.data.updateBranch;
+
+				if(!mode) {
+					repo = 'martok#edgemonkey';
+				}
+				if(2 > mode) {
+					branch = 'master';
+				}
+
+				var commit = null;
+				var c = null;
+				switch(mode) {
+					case 0:		//Only use tags
+						var mostcurrent = new Date(0);
+		                for(var tag in obj.tags[repo]) {
+		                	c = obj.tags[repo][tag];
+		                	var rev_date = new Date().setISO8601(obj.commits[c].committed_date);
+		                    if(rev_date > mostcurrent) {
+		                    	commit = c;
+		                    	mostcurrent = rev_date;
+		                    }
+		                }
+						break;
+					case 1:		//Use the master branch
+					case 2:		//Use a custom branch
+						c = obj.branches[repo][branch];
+	                    if(isEmpty(obj.commits[c])) {
+	                    	break;
+	                    }
+	                    commit = c;
+						break;
+					default:
+						obj.failMonkeyMessage('Unknown Update mode!');
+						return;
+				}
+
+				console.log(commit);
+
+				if(!isEmpty(commit)) {
+					alert(commit);
+				}
+
+                a.done(a);
+            },
+            function(a) {
+            	//Check the cache for the various commits we need ...
+				var mode = 1*a.data.updateType;
+				var repo = a.data.updateSource;
+				var branch = a.data.updateBranch;
+
+				if(!mode) {
+					repo = 'martok#edgemonkey';
+				}
+				if(2 > mode) {
+					branch = 'master';
+				}
+
+				switch(mode) {
+					case 0:		//Only use tags
+		                for(var tag in obj.tags[repo]) {
+		                    if(isEmpty(obj.commits[obj.tags[repo][tag]])) {
+		                    	return false;
+		                    }
+		                }
+						break;
+					case 1:		//Use the master branch
+					case 2:		//Use a custom branch
+	                    if(isEmpty(obj.commits[obj.branches[repo][branch]])) {
+	                    	return false;
+	                    }
+						break;
+					default:
+						obj.failMonkeyMessage('Unknown Update mode!');
+						return true;
+				}
+                return true;
+            },
+            function(a) {
+                obj.actionDone(a);
+            },
+            obj.settings
+        );
+    },
+
     checkUpdate: function() {
+    	if(!this.settings.enabled) {
+//    		return true;
+    	}
         this.updateNetwork();
+        this.checkUpdateAvail();
     }
 }
 
