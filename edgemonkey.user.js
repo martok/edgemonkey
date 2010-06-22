@@ -2256,8 +2256,9 @@ function Pagehacks() {
   if(EM.Settings.GetValue('ui','addsid')) {
     this.AddLinkSIDs();
   }
-  if(EM.Settings.GetValue('pageghack','pnautocheck')) {
+  if(1*EM.Settings.GetValue('pageghack','pnautocheck')) {
     var min = EM.Settings.GetValue('pageghack','pnautocheck');
+    if(1 > 1 * min) min = 1;
     window.setInterval('EM.Pagehacks.checkPMAuto()', min * 60000);
   }
 }
