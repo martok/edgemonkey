@@ -3957,6 +3957,13 @@ UpdateMonkey.prototype = {
 					console.log(a.data.installed);
 					if(commit != a.data.installed) {
 						console.log('UpdateMonkey haz njuz!');
+						EM.Notifier.notify(
+							'/graphics/Profil-Sidebar.gif',
+							'Neues EM-Update',
+							'Ein Update auf Commit ' + commit + ' steht zur Installation bereit!',
+							'updatemonkey_haz_update',
+							Notifier.REPLACE
+						);
 						//EM.Settings.SetValue('update','installed',commit);
 					}
 				}
