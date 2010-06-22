@@ -571,7 +571,7 @@ CacheMonkey.prototype = {
 
     clean: function() {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
+        if(isEmpty(cacheData)) {
             return;
         }
         for(var key in cacheData) {
@@ -592,7 +592,7 @@ CacheMonkey.prototype = {
 
     get: function(name, key) {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
+        if(isEmpty(cacheData)) {
             return {
                 lastRefresh:null,
                 expireTimeout:0,
@@ -601,7 +601,7 @@ CacheMonkey.prototype = {
                 };
         }
         var val = cacheData[key];
-        if(isUndef(val)) {
+        if(isEmpty(val)) {
             return {
                 lastRefresh:null,
                 expireTimeout:0,
@@ -619,13 +619,13 @@ CacheMonkey.prototype = {
 
     put: function(name, key, value, timeout) {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
+        if(isEmpty(cacheData)) {
             cacheData = {};
         }
         var val = cacheData[key];
-        if(isUndef(val)) {
+        if(isEmpty(val)) {
             val = {lr:0, et:isUndef(timeout)?86400:timeout, data:null};
-        } else if(!isUndef(timeout)) {
+        } else if(!isEmpty(timeout)) {
             val.et = timeout;
         }
         val.lr = new Date().getTime()/1000;
