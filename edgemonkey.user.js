@@ -3773,7 +3773,7 @@ UpdateMonkey.prototype = {
                                         obj.failMonkeyMessage('Branch List request returned no branch information!');
                                         return;
                                     }
-                                    EM.Cache.put('updatemonkey.branches', a.data.user+'#'+a.data.repo, tmp.branches);
+                                    EM.Cache.put('updatemonkey.branches', a.data.user+'#'+a.data.repo, tmp.branches, obj.settings.updateTimeout);
                                     obj.branches[a.data.user+'#'+a.data.repo] = tmp.branches;
                                     a.done(a);
                                 }
@@ -3869,7 +3869,7 @@ UpdateMonkey.prototype = {
                                         obj.failMonkeyMessage('Network request returned no network information!');
                                         return;
                                     }
-                                    EM.Cache.put('updatemonkey.networks', 'main', tmp.network);
+                                    EM.Cache.put('updatemonkey.networks', 'main', tmp.network, obj.settings.updateTimeout);
                                     obj.network = tmp.network;
                                     a.done(a);
                                 }
