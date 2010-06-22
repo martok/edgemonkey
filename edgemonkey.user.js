@@ -576,7 +576,7 @@ CacheMonkey.prototype = {
         }
         for(var key in cacheData) {
             var value = this.get(name, key);
-            if(!value.current && (new Date().getTime()/1000) > (value.lr + 5 * value.et)) {
+            if(!value.current && (new Date().getTime()/1000) > (value.lastRefresh + 5 * value.expireTimeout)) {
                 delete cacheData[key];
             }
         }
