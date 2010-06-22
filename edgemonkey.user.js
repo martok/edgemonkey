@@ -3985,6 +3985,9 @@ UpdateMonkey.prototype = {
 
 				switch(mode) {
 					case 0:		//Only use tags
+						if(isEmpty(obj.tags[repo])) {
+							return false;
+						}
 		                for(var tag in obj.tags[repo]) {
 		                    if(isEmpty(obj.commits[obj.tags[repo][tag]])) {
 		                    	return false;
@@ -3993,6 +3996,9 @@ UpdateMonkey.prototype = {
 						break;
 					case 1:		//Use the master branch
 					case 2:		//Use a custom branch
+						if(isEmpty(obj.branches[repo])) {
+							return false;
+						}
 	                    if(isEmpty(obj.commits[obj.branches[repo][branch]])) {
 	                    	return false;
 	                    }
