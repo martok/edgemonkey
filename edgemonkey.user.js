@@ -1139,13 +1139,47 @@ SettingsStore.prototype = {
   },
 
   FillDialog: function() {
-    var tbl = this.Window.Document.createElement('table');
-    tbl.className = 'forumline';
-    tbl.style.cssText = 'width:98%; align:center; margin:5px;';
-    var sg = new SettingsGenerator(tbl, this.Window.Document);
-    with (sg) {
-      this.Categories.forEach(function(c){
-        addHeadrow(c.title, 2);
+    var head = this.Window.Document.createElement('ul');
+    head.style.cssText='background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
+                       'height:30px;padding:0px;margin:0px;list-style-type: none;';
+    this.Window.Body.appendChild(head);
+    this.Categories.forEach(function(c){
+      var h=this.Window.Document.createElement('li');
+      h.innerHTML = c.title;
+      h.style.cssText= 'float:left;display:inline;overflow:hidden;height:20px; background-color:#EFEFF4;'+
+                    '-moz-border-radius:5px 5px 0px 0px;padding:4px;margin-left:5px;cursor:pointer';
+      head.appendChild(h);
+      var id = 'page'+Math.ceil(Math.random()*1E6);
+      var doc = this.Window.Document;
+      addEvent(h, 'click', function(el) {
+        var l=doc.getElementsByTagName('table');
+        for (var i=0; i<l.length-1;i++) {
+          l[i].style.display='none';
+        }
+        var l=el.parentNode.children
+        for (var i=0; i<l.length;i++) {
+          with (l[i].style) {
+            backgroundColor='#EFEFF4';
+            border='none';
+            padding='4px 4px 3px 4px';
+          }
+        }
+
+        doc.getElementById(id).style.display='';
+        with (el.style) {
+          backgroundColor='#BDD6EA';
+          border='1px solid black';
+          padding='3px';
+        }
+      });
+
+      var tbl = this.Window.Document.createElement('table');
+      this.Window.Body.appendChild(tbl);
+      tbl.id=id;
+      tbl.className = 'forumline';
+      tbl.style.cssText = 'width:98%; align:center; margin:5px;display:none';
+      var sg = new SettingsGenerator(tbl, this.Window.Document);
+      with (sg) {
         c.settings.forEach(function(s) {
           var html;
           var nm = s.key.replace('.','_');
@@ -1171,11 +1205,18 @@ SettingsStore.prototype = {
             e.addEventListener('focus',function(e) { s.events.onEnter(e.target,w,e); },true);
           }
         }, this);
-      }, this);
-    }
-    this.Window.OptionsTable = tbl;
-    this.Window.OptionsGenerator = sg;
-    this.Window.Body.appendChild(tbl);
+      }
+    }, this);
+    this.Window.Window.setTimeout(function() {
+      var ev = document.createEvent("HTMLEvents");
+      ev.initEvent("click", true, false);
+      head.firstChild.dispatchEvent(ev);
+    }, 1);
+
+    this.Window.ButtonBar = this.Window.Document.createElement('table');
+    this.Window.ButtonBar.className = 'forumline';
+    this.Window.ButtonBar.style.cssText = 'width:98%; align:center; margin:5px;';
+    this.Window.Body.appendChild(this.Window.ButtonBar);
   },
 
   ev_SaveDialog: function(evt) {
@@ -1234,7 +1275,8 @@ SettingsStore.prototype = {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
             'HEIGHT=400,WIDTH=500,resizable=yes,scrollbars=yes', this.Window);
     this.FillDialog();
-    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+    var sg = new SettingsGenerator(this.Window.ButtonBar, this.Window.Document);;
+    with (sg.addFootrow('',2)) {
       innerHTML = '&nbsp;';
       innerHTML += '<input type="button" class="mainoption" value="Speichern">';
       innerHTML += '&nbsp;&nbsp;';
@@ -1243,7 +1285,7 @@ SettingsStore.prototype = {
       var i = getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_SaveDialog);
     }
-    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+    with (sg.addFootrow('',2)) {
       innerHTML = '&nbsp;';
       innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
       innerHTML += '&nbsp;&nbsp;';
@@ -1253,7 +1295,6 @@ SettingsStore.prototype = {
       addEvent(i[0], 'click', this.ev_ClearAll);
       addEvent(i[1], 'click', this.ev_ClearUIDCache);
     }
-    this.Window.Body.appendChild(tbl);
   },
 
   getControl: function (name) {
