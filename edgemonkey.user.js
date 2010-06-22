@@ -3944,10 +3944,9 @@ UpdateMonkey.prototype = {
 						return;
 				}
 
-				console.log(commit);
-
 				if(!isEmpty(commit)) {
-					console.log(a.data.installed);
+					console.log('OLD: ' + a.data.installed);
+					console.log('NEW: ' + commit);
 					if(commit != a.data.installed) {
 						console.log('UpdateMonkey haz njuz!');
 						EM.Notifier.notify(
