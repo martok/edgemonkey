@@ -3647,14 +3647,12 @@ function UpdateMonkey() {
             if(isEmpty(method)) method = 'network';
             if(isEmpty(user)) user = this.defaultUser;
             if(isEmpty(repo)) repo = this.defaultRepo;
-            console.log('Retreiving ' + method + ' for repository ' + repo + ' of user ' + user);
             this.request('GET', 'http://github.com/api/v2/json/repos/show/'+user+'/'+repo+'/'+method,null,null,cb,cbdata);
         },
         queryCommit: function (commit,user,repo,cb,cbdata) {
             if(isEmpty(commit)) commit = 'HEAD';
             if(isEmpty(user)) user = this.defaultUser;
             if(isEmpty(repo)) repo = this.defaultRepo;
-            console.log('Retreiving commit ' + commit + ' for repository ' + repo + ' of user ' + user);
             this.request('GET', 'http://github.com/api/v2/json/commits/show/'+user+'/'+repo+'/'+commit,null,null,cb,cbdata);
         }
     };
@@ -3723,7 +3721,6 @@ UpdateMonkey.prototype = {
                                 console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                                 if(success) {
                                     var tmp = JSON.parse(response.responseText);
-                                    console.dir(tmp);
                                     if (isEmpty(tmp.commit)) {
                                         obj.failMonkeyMessage('Commit request returned no commit information!');
                                         return;
@@ -3768,7 +3765,6 @@ UpdateMonkey.prototype = {
                                 console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                                 if(success) {
                                     var tmp = JSON.parse(response.responseText);
-                                    console.dir(tmp);
                                     if (isEmpty(tmp.branches)) {
                                         obj.failMonkeyMessage('Branch List request returned no branch information!');
                                         return;
@@ -3816,7 +3812,6 @@ UpdateMonkey.prototype = {
                                 console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                                 if(success) {
                                     var tmp = JSON.parse(response.responseText);
-                                    console.dir(tmp);
                                     if (isEmpty(tmp.tags)) {
                                         obj.failMonkeyMessage('Tag List request returned no tag information!');
                                         return;
@@ -3864,7 +3859,6 @@ UpdateMonkey.prototype = {
                                 console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
                                 if(success) {
                                     var tmp = JSON.parse(response.responseText);
-                                    console.dir(tmp);
                                     if (isEmpty(tmp.network)) {
                                         obj.failMonkeyMessage('Network request returned no network information!');
                                         return;
@@ -3885,7 +3879,6 @@ UpdateMonkey.prototype = {
                 return true;
             },
             function(a) {
-                console.dir(obj.network);
                 obj.network.forEach(
                     function(e) {
                         obj.updateBranches(e.owner,e.name);
