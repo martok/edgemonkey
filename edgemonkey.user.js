@@ -642,7 +642,7 @@ CacheMonkey.prototype = {
     },
 
     checkCurrent: function(value){
-        return (new Date().getTime()/1000) < (value.lr + value.et);
+        return (new Date().getTime()/1000) < (1*value.lr + 1*value.et);
     },
 
     clear: function(name) {
@@ -657,12 +657,12 @@ CacheMonkey.prototype = {
 
     clean: function() {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
+        if(isEmpty(cacheData)) {
             return;
         }
         for(var key in cacheData) {
             var value = this.get(name, key);
-            if(!value.current && (new Date().getTime()/1000) > (value.lr + 5 * value.et)) {
+            if(!value.current && (new Date().getTime()/1000) > (value.lastRefresh + 5 * value.expireTimeout)) {
                 delete cacheData[key];
             }
         }
@@ -678,7 +678,7 @@ CacheMonkey.prototype = {
 
     get: function(name, key) {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
+        if(isEmpty(cacheData)) {
             return {
                 lastRefresh:null,
                 expireTimeout:0,
@@ -687,7 +687,7 @@ CacheMonkey.prototype = {
                 };
         }
         var val = cacheData[key];
-        if(isUndef(val)) {
+        if(isEmpty(val)) {
             return {
                 lastRefresh:null,
                 expireTimeout:0,
@@ -696,8 +696,8 @@ CacheMonkey.prototype = {
                 };
         }
         return {
-            lastRefresh:val.lr,
-            expireTimeout:val.et,
+            lastRefresh:1*val.lr,
+            expireTimeout:1*val.et,
             current:this.checkCurrent(val),
             data:val.data
             };
@@ -705,14 +705,14 @@ CacheMonkey.prototype = {
 
     put: function(name, key, value, timeout) {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
+        if(isEmpty(cacheData)) {
             cacheData = {};
         }
         var val = cacheData[key];
-        if(isUndef(val)) {
-            val = {lr:0, et:isUndef(timeout)?86400:timeout, data:null};
-        } else if(!isUndef(timeout)) {
-            val.et = timeout;
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        } else if(!isEmpty(timeout)) {
+            val.et = 1*timeout;
         }
         val.lr = new Date().getTime()/1000;
         val.data = value;
