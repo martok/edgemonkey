@@ -1139,24 +1139,25 @@ SettingsStore.prototype = {
   },
 
   FillDialog: function() {
-    var head = this.Window.Document.createElement('ul');
+    var head = this.Window.Document.createElement('table');
     head.style.cssText='background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
-                       'height:30px;padding:0px;margin:0px;list-style-type: none;';
+                       'height:30px;padding:0px;padding-bottom:1px;margin:0px;width:100%';
     this.Window.Body.appendChild(head);
+    head=head.insertRow(-1);
     this.Categories.forEach(function(c){
-      var h=this.Window.Document.createElement('li');
+      var h=head.insertCell(-1);
       h.innerHTML = c.title;
-      h.style.cssText= 'float:left;display:inline;overflow:hidden;height:20px; background-color:#EFEFF4;'+
-                    '-moz-border-radius:5px 5px 0px 0px;padding:4px;margin-left:5px;cursor:pointer';
-      head.appendChild(h);
+      h.className='gensmall';
+      h.style.cssText= 'white-space:nowrap;height:20px; background-color:#EFEFF4;'+
+                    '-moz-border-radius:5px 5px 0px 0px;padding:4px;cursor:pointer;text-align:center;-moz-user-select:none';
       var id = 'page'+Math.ceil(Math.random()*1E6);
       var doc = this.Window.Document;
       addEvent(h, 'click', function(el) {
         var l=doc.getElementsByTagName('table');
-        for (var i=0; i<l.length-1;i++) {
+        for (var i=1; i<l.length-1;i++) {
           l[i].style.display='none';
         }
-        var l=el.parentNode.children
+        var l=el.parentNode.children;
         for (var i=0; i<l.length;i++) {
           with (l[i].style) {
             backgroundColor='#EFEFF4';
@@ -1169,6 +1170,7 @@ SettingsStore.prototype = {
         with (el.style) {
           backgroundColor='#BDD6EA';
           border='1px solid black';
+          borderBottomWidth='0';
           padding='3px';
         }
       });
