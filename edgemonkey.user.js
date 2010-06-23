@@ -4048,7 +4048,7 @@ UpdateMonkey.prototype = {
 
     checkUpdate: function() {
     	if(!this.settings.enabled) {
-//    		return true;
+    		return true;
     	}
         this.updateNetwork();
         this.checkUpdateAvail();
@@ -4074,7 +4074,7 @@ UpdateMonkey.prototype = {
     	console.log('install:'+commit);
 		EM.Settings.SetValue('update','installed',commit);
 		Settings_SaveToDisk();
-		return false;
+		return true;
     }
 }
 
