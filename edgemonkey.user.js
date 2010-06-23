@@ -637,11 +637,11 @@ CacheMonkey.prototype = {
 
     touch: function(name, key) {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
-            cacheData = [];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
         }
         var val = cacheData[key];
-        if(isUndef(val)) {
+        if(isEmpty(val)) {
             val = {lr:0, et:86400, data:null};
         }
         val.lr = new Date().getTime()/1000;
