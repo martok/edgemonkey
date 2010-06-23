@@ -1127,17 +1127,30 @@ SettingsStore.prototype = {
   },
 
   FillDialog: function() {
+    var st = this.Window.Document.createElement('style');
+    st.type='text/css';
+    st.innerHTML =
+    '.em-tabbar{'+
+    '  background: url("../graphics/navBar.gif") repeat scroll 0 0 transparent;'+
+    '  height:30px;padding:0px;padding-bottom:1px;margin:0px;width:100%;border-bottom: 2px solid #197BB5'+
+    '}'+
+    '.em-tabbutton {'+
+    '  background-color:#EFEFF4;'+
+    '  height:20px;-moz-border-radius:5px 5px 0px 0px;padding:4px 4px 3px 4px;cursor:pointer;'+
+    '  white-space:nowrap;text-align:center;-moz-user-select:none;'+
+    '  font-size:10px;'+
+    '}';
+
+    this.Window.Body.appendChild(st);
     var head = this.Window.Document.createElement('table');
-    head.style.cssText='background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
-                       'height:30px;padding:0px;padding-bottom:1px;margin:0px;width:100%';
+    head.className='em-tabbar';
     this.Window.Body.appendChild(head);
     head=head.insertRow(-1);
     this.Categories.forEach(function(c){
+      if(head.children.length>=4) head=head.parentNode.insertRow(-1);
       var h=head.insertCell(-1);
       h.innerHTML = c.title;
-      h.className='gensmall';
-      h.style.cssText= 'white-space:nowrap;height:20px; background-color:#EFEFF4;'+
-                    '-moz-border-radius:5px 5px 0px 0px;padding:4px;cursor:pointer;text-align:center;-moz-user-select:none';
+      h.className='em-tabbutton';
       var id = 'page'+Math.ceil(Math.random()*1E6);
       var doc = this.Window.Document;
       addEvent(h, 'click', function(el) {
@@ -1145,13 +1158,9 @@ SettingsStore.prototype = {
         for (var i=1; i<l.length-1;i++) {
           l[i].style.display='none';
         }
-        var l=el.parentNode.children;
+        var l=queryXPathNodeSet(el, '//*[@class="em-tabbutton"]')
         for (var i=0; i<l.length;i++) {
-          with (l[i].style) {
-            backgroundColor='#EFEFF4';
-            border='none';
-            padding='4px 4px 3px 4px';
-          }
+          l[i].style.cssText='';
         }
 
         doc.getElementById(id).style.display='';
@@ -1167,7 +1176,7 @@ SettingsStore.prototype = {
       this.Window.Body.appendChild(tbl);
       tbl.id=id;
       tbl.className = 'forumline';
-      tbl.style.cssText = 'width:98%; align:center; margin:5px;display:none';
+      tbl.style.cssText = 'width:98%; margin:5px;display:none';
       var sg = new SettingsGenerator(tbl, this.Window.Document);
       with (sg) {
         c.settings.forEach(function(s) {
@@ -1197,6 +1206,14 @@ SettingsStore.prototype = {
         }, this);
       }
     }, this);
+      var ct=4,cs=Math.floor(4/head.children.length);
+      var l=head.children;
+      for (var i=0; i<l.length-1;i++) {
+        l[i].colSpan=cs;
+        ct-=cs;
+      }
+      l[l.length-1].colSpan=ct;
+
     this.Window.Window.setTimeout(function() {
       var ev = document.createEvent("HTMLEvents");
       ev.initEvent("click", true, false);
@@ -1205,7 +1222,7 @@ SettingsStore.prototype = {
 
     this.Window.ButtonBar = this.Window.Document.createElement('table');
     this.Window.ButtonBar.className = 'forumline';
-    this.Window.ButtonBar.style.cssText = 'width:98%; align:center; margin:5px;';
+    this.Window.ButtonBar.style.cssText = 'width:98%; margin:5px;';
     this.Window.Body.appendChild(this.Window.ButtonBar);
   },
 
