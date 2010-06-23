@@ -267,7 +267,15 @@ var data = {
     'w7xiZXJsYXNzZW4gU2llIGJlc3NlciB3ZWl0ZXJoaW4gZGVuIFVzZXJuIGltIEhlaXNlLUZvcnVtLjwvdHNwYW4%2BCiAgICAgIDx0c3BhbiBzb2RpcG9kaTpyb2xlPSJsaW5lIiB4PSIzODQuMCIgeT0iNjIyLjQyNTY2Ij4gPC90c3Bhbj4KICAgICAgPHRzcGFuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2MzQuOTI1Nj'+
     'YiPlNvbGx0ZW4gU2llIG51biwgZW50Z2VnZW4gZGllc2VyIFdhcm51bmcgdW5kIHRyb3R6IGRlbjwvdHNwYW4%2BCiAgICAgIDx0c3BhbiBzb2RpcG9kaTpyb2xlPSJsaW5lIiB4PSIzODQuMCIgeT0iNjQ3LjQyNTY2Ij5tw7ZnbGljaGVuIEdlZmFocmVuIHVuZCBGb2xnZW4sIGRpZXNlIGdldHJvbGx0ZTwvdHNwYW4%2BCiAgICAgIDx0c3'+
     'BhbiBzb2RpcG9kaTpyb2xlPSJsaW5lIiB4PSIzODQuMCIgeT0iNjU5LjkyNTY2Ij5JbnRlcm5ldGRpc2t1c3Npb24gZGVubm9jaCBiZXRyZXRlbiB3b2xsZW4sPC90c3Bhbj4KICAgICAgPHRzcGFuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2NzIuNDI1NjYiPnNvIGtsaWNrZW4gc2llPC90c3Bhbj4KICAgICAgPHRzcG'+
-    'FuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2ODQuOTI1NzIiPiA8L3RzcGFuPgogICAgPC90ZXh0Pg0KICA8L2c%2BDQo8L3N2Zz4%3D'
+    'FuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2ODQuOTI1NzIiPiA8L3RzcGFuPgogICAgPC90ZXh0Pg0KICA8L2c%2BDQo8L3N2Zz4%3D',
+  close:
+    'data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%10%00%00%00%10%08%06%00%00%00%1F%F3%FFa%00%00%00%04gAMA%00%00%AF%C87%05%8A%E9%00%00%00%19tEXtSoftware%00Adobe%20ImageReadyq%C9e%3C%00%00%02!IDAT8%CB%95%93%EBN%13Q%14%85%89%89%C9%89%CF%A0V%89%86%C8%'+
+    '91%80%C4%1BB%5B%06(%AD%0D%08%26%D0%FB%85%5E%A4%80%B4%A5%ED%A4M%A16%EA%0FM%7C%12%9F%0BD%C5%DE%B0%D2%99v%3A%D3%E5%AE%98J-%25%E1%C7N%CEd%CE%FA%F6%AC%B5%F7%0C%00%18%B8L%D5%D7B%D7%CE%3Ew_%103%3A*%DEW%EC%0Fr%D9%ED%8D%D7lNC%2F%A0-%CE%EC%A2%95%CEB%8B\'%7B%20u_%80%D'+
+    '7%03a46%B6%F0%EB%E5%CA%E7%EA%E2%D2%BD%7F%80%BFb%E4%DF%A1E%A5%25D47%B7%3B%10%D9%BB%C6%A9%3B%9A%D18%90%CB%A3%7D%3E6%5B%E3%E5%19%D3%95S%40*%CDZ%09Qk%ED%BE%01%3E~%82%96%CD%B5%01h%04B%5C%F6%F89u%87%B2%1D%03%E8%BD%EC%0F%E0x%FE%B9Z%16%E6%AEvY%D0b%09%A6%BE%8E%A9%9'+
+    'A%98%01%DE%7F%80%9AJ%A3%1E%0C%83%BAC%D9%8A%02%D9%BD%3F%E7%8A%C9B%E2Yvn%88%CD%C8%26k%84%D6%D5ft%87%EC%BC%05%F6%F2%24%CC%01%99%2Cd%8F%0F%959%B3Z%9E%9Ea%FD%A7p%1A%16%93%5C%5E%0DY%B2%E3%F6%01%0E7%20%A6Q%99%9D%D7JF%81%FD%7F%BF%07%209%3D%EDQ%014%0D%D8%9C%C0%8A%1'+
+    'D%D8I%92o%0B%0A%13S%FCB%80%E4ps%C9%E5%81%12%8E%00I%91%84)%20Fv(%40y%D5%8E%B2%DE%88%EFc%E3%FC%5C%40%CD%EE%E2%92%D3%0D%25%B4%0E%D0%18%25%87%0B%14%96Z%9C2h\'%8B%CB%40d%03%B5%17%CB(%3C%7C%8C%C3%A1a%DE%05%A0%CD%E2%D4%1DJ%F0%15uM%40%A2O%A7%B0%D4%E2%A4%81%15%9EL%B'+
+    '0%A3%F1Gj%D5d%06%82!%9CX%AC8%1A%19%C5%C1%ADA%DE%01%D0f%095%9B%03J%20%04i%D5%01%0AK-%3E%D3w%02%FB62%C6%BE%0E%DFW%7F%1A%05H%D6%05%FC%18%7D%80%FD%1B%3A%A1%CB%02m%96P%5DXB%C90%ADQX%3Di%1F%DE%1Db_%06%EF%A8g%C5%3D!%96%F4F%A1%F0t%92%F5%FB%99%0Et%B7%D9%FE%F5%9B%C2'+
+    '%85c%BCl%FD%06r%BB%A4%C7%DB%ED%BE%14%00%00%00%00IEND%AEB%60%82'
 }
 
 function queryXPath(node,xpath){
@@ -363,6 +371,10 @@ String.prototype.equals = function (what) {
 // FF 3.1+ has it native (JS 1.8.1)
 if (!String.prototype.trim) String.prototype.trim = function() {
   return this.replace(/^\s*/,'').replace(/\s*$/,'');
+};
+
+Math.sign = function(a) {
+  return a>0?1:(a<0?-1:0);
 };
 
 (function() {
@@ -612,6 +624,117 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
     document.body.removeEventListener(eventName, functionObject, c);
 }
 
+
+function CacheMonkey(){
+    this.data = {};
+
+    this.load();
+}
+
+CacheMonkey.prototype = {
+    load: function(){
+        this.data = EM.Settings.load_field('cachemonkey',this.data);
+    },
+
+    store: function(){
+        EM.Settings.store_field('cachemonkey',this.data);
+    },
+
+    checkCurrent: function(value){
+        return (new Date().getTime()/1000) < (1*value.lr + 1*value.et);
+    },
+
+    clear: function(name) {
+        this.data[name] = {};
+        this.store();
+    },
+
+    clearAll: function() {
+        this.data = {};
+        this.store();
+    },
+
+    clean: function() {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            return;
+        }
+        for(var key in cacheData) {
+            var value = this.get(name, key);
+            if(!value.current && (new Date().getTime()/1000) > (value.lastRefresh + 5 * value.expireTimeout)) {
+                delete cacheData[key];
+            }
+        }
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    cleanAll: function(name) {
+        for(var name in this.data) {
+            this.clean(name);
+        }
+    },
+
+    get: function(name, key) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            return {
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
+                };
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            return {
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
+                };
+        }
+        return {
+            lastRefresh:1*val.lr,
+            expireTimeout:1*val.et,
+            current:this.checkCurrent(val),
+            data:val.data
+            };
+    },
+
+    put: function(name, key, value, timeout) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        } else if(!isEmpty(timeout)) {
+            val.et = 1*timeout;
+        }
+        val.lr = new Date().getTime()/1000;
+        val.data = value;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    touch: function(name, key, timeout) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        }
+        val.lr = new Date().getTime()/1000;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    }
+};
 
 function SettingsGenerator(table, doc)
 {
@@ -1051,6 +1174,7 @@ OverlayWindow.prototype = {
     if (this.evgmousedown) removeGlobalEvent('mousedown',this.evgmousedown,true);
 
     document.overlayWindows.remove(this);
+    if (this.OnClose) this.OnClose(this);
   },
   BringToFront: function() {
     return bringToFront(this.Outer);
@@ -1098,7 +1222,13 @@ function SettingsStore() {
           ['Ja, fest', 2],
         ], 1),
     this.AddSetting( '"Meine offenen Fragen" um Inline-Markieren erweitern', 'pagehack.answeredLinks', 'bool', true),
-    this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true)
+    this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true),
+    this.AddSetting( 'Automatisch auf neue PNs pr&uuml;fen', 'pageghack.pnautocheck',[
+          ['Nein', 0],
+          ['5 Minuten', 5],
+          ['10 Minuten', 10],
+          ['15 Minuten', 15]
+        ], 0)
   ]);
   this.AddCategory('Entwickler', [
     this.AddSetting( 'Zus&auml;tzliche Funktionen f&uuml;r Beta-Tester', 'ui.betaFeatures', 'bool', false),
@@ -1144,6 +1274,34 @@ function SettingsStore() {
     this.AddSetting( 'Shouts von Moderatoren/Admins hervorheben', 'sb.highlight_mod', 'color', 0),
     this.AddSetting( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_stalk', 'list', []),
     this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true)
+  ]);
+
+  this.AddCategory('UpdateMonkey', [
+    this.AddSetting( 'Automatisches Update aktivieren', 'update.enable', 'bool', false),
+    this.AddSetting( 'Art zu installierender Updates','update.update_type', [
+          ['Stable Releases (Release Tags)', 0],
+          ['Testing Releases (Master Branch)', 1],
+          ['Unstable Releases (Custom Branch)', 2]
+        ], 0),
+    this.AddSetting( 'Quelle für Updates','update.source_repo', [
+          ['BenBE', 'BenBE#edgemonkey'],
+          ['Kha', 'Kha#edgemonkey'],
+          ['martok', 'martok#edgemonkey']
+        ], 'martok#edgemonkey'),
+    this.AddSetting( 'Source Branch (Nur bei Unstable Releases)','update.source_branch', [
+          ['master', 'master']
+        ], 'master'),
+    this.AddSetting( 'Zeit zwischen Update-Checks','update.check_every', [
+          ['30 Minuten', 1800],
+          ['60 Minuten', 3600],
+          ['2 Stunden', 7200],
+          ['3 Stunden', 10800],
+          ['6 Stunden', 21600],
+          ['12 Stunden', 43200],
+          ['24 Stunden', 86400],
+          ['7 Tage', 86400*7],
+          ['14 Tage', 86400*14],
+        ], 86400)
   ]);
 
   this.RestoreDefaults();
@@ -1661,6 +1819,160 @@ UserManager.prototype = {
 
 }
 
+function Notifier() {
+  this.Element = document.createElement('div');
+  this.Element.style.cssText = 'position:fixed;left:0;top:0;height:0px;right:0;opacity:0.9;overflow:hidden;'+
+                               'background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
+                               '-moz-user-select:none;z-index:999;cursor:default';
+  this.fadeTimer = null;
+  document.body.appendChild(this.Element);
+
+  this.Close = document.createElement('span');
+  this.Element.appendChild(this.Close);
+  this.Close.style.cssText='height:14px;width:14px;float:right;margin:8px 4px;cursor:pointer;background: url("chrome://global/skin/icons/close.png")';
+  this.Close.innerHTML='&nbsp;';
+  var t=this;
+  addEvent(t.Close, 'click', function() {
+    t.fadeOut();
+  });
+
+  this.List = document.createElement('ul');
+  this.Element.appendChild(this.List);
+  this.List.style.cssText='list-style-type: none;margin:0;padding:0';
+}
+
+Notifier.REPLACE = 1<<0;
+Notifier.POPUP   = 1<<1;
+
+Notifier.prototype = {
+  fadeIn: function() {
+    this.targetHeight=30;
+    this.fade();
+    this.List.style.visibility='visible';
+  },
+  fadeOut: function() {
+    this.List.style.visibility='hidden';
+    if(this.List.children.length) {
+      this.targetHeight=3;
+      var t=this;
+      t.fadeEvent = addEvent(t.Element, 'mouseover', function() {
+        t.fadeIn();
+        removeEvent(t.Element, 'mouseover',t.fadeEvent);
+      });
+    } else {
+      this.targetHeight=0;
+    }
+    this.fade();
+  },
+  fade: function() {
+    if(this.fadeTimer) {
+      window.clearTimeout(this.fadeTimer);
+      this.fadeTimer = null;
+    }
+    var h = parseInt(this.Element.style.height);
+    var step = 2;
+    if (Math.abs(h-this.targetHeight)<step) {
+      this.Element.style.height = this.targetHeight+'px';
+    } else {
+      this.Element.style.height = (h + Math.sign(this.targetHeight-h)*step)+'px';
+      this.fadeTimer = window.setTimeout('EM.Notifier.fade()', 10);
+    }
+  },
+  notify: function(icon,title,detail,uniquename,options) {
+    if (typeof detail=='string') {
+      var k=document.createElement('div');
+      k.innerHTML=detail;
+      detail=k;
+    }
+    if (isEmpty(options)) {
+      options=0;
+    }
+    if (isEmpty(uniquename)) {
+      uniquename=Math.floor(Math.random()*1E6);
+    }
+    uniquename='em_notification_'+uniquename;
+
+    detail.style.cssText='display:none';
+    this.fadeIn();
+
+    var f = document.getElementById(uniquename);
+    if (f) {
+      if (options & Notifier.REPLACE) {
+        f.parentNode.removeChild(f);
+      } else {
+        return;
+      }
+    }
+    f = document.createElement('li');
+    f.id=uniquename;
+    f.style.cssText='float:left;display:inline;overflow:hidden;height:20px; background-color:#EFEFF4;'+
+                    '-moz-border-radius:5px;padding:3px;margin-left:5px;cursor:pointer';
+    f.innerHTML = '<a><img border="0" style="width: 19px; height: 18px;" src="'+icon+'" alt="'+title+'" class="navbar">'+title+'</a>';
+    var c = document.createElement('img');
+    f.appendChild(c);
+    f.appendChild(detail);
+
+    this.List.appendChild(f);
+    var t=this;
+    addEvent(f, 'click', function() {
+      t.expand(f);
+      t.popup(f);
+    });
+
+    c.style.cssText='height:16px;width:16px; margin-top:2px;float:right;cursor:pointer';
+    c.src=data.close;
+    addEvent(c,'click',function(el,e) {
+      e.preventDefault();
+      e.stopPropagation();
+      t.remove(f.id);
+    });
+
+    this.expand(f);
+    if (options & Notifier.POPUP) {
+      setTimeout(function() {t.popup(f);}, 150);
+    }
+  },
+  expand: function(e) {
+    this.collapseAll();
+    if (isEmpty(e)) {
+      e = this.List.lastElementChild;
+    }
+    e.style.width='';
+  },
+  collapseAll: function() {
+    for (var i=0; i<this.List.children.length; i++) {
+      var e=this.List.children[i];
+      e.style.width='20px';
+    }
+  },
+  popup: function(e) {
+    var a = e.lastElementChild;
+    var coords = new Point(e.getBoundingClientRect().left, e.getBoundingClientRect().bottom);
+    coords.TranslateWindow();
+    var w = new OverlayWindow(coords.x,coords.y,300,180,'','em_notificationpopup');
+    w.InitDropdown();
+    a.style.display='';
+
+    w.ContentArea.appendChild(a);
+    w.OnClose = function(wi) {
+      var el=document.getElementById(e.id);
+      var d=wi.ContentArea.lastElementChild;
+      if (el && el.children.length==2) el.appendChild(d);
+      d.style.display='none';
+    }
+  },
+  remove: function(e) {
+    if (typeof e=='string')
+      e=document.getElementById(e);
+    this.List.removeChild(e);
+    if (!this.List.children.length) {
+      this.fadeOut();
+    } else {
+      this.expand();
+    }
+  }
+}
+
 function ShoutboxReplacer(){
 	//suchString, Replacement, WortGrenzen, CaseSensitive
 	this.replacements = new Array(
@@ -1702,7 +2014,7 @@ ShoutboxReplacer.prototype = {
 			return s;
 		}else return regE;
 	},
-	
+
 	do_replace: function (str){
 		var regExp,s,replacement;
 		for(var i=0;i<this.length();i++){
@@ -1716,12 +2028,12 @@ ShoutboxReplacer.prototype = {
 		}
 		return str;
 	},
-	
+
 	getSearchString: function (index){
 		if(index<0 || index>=this.length()) return "";
 		return this.regexp_toString(this.replacements[index*4]);
 	},
-	
+
 	findSearchString: function (sSearch){
 		sSearch=this.regexp_toString(sSearch);
 		for(var i=0; i<this.length(); i++){
@@ -1729,17 +2041,17 @@ ShoutboxReplacer.prototype = {
 		}
 		return -1;
 	},
-	
+
 	length: function (){
 		return Math.floor(this.replacements.length/4);
 	},
-	
+
 	get: function (index){
 		if(index<0 || index>=this.length()) return new Array();
 		index*=4;
 		return this.replacements.slice(index,index+4);
 	},
-	
+
 	add: function (sSearch,sReplace,useWordbounds,caseSensitive,doSave){
 		if(isUndef(sSearch) || isUndef(sReplace)) return;
 		var index=this.findSearchString(sSearch);
@@ -1754,7 +2066,7 @@ ShoutboxReplacer.prototype = {
 		this.replacements[index+3]=(caseSensitive==true); //standart is false
 		if(doSave!=false) this.save();
 	},
-	
+
 	remove: function (sSearch){
 		var index=this.findSearchString(sSearch);
 		if(index>=0){
@@ -1762,7 +2074,7 @@ ShoutboxReplacer.prototype = {
 			this.save();
 		}
 	},
-	
+
 	load: function (){
 		var newEntries=EM.Settings.load_field('sb-replacements');
 		if(isUndef(newEntries)) return;
@@ -1770,7 +2082,7 @@ ShoutboxReplacer.prototype = {
 			this.add(newEntries[i],newEntries[i+1],newEntries[i+2],newEntries[i+3],false);
 		}
 	},
-	
+
 	save: function (){
 		EM.Settings.store_field('sb-replacements',this.replacements);
 	}
@@ -1778,7 +2090,7 @@ ShoutboxReplacer.prototype = {
 
 function ShoutboxControls() {
   this.replacer=new ShoutboxReplacer();
-  
+
   this.shout_obj = document.getElementById('sidebar_shoutbox');
 
   this.get_iframe = function () {
@@ -1950,7 +2262,7 @@ ShoutboxControls.prototype = {
 
   ev_sb_post: function (evt) {
     var s = EM.Shouts.form_text.value;
-	
+
 	//replace some stuff
     s=this.replacer.do_replace(s);
 
@@ -2053,7 +2365,7 @@ ShoutboxControls.prototype = {
                     }
                     return $0;
                   });
-				  
+
     s = s.replace(/@@/g, '@');
 
     EM.Shouts.form_text.value = s;
@@ -2493,6 +2805,11 @@ function Pagehacks() {
   if(EM.Settings.GetValue('ui','addsid')) {
     this.AddLinkSIDs();
   }
+  if(1*EM.Settings.GetValue('pageghack','pnautocheck')) {
+    var min = EM.Settings.GetValue('pageghack','pnautocheck');
+    if(1 > 1 * min) min = 1;
+    window.setInterval('EM.Pagehacks.checkPMAuto()', min * 60000);
+  }
 }
 
 Pagehacks.prototype = {
@@ -2511,6 +2828,26 @@ Pagehacks.prototype = {
             a[i].style.cssText+=' cursor:pointer';
             addEvent(a[i],'click',function() {div.Window.Close(); return false;});
           } else a[i].removeAttribute('target');
+        }
+      });
+  },
+
+  checkPMAuto: function() {
+    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,document.createElement('div'),
+      function(div) {
+        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(div.innerHTML)) {
+          // no PNs, but nobody would want to know that
+        } else {
+          var a=div.getElementsByTagName('a');
+          for(i=0;i<a.length;i++) {
+            if (a[i].href.match(/window\.close/)) {
+              a[i].parentNode.removeChild(a[i]);
+            } else a[i].removeAttribute('target');
+          }
+          div=queryXPathNode(div, './/table[@class=\'forumline\']');
+          div.className='';
+          EM.Notifier.notify('/graphics/Portal-PM.gif','PN eingetroffen',div,'pnarrived',true);
+          div.style.cssText='height:100%';
         }
       });
   },
@@ -2924,7 +3261,7 @@ Pagehacks.prototype = {
     if(isUndef(t) || null == t) {
       return;
     }
-	
+
     var t = queryXPathNode(sp, "tbody/tr[1]/th/b");
     console.log(t);
     if(isUndef(t) || null == t) {
@@ -3402,6 +3739,462 @@ Pagehacks.prototype = {
   }
 }
 
+function UpdateMonkey() {
+    this.state = 'init';
+    this.network = [];
+    this.branches = {};
+    this.tags = {};
+    this.commits = {};
+
+    this.stack = [];
+    this.running = false;
+
+    this.settings = {
+		enabled: EM.Settings.GetValue('update','enable'),
+		installed: EM.Settings.GetValue('update','installed'),
+		updateType: EM.Settings.GetValue('update','update_type'),
+		updateSource: EM.Settings.GetValue('update','source_repo'),
+		updateBranch: EM.Settings.GetValue('update','source_branch'),
+		updateTimeout: EM.Settings.GetValue('update','check_every')
+	};
+
+    this.ghapi = {
+        parent: this,
+        defaultUser : 'martok',
+        defaultRepo : 'edgemonkey',
+
+        request: function(method, url, headers, data, cb, cbdata) {
+            if(isEmpty(method)) method = 'GET';
+            if(isEmpty(headers))
+                headers = {
+                    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+                    'Accept': '*'
+                };
+            if(isEmpty(data)) data = '';
+            console.log('Asking for Bananas @ ' + url);
+
+            GM_xmlhttpRequest({
+                method: method,
+                url: url,
+                headers: headers,
+                data: data,
+                onload: function(rd) {
+                    cb(1,1,rd,cbdata);
+                },
+                onerror: function(rd) {
+                    cb(1,0,rd,cbdata);
+                },
+                onreadystatechange: function(rd) {
+                    cb(0,rd.readyState,rd,cbdata);
+                }
+            });
+        },
+        queryRepo: function (method,user,repo,cb,cbdata) {
+            if(isEmpty(method)) method = 'network';
+            if(isEmpty(user)) user = this.defaultUser;
+            if(isEmpty(repo)) repo = this.defaultRepo;
+            this.request('GET', 'http://github.com/api/v2/json/repos/show/'+user+'/'+repo+'/'+method,null,null,cb,cbdata);
+        },
+        queryCommit: function (commit,user,repo,cb,cbdata) {
+            if(isEmpty(commit)) commit = 'HEAD';
+            if(isEmpty(user)) user = this.defaultUser;
+            if(isEmpty(repo)) repo = this.defaultRepo;
+            this.request('GET', 'http://github.com/api/v2/json/commits/show/'+user+'/'+repo+'/'+commit,null,null,cb,cbdata);
+        }
+    };
+}
+UpdateMonkey.prototype.updateEngine = function(stage, success, response) {}; //Telling JS something it doesn't believe me without telling it directly
+UpdateMonkey.prototype = {
+    actionPush: function(actionProc,checkProc,doneProc,data) {
+        var action = {
+            perform:actionProc,
+            check:checkProc,
+            done:doneProc,
+            data:data
+            };
+        this.stack.push(action);
+        this.actionPerform();
+    },
+    actionPop: function() {
+        if(!this.stack.length){
+            return null;
+        }
+        return this.stack.shift();
+    },
+    actionPerform: function() {
+        if(this.running) {
+            return;
+        }
+        var action = this.actionPop();
+        if(isEmpty(action)) {
+            console.log('UpdateMonkey can haz cheezeburger?');
+            return;
+        }
+        if(!action.check(action)) {
+            console.log('UpdateMonkey rescheduling ... feed more or other bananas!');
+            this.actionPerform();
+            this.stack.push(action);
+            return;
+        }
+        this.running = true;
+        action.perform(action);
+    },
+    actionDone:function() {
+        this.running = false;
+        this.actionPerform();
+    },
+
+    checkNetwork: function() {
+        var skynet = EM.Cache.get('updatemonkey.networks', 'main');
+        return skynet.current;
+    },
+
+    failMonkeyMessage:function(msg) {
+        console.log('UpdateMonkey failed liek crazy: ' + msg);
+    },
+
+    updateCommit: function(user,repo,commit) {
+        console.log('commit:'+commit);
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var commitinfo = EM.Cache.get('updatemonkey.commits', a.data.commit);
+                if(!commitinfo.current) {
+                    obj.ghapi.queryCommit(a.data.commit,a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.commit)) {
+                                        obj.failMonkeyMessage('Commit request returned no commit information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.commits', a.data.commit, tmp.commit);
+                                    obj.commits[a.data.commit] = tmp.commit;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.commits[a.data.commit] = commitinfo.data;
+                a.done(a);
+            },
+            function(a) {
+                return true;
+            },
+            function(a) {
+                obj.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo,
+                commit:commit
+            }
+        );
+    },
+
+    updateBranches: function(user,repo) {
+        console.log('branches:'+user+','+repo);
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var branches = EM.Cache.get('updatemonkey.branches', a.data.user+'#'+a.data.repo);
+                if(!branches.current) {
+                    obj.ghapi.queryRepo('branches',a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.branches)) {
+                                        obj.failMonkeyMessage('Branch List request returned no branch information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.branches', a.data.user+'#'+a.data.repo, tmp.branches, obj.settings.updateTimeout);
+                                    obj.branches[a.data.user+'#'+a.data.repo] = tmp.branches;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.branches[a.data.user+'#'+a.data.repo] = branches.data;
+                a.done(a);
+            },
+            function(a) {
+                return obj.checkNetwork();
+            },
+            function(a) {
+            	var branches = obj.branches[a.data.user+'#'+a.data.repo];
+                for(var branch in branches) {
+                    obj.updateCommit(a.data.user,a.data.repo,branches[branch]);
+                }
+                obj.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo
+            }
+        );
+    },
+
+    updateTags: function(user,repo) {
+        console.log('tags:'+user+','+repo);
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var tags = EM.Cache.get('updatemonkey.tags', a.data.user+'#'+a.data.repo);
+                if(!tags.current) {
+                    obj.ghapi.queryRepo('tags',a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.tags)) {
+                                        obj.failMonkeyMessage('Tag List request returned no tag information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.tags', a.data.user+'#'+a.data.repo, tmp.tags);
+                                    obj.tags[a.data.user+'#'+a.data.repo] = tmp.tags;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.tags[a.data.user+'#'+a.data.repo] = tags.data;
+                a.done(a);
+            },
+            function(a) {
+                return obj.checkNetwork();
+            },
+            function(a) {
+            	var tags = obj.tags[a.data.user+'#'+a.data.repo];
+                for(var tag in tags) {
+                    obj.updateCommit(a.data.user,a.data.repo,tags[tag]);
+                }
+                obj.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo
+            }
+        );
+    },
+
+    updateNetwork: function() {
+        console.log('networks');
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var skynet = EM.Cache.get('updatemonkey.networks', 'main');
+                if(!skynet.current) {
+                    obj.ghapi.queryRepo('network',null,null,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.network)) {
+                                        obj.failMonkeyMessage('Network request returned no network information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.networks', 'main', tmp.network, obj.settings.updateTimeout);
+                                    obj.network = tmp.network;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.network = skynet.data;
+                a.done(a);
+            },
+            function(a) {
+                return true;
+            },
+            function(a) {
+                obj.network.forEach(
+                    function(e) {
+                        obj.updateBranches(e.owner,e.name);
+                        obj.updateTags(e.owner,e.name);
+                    }
+                );
+                obj.actionDone(a);
+            },
+            null
+        );
+    },
+
+    checkUpdateAvail: function() {
+        console.log('update');
+        var obj = this;
+        this.actionPush(
+            function(a) {
+            	//Check the cache for the various commits we need ...
+				var mode = 1*a.data.updateType;
+				var repo = a.data.updateSource;
+				var branch = a.data.updateBranch;
+
+				if(!mode) {
+					repo = 'martok#edgemonkey';
+				}
+				if(2 > mode) {
+					branch = 'master';
+				}
+
+				var commit = null;
+				var c = null;
+				switch(mode) {
+					case 0:		//Only use tags
+						var mostcurrent = new Date(0);
+		                for(var tag in obj.tags[repo]) {
+		                	c = obj.tags[repo][tag];
+		                	var rev_date = new Date();
+		                	rev_date.setISO8601(obj.commits[c].committed_date);
+		                    if(rev_date > mostcurrent) {
+		                    	commit = c;
+		                    	mostcurrent = rev_date;
+		                    }
+		                }
+						break;
+					case 1:		//Use the master branch
+					case 2:		//Use a custom branch
+						c = obj.branches[repo][branch];
+	                    if(isEmpty(obj.commits[c])) {
+	                    	break;
+	                    }
+	                    commit = c;
+						break;
+					default:
+						obj.failMonkeyMessage('Unknown Update mode!');
+						return;
+				}
+
+				if(!isEmpty(commit)) {
+					console.log('OLD: ' + a.data.installed);
+					console.log('NEW: ' + commit);
+					if(commit.trim() != (''+a.data.installed).trim()) {
+						console.log('UpdateMonkey haz njuz!');
+						ur = repo.match(/^([^#]+)#([^#]+)$/);
+						EM.Cache.put('updatemonkey.networks', 'update',
+							{user:ur[1], repo:ur[2], branch:branch, tag:tag, commit:commit, mode:mode}, obj.settings.updateTimeout);
+						obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
+					}
+				}
+
+                a.done(a);
+            },
+            function(a) {
+            	//Check the cache for the various commits we need ...
+				var mode = 1*a.data.updateType;
+				var repo = a.data.updateSource;
+				var branch = a.data.updateBranch;
+
+				if(!mode) {
+					repo = 'martok#edgemonkey';
+				}
+				if(2 > mode) {
+					branch = 'master';
+				}
+
+				switch(mode) {
+					case 0:		//Only use tags
+						if(isEmpty(obj.tags[repo])) {
+							return false;
+						}
+		                for(var tag in obj.tags[repo]) {
+		                    if(isEmpty(obj.commits[obj.tags[repo][tag]])) {
+		                    	return false;
+		                    }
+		                }
+						break;
+					case 1:		//Use the master branch
+					case 2:		//Use a custom branch
+						if(isEmpty(obj.branches[repo])) {
+							return false;
+						}
+	                    if(isEmpty(obj.commits[obj.branches[repo][branch]])) {
+	                    	return false;
+	                    }
+						break;
+					default:
+						obj.failMonkeyMessage('Unknown Update mode!');
+						return true;
+				}
+                return true;
+            },
+            function(a) {
+                obj.actionDone(a);
+            },
+            obj.settings
+        );
+    },
+
+    checkUpdate: function() {
+    	if(!this.settings.enabled) {
+    		return true;
+    	}
+		var update = EM.Cache.get('updatemonkey.networks', 'update');
+		if(update.current) {
+			var u = update.data;
+			this.notifyUpdate(u.user, u.repo,u.branch,u.tag,u.commit,u.mode);
+			return;
+		}
+
+        this.updateNetwork();
+        this.checkUpdateAvail();
+    },
+
+    notifyUpdate: function(user,repo,branch,tag,commit,mode) {
+    	var e = document.createElement('div');
+    	e.innerHTML = '<div class="dfnav">Neues Update</div><br/>'+
+    		'<div class="gensmall">Ein neuer Update von EdgeMonkey wurde gefunden.</div>' +
+    		'<table>'+
+    		'<tr><td><span class="gensmall">Benutzer:</span></td><td><span class="gensmall">' + user + '</span></td></tr>' +
+    		'<tr><td><span class="gensmall">Repository:</span></td><td><span class="gensmall">' + repo + '</span></td></tr>' +
+    		'<tr><td><span class="gensmall">Branch:</span></td><td><span class="gensmall">' + branch + '</span></td></tr>' +
+    		(isEmpty(tag)?'':'<tr><td><span class="gensmall">Tag:</span></td><td><span class="gensmall">' + tag + '</span></td></tr>' )+
+    		'<tr><td><span class="gensmall">Commit:</span></td><td><span class="gensmall"><a href="http://github.com/'+user+'/'+repo+'/commit/'+commit+'/" target="_blank">' + commit.substr(0,16) + '</a></span></td></tr>' +
+    		'</table><br/>' +
+    		'<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/raw/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
+    		'<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
+
+		EM.Notifier.notify(
+			'/graphics/Profil-Sidebar.gif',
+			'Neues EM-Update',
+			e,
+			'updatemonkey_haz_update',
+			Notifier.REPLACE
+		);
+
+    },
+
+    installUpdate: function(commit) {
+    	console.log('install:'+commit);
+		EM.Settings.SetValue('update','installed',commit);
+		Settings_SaveToDisk();
+		EM.Cache.touch('updatemonkey.networks', 'update', -1);
+		return true;
+    }
+}
+
+function checkUpdate(){
+    EM.Updater = new UpdateMonkey();
+    EM.Updater.checkUpdate();
+}
+
 function upgradeSettings(){
   var upgraded = false;
 
@@ -3487,6 +4280,13 @@ function initEdgeApe() {
     }
     EM.Pagehacks = new Pagehacks();
     EM.Shouts = new ShoutboxControls();
+
+    EM.Cache = new CacheMonkey();
+  }
+
+  if(isEmpty(window.opener) && (window.parent==window) )
+  {
+    checkUpdate();
   }
 }
 
@@ -3506,8 +4306,10 @@ if (SOP_ok && !isEmpty(unsafeWindow.parent.EM)) {
   window.EM = {};
   EM.Settings = new SettingsStore();
   EM.User = new UserManager();
+  EM.Notifier = new Notifier();
   unsafeWindow.EM = EM;
 }
+
 Ajax = new AJAXObject();
 Location = window.location.href;
 
