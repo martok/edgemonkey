@@ -822,18 +822,6 @@ SettingsGenerator.prototype = {
   },
   createArrayInput: function (name, arr) {
     return '<textarea name="'+name+'">'+arr.map(function(e) {return new String(e).escapeHTML(3)}).join("\n")+'</textarea>';
-  },
-  getControl: function(name) {
-    return this.Document.getElementsByName(name)[0];
-  },
-  getBool: function(name) {
-    return this.getControl(name).checked;
-  },
-  getValue: function(name) {
-    return this.getControl(name).value;
-  },
-  getArray: function(name) {
-    return this.getControl(name).value.split("\n").map(function(e) { return e.trim() });
   }
 }
 
@@ -1462,7 +1450,7 @@ SettingsStore.prototype = {
   },
 
   ev_SaveDialog: function(evt) {
-    with (EM.Settings.Window.OptionsGenerator) {
+    with (EM.Settings.Window) {
       EM.Settings.Categories.forEach(function(c){
         c.settings.forEach(function(s) {
           var nm = s.key.replace('.','_');
@@ -1516,8 +1504,21 @@ SettingsStore.prototype = {
   ShowSettingsDialog: function() {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
             'HEIGHT=400,WIDTH=500,resizable=yes,scrollbars=yes', this.Window);
+    this.Window.getControl= function(name) {
+      return this.Document.getElementsByName(name)[0];
+    };
+    this.Window.getBool= function(name) {
+      return this.getControl(name).checked;
+    };
+    this.Window.getValue= function(name) {
+      return this.getControl(name).value;
+    };
+    this.Window.getArray= function(name) {
+      return this.getControl(name).value.split("\n").map(function(e) { return e.trim() });
+    };
+
     this.FillDialog();
-    var sg = new SettingsGenerator(this.Window.ButtonBar, this.Window.Document);;
+    var sg = new SettingsGenerator(this.Window.ButtonBar, this.Window.Document);
     with (sg.addFootrow('',2)) {
       innerHTML = '&nbsp;';
       innerHTML += '<input type="button" class="mainoption" value="Speichern">';
@@ -1542,7 +1543,7 @@ SettingsStore.prototype = {
   getControl: function (name) {
     if (this.Window && !this.Window.Window.closed) {
       var nm = name.replace('.','_');
-      this.Window.OptionsGenerator.getControl(nm);
+      this.Window.getControl(nm);
     }
     return null;
   }
