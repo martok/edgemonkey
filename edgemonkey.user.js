@@ -3991,16 +3991,10 @@ UpdateMonkey.prototype = {
 				if(!isEmpty(commit)) {
 					console.log('OLD: ' + a.data.installed);
 					console.log('NEW: ' + commit);
-					if(commit != a.data.installed) {
+					if(trim(commit) != trim(a.data.installed)) {
 						console.log('UpdateMonkey haz njuz!');
-						EM.Notifier.notify(
-							'/graphics/Profil-Sidebar.gif',
-							'Neues EM-Update',
-							'Ein Update auf Commit ' + commit + ' steht zur Installation bereit!',
-							'updatemonkey_haz_update',
-							Notifier.REPLACE
-						);
-						//EM.Settings.SetValue('update','installed',commit);
+						ur = repo.match(/^([^#]+)#([^#]+)$/);
+						obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
 					}
 				}
 
@@ -4058,6 +4052,29 @@ UpdateMonkey.prototype = {
     	}
         this.updateNetwork();
         this.checkUpdateAvail();
+    },
+
+    notifyUpdate: function(user,repo,branch,tag,commit,mode) {
+    	var e = document.createElement('div');
+    	e.innerHTML = '<div class="gensmall">Ein neuer Update von EdgeMonkey wurde ' +
+    		'vom Benutzer ' + user + ' in seinem Repository ' + repo + ' im Zweig ' + branch + ' bereitgestellt. ' +
+    		'Die neue Versionsnummer ist <a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/raw/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">' + commit + '.</div>';
+
+		EM.Notifier.notify(
+			'/graphics/Profil-Sidebar.gif',
+			'Neues EM-Update',
+			e,
+			'updatemonkey_haz_update',
+			Notifier.REPLACE
+		);
+
+    },
+
+    installUpdate: function(commit) {
+    	console.log('install:'+commit);
+		EM.Settings.SetValue('update','installed',commit);
+		Settings_SaveToDisk();
+		return false;
     }
 }
 
