@@ -3992,7 +3992,7 @@ UpdateMonkey.prototype = {
 				if(!isEmpty(commit)) {
 					console.log('OLD: ' + a.data.installed);
 					console.log('NEW: ' + commit);
-					if(trim(commit) != trim(a.data.installed)) {
+					if(commit.trim() != a.data.installed.trim()) {
 						console.log('UpdateMonkey haz njuz!');
 						ur = repo.match(/^([^#]+)#([^#]+)$/);
 						obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
@@ -4057,9 +4057,17 @@ UpdateMonkey.prototype = {
 
     notifyUpdate: function(user,repo,branch,tag,commit,mode) {
     	var e = document.createElement('div');
-    	e.innerHTML = '<div class="gensmall">Ein neuer Update von EdgeMonkey wurde ' +
-    		'vom Benutzer ' + user + ' in seinem Repository ' + repo + ' im Zweig ' + branch + ' bereitgestellt. ' +
-    		'Die neue Versionsnummer ist <a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/raw/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">' + commit + '.</div>';
+    	e.innerHTML = '<div class="dfnav">Neues Update</div><br/>'+
+    		'<div class="gensmall">Ein neuer Update von EdgeMonkey wurde gefunden.</div>' +
+    		'<table>'+
+    		'<tr><td><span class="gensmall">Benutzer:</span></td><td><span class="gensmall">' + user + '</span></td></tr>' +
+    		'<tr><td><span class="gensmall">Repository:</span></td><td><span class="gensmall">' + repo + '</span></td></tr>' +
+    		'<tr><td><span class="gensmall">Branch:</span></td><td><span class="gensmall">' + branch + '</span></td></tr>' +
+    		'<tr><td><span class="gensmall">Tag:</span></td><td><span class="gensmall">' + tag + '</span></td></tr>' +
+    		'<tr><td><span class="gensmall">Commit:</span></td><td><span class="gensmall">' + commit + '</span></td></tr>' +
+    		'</table><br/>' +
+    		'<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/raw/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
+    		'<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
 
 		EM.Notifier.notify(
 			'/graphics/Profil-Sidebar.gif',
