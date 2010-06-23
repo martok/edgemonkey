@@ -4168,7 +4168,7 @@ UpdateMonkey.prototype = {
     		(isEmpty(tag)?'':'<tr><td><span class="gensmall">Tag:</span></td><td><span class="gensmall">' + tag + '</span></td></tr>' )+
     		'<tr><td><span class="gensmall">Commit:</span></td><td><span class="gensmall"><a href="http://github.com/'+user+'/'+repo+'/commit/'+commit+'/" target="_blank">' + commit.substr(0,16) + '</a></span></td></tr>' +
     		'</table><br/>' +
-    		'<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/raw/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
+    		'<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
     		'<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
 
 		EM.Notifier.notify(
