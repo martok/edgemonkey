@@ -721,14 +721,14 @@ CacheMonkey.prototype = {
         this.store();
     },
 
-    touch: function(name, key) {
+    touch: function(name, key, timeout) {
         var cacheData = this.data[name];
-        if(isUndef(cacheData)) {
-            cacheData = [];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
         }
         var val = cacheData[key];
-        if(isUndef(val)) {
-            val = {lr:0, et:86400, data:null};
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
         }
         val.lr = new Date().getTime()/1000;
         cacheData[key] = val;
