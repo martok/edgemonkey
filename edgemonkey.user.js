@@ -3992,7 +3992,7 @@ UpdateMonkey.prototype = {
 				if(!isEmpty(commit)) {
 					console.log('OLD: ' + a.data.installed);
 					console.log('NEW: ' + commit);
-					if(commit.trim() != a.data.installed.trim()) {
+					if(commit.trim() != (''+a.data.installed).trim()) {
 						console.log('UpdateMonkey haz njuz!');
 						ur = repo.match(/^([^#]+)#([^#]+)$/);
 						obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
