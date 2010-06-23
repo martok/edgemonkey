@@ -3987,6 +3987,8 @@ UpdateMonkey.prototype = {
 					if(commit.trim() != (''+a.data.installed).trim()) {
 						console.log('UpdateMonkey haz njuz!');
 						ur = repo.match(/^([^#]+)#([^#]+)$/);
+						EM.Cache.put('updatemonkey.networks', 'update',
+							{user:ur[1], repo:ur[2], branch:branch, tag:tag, commit:commit, mode:mode}, obj.settings.updateTimeout);
 						obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
 					}
 				}
@@ -4043,6 +4045,13 @@ UpdateMonkey.prototype = {
     	if(!this.settings.enabled) {
     		return true;
     	}
+		var update = EM.Cache.get('updatemonkey.networks', 'update');
+		if(update.current) {
+			var u = update.data;
+			this.notifyUpdate(u.user, u.repo,u.branch,u.tag,u.commit,u.mode);
+			return;
+		}
+
         this.updateNetwork();
         this.checkUpdateAvail();
     },
@@ -4075,6 +4084,7 @@ UpdateMonkey.prototype = {
     	console.log('install:'+commit);
 		EM.Settings.SetValue('update','installed',commit);
 		Settings_SaveToDisk();
+		EM.Cache.touch('updatemonkey.networks', 'update', -1);
 		return true;
     }
 }
