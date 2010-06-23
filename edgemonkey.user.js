@@ -3941,14 +3941,6 @@ UpdateMonkey.prototype = {
         var obj = this;
         this.actionPush(
             function(a) {
-//    this.settings = {
-//		enabled: EM.Settings.GetValue('update','enable'),
-//		installed: EM.Settings.GetValue('update','installed'),
-//		updateType: EM.Settings.GetValue('update','update_type'),
-//		updateSource: EM.Settings.GetValue('update','source_repo'),
-//		updateBranch: EM.Settings.GetValue('update','source_branch'),
-//		updateTimeout: EM.Settings.GetValue('update','check_every')
-//	};
             	//Check the cache for the various commits we need ...
 				var mode = 1*a.data.updateType;
 				var repo = a.data.updateSource;
