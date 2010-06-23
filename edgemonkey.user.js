@@ -1025,21 +1025,17 @@ function bringToFront(obj)
 function OverlayWindow(x,y,w,h,content,id)
 {
   //Fix Popups that open to much to the right ...
-  console.log("x:"+x+",y:"+y+",w:"+w+",h:"+h);
   if (x+w+10 > unsafeWindow.innerWidth - 30){
       x = unsafeWindow.innerWidth - 30 - w - 10;
   }
 
-  console.log('Overlay start');
   this.Outer = this.createElement('div');
   this.Outer.className='overlayWin';
   this.Outer.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h+';width:'+w+';height:'+h;
   this.id = id;
 
-  console.log('Overlay Frame Window');
   this.Frame = this.createElement('div');
 
-  console.log('Overlay Drop Shadow');
   this.Shadows = [];
   var pwn = this.Outer;
   var swtop = 0;
@@ -1063,7 +1059,6 @@ function OverlayWindow(x,y,w,h,content,id)
   this.Frame.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);'+
                                    'border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
 
-  console.log('Overlay Content Area');
   this.ContentArea=this.createElement('div');
   this.Frame.appendChild(this.ContentArea);
   this.ContentArea.innerHTML=content;
@@ -1071,7 +1066,6 @@ function OverlayWindow(x,y,w,h,content,id)
 
   this.BringToFront();
   this.showing=true;
-  console.log('Overlay finish');
   document.getElementsByTagName('body')[0].appendChild(this.Outer);
   document.overlayWindows.add(this);
 }
@@ -1084,12 +1078,10 @@ OverlayWindow.prototype = {
   },
 
   InitWindow: function() {
-    console.log('Overlay Caption Bar Window');
     this.TitleBar=this.createElement('div');
     this.Frame.insertBefore(this.TitleBar, this.ContentArea);
     this.TitleBar.style.cssText='text-align:right;background:url(../templates/subSilver/images/cellpic3.gif);padding:3px;cursor:move;';
 
-    console.log('Overlay Caption Bar Close Button');
     this.moving = false;
     this.evmousedown = addEvent(this.TitleBar,'mousedown',function(dv,event) {
       var win = dv.Window;
@@ -1131,7 +1123,6 @@ OverlayWindow.prototype = {
   },
 
   InitDropdown: function() {
-    console.log('Overlay Caption Bar Window');
     this.Outer.style.zIndex=1000;
 
     this.evgmousedown = addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
@@ -2354,7 +2345,6 @@ ShoutboxControls.prototype = {
                       } break;
                       case 'S@': {
                         if(re = resolveForumSelect(".*?", txt)) {
-                          console.log(re);
                           return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
                                   encodeURIComponent(re.found)+"]"+re.found+"[/url]";
                         }
@@ -2636,7 +2626,6 @@ function SmileyWindow(target) {
   this.Target = target;
   var pt = new Point(0,0);
   pt.CenterInWindow(440,290);
-  console.log(pt);
   this.win = new OverlayWindow(pt.x,pt.y,440,290,'','em_SmileyWin');
   if(EM.Settings.GetValue('pagehack','smileyOverlay')==1) {
     this.win.InitWindow();
@@ -3249,7 +3238,6 @@ Pagehacks.prototype = {
   FixPostingDialog: function () {
     //Get the Content Main Table
     var sp = EM.Buttons.mainTable;
-    console.log(sp);
 
     if(isUndef(sp) || null == sp) {
       return;
@@ -3257,13 +3245,11 @@ Pagehacks.prototype = {
 
     //Get the Information Table
     sp = queryXPathNode(sp, "tbody/tr[2]/td/div/table");
-    console.log(sp);
     if(isUndef(t) || null == t) {
       return;
     }
 
     var t = queryXPathNode(sp, "tbody/tr[1]/th/b");
-    console.log(t);
     if(isUndef(t) || null == t) {
       return;
     }
@@ -3274,7 +3260,6 @@ Pagehacks.prototype = {
 
     //Get the Information Span with all those links ...
     sp = queryXPathNode(sp, "tbody/tr[2]/td/table/tbody/tr[2]/td/span");
-    console.log(sp);
 
     sp.innerHTML+='<br><br><a href="/search.php?search_id=unread">Hier klicken</a>, um die ungelesenen Themen anzuzeigen';
   },
