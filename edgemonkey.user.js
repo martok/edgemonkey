@@ -698,15 +698,6 @@ SettingsGenerator.prototype = {
   },
   createArrayInput: function (name, arr) {
     return '<textarea name="'+name+'">'+arr.map(function(e) {return new String(e).escapeHTML(3)}).join("\n")+'</textarea>';
-  },
-  getBool: function(name) {
-    return this.Document.getElementsByName(name)[0].checked;
-  },
-  getValue: function(name) {
-    return this.Document.getElementsByName(name)[0].value;
-  },
-  getArray: function(name) {
-    return this.Document.getElementsByName(name)[0].value.split("\n").map(function(e) { return e.trim() });
   }
 }
 
@@ -1197,8 +1188,8 @@ SettingsStore.prototype = {
     this.Categories.push({title: title, settings: settings});
   },
 
-  AddSetting: function(description, key, type, standard) {
-    return {desc: description, key: key, type: type, standard: standard};
+  AddSetting: function(description, key, type, standard, events) {
+    return {desc: description, key: key, type: type, standard: standard, events:events||{}};
   },
   RestoreDefaults: function() {
     this.Values = new Object();
@@ -1217,13 +1208,49 @@ SettingsStore.prototype = {
   },
 
   FillDialog: function() {
-    var tbl = this.Window.Document.createElement('table');
-    tbl.className = 'forumline';
-    tbl.style.cssText = 'width:98%; align:center; margin:5px;';
-    var sg = new SettingsGenerator(tbl, this.Window.Document);
-    with (sg) {
-      this.Categories.forEach(function(c){
-        addHeadrow(c.title, 2);
+    var head = this.Window.Document.createElement('table');
+    head.style.cssText='background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
+                       'height:30px;padding:0px;padding-bottom:1px;margin:0px;width:100%';
+    this.Window.Body.appendChild(head);
+    head=head.insertRow(-1);
+    this.Categories.forEach(function(c){
+      var h=head.insertCell(-1);
+      h.innerHTML = c.title;
+      h.className='gensmall';
+      h.style.cssText= 'white-space:nowrap;height:20px; background-color:#EFEFF4;'+
+                    '-moz-border-radius:5px 5px 0px 0px;padding:4px;cursor:pointer;text-align:center;-moz-user-select:none';
+      var id = 'page'+Math.ceil(Math.random()*1E6);
+      var doc = this.Window.Document;
+      addEvent(h, 'click', function(el) {
+        var l=doc.getElementsByTagName('table');
+        for (var i=1; i<l.length-1;i++) {
+          l[i].style.display='none';
+        }
+        var l=el.parentNode.children;
+        for (var i=0; i<l.length;i++) {
+          with (l[i].style) {
+            backgroundColor='#EFEFF4';
+            border='none';
+            padding='4px 4px 3px 4px';
+          }
+        }
+
+        doc.getElementById(id).style.display='';
+        with (el.style) {
+          backgroundColor='#BDD6EA';
+          border='1px solid black';
+          borderBottomWidth='0';
+          padding='3px';
+        }
+      });
+
+      var tbl = this.Window.Document.createElement('table');
+      this.Window.Body.appendChild(tbl);
+      tbl.id=id;
+      tbl.className = 'forumline';
+      tbl.style.cssText = 'width:98%; align:center; margin:5px;display:none';
+      var sg = new SettingsGenerator(tbl, this.Window.Document);
+      with (sg) {
         c.settings.forEach(function(s) {
           var html;
           var nm = s.key.replace('.','_');
@@ -1236,17 +1263,35 @@ SettingsStore.prototype = {
             } else
               html='::('+s.type+')';
           };
-          addSettingsRow(s.desc, html);
+          var e = addSettingsRow(s.desc, html);
+          e = queryXPathNode(e,'./td[2]/div/*');
+          var w = this.Window;
+          if (s.events.onChange) {
+            e.addEventListener('change',function(e) { s.events.onChange(e.target,w,e); },true);
+          }
+          if (s.events.onExit) {
+            e.addEventListener('blur',function(e) { s.events.onExit(e.target,w,e); },true);
+          }
+          if (s.events.onEnter) {
+            e.addEventListener('focus',function(e) { s.events.onEnter(e.target,w,e); },true);
+          }
         }, this);
-      }, this);
-    }
-    this.Window.OptionsTable = tbl;
-    this.Window.OptionsGenerator = sg;
-    this.Window.Body.appendChild(tbl);
+      }
+    }, this);
+    this.Window.Window.setTimeout(function() {
+      var ev = document.createEvent("HTMLEvents");
+      ev.initEvent("click", true, false);
+      head.firstChild.dispatchEvent(ev);
+    }, 1);
+
+    this.Window.ButtonBar = this.Window.Document.createElement('table');
+    this.Window.ButtonBar.className = 'forumline';
+    this.Window.ButtonBar.style.cssText = 'width:98%; align:center; margin:5px;';
+    this.Window.Body.appendChild(this.Window.ButtonBar);
   },
 
   ev_SaveDialog: function(evt) {
-    with (EM.Settings.Window.OptionsGenerator) {
+    with (EM.Settings.Window) {
       EM.Settings.Categories.forEach(function(c){
         c.settings.forEach(function(s) {
           var nm = s.key.replace('.','_');
@@ -1300,8 +1345,22 @@ SettingsStore.prototype = {
   ShowSettingsDialog: function() {
     this.Window = new UserWindow('EdgeMonkey :: Einstellungen', 'em_wnd_settings',
             'HEIGHT=400,WIDTH=500,resizable=yes,scrollbars=yes', this.Window);
+    this.Window.getControl= function(name) {
+      return this.Document.getElementsByName(name)[0];
+    };
+    this.Window.getBool= function(name) {
+      return this.getControl(name).checked;
+    };
+    this.Window.getValue= function(name) {
+      return this.getControl(name).value;
+    };
+    this.Window.getArray= function(name) {
+      return this.getControl(name).value.split("\n").map(function(e) { return e.trim() });
+    };
+
     this.FillDialog();
-    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+    var sg = new SettingsGenerator(this.Window.ButtonBar, this.Window.Document);
+    with (sg.addFootrow('',2)) {
       innerHTML = '&nbsp;';
       innerHTML += '<input type="button" class="mainoption" value="Speichern">';
       innerHTML += '&nbsp;&nbsp;';
@@ -1310,7 +1369,7 @@ SettingsStore.prototype = {
       var i = getElementsByTagName('input');
       addEvent(i[0], 'click', this.ev_SaveDialog);
     }
-    with (this.Window.OptionsGenerator.addFootrow('',2)) {
+    with (sg.addFootrow('',2)) {
       innerHTML = '&nbsp;';
       innerHTML += '<input type="button" value="Alles zur&uuml;cksetzen" class="liteoption">';
       innerHTML += '&nbsp;&nbsp;';
@@ -1320,7 +1379,14 @@ SettingsStore.prototype = {
       addEvent(i[0], 'click', this.ev_ClearAll);
       addEvent(i[1], 'click', this.ev_ClearUIDCache);
     }
-    this.Window.Body.appendChild(tbl);
+  },
+
+  getControl: function (name) {
+    if (this.Window && !this.Window.Window.closed) {
+      var nm = name.replace('.','_');
+      this.Window.getControl(nm);
+    }
+    return null;
   }
 }
 
