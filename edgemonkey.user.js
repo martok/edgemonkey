@@ -540,6 +540,117 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
 }
 
 
+function CacheMonkey(){
+    this.data = {};
+
+    this.load();
+}
+
+CacheMonkey.prototype = {
+    load: function(){
+        this.data = EM.Settings.load_field('cachemonkey',this.data);
+    },
+
+    store: function(){
+        EM.Settings.store_field('cachemonkey',this.data);
+    },
+
+    checkCurrent: function(value){
+        return (new Date().getTime()/1000) < (1*value.lr + 1*value.et);
+    },
+
+    clear: function(name) {
+        this.data[name] = {};
+        this.store();
+    },
+
+    clearAll: function() {
+        this.data = {};
+        this.store();
+    },
+
+    clean: function() {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            return;
+        }
+        for(var key in cacheData) {
+            var value = this.get(name, key);
+            if(!value.current && (new Date().getTime()/1000) > (value.lastRefresh + 5 * value.expireTimeout)) {
+                delete cacheData[key];
+            }
+        }
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    cleanAll: function(name) {
+        for(var name in this.data) {
+            this.clean(name);
+        }
+    },
+
+    get: function(name, key) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            return {
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
+                };
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            return {
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
+                };
+        }
+        return {
+            lastRefresh:1*val.lr,
+            expireTimeout:1*val.et,
+            current:this.checkCurrent(val),
+            data:val.data
+            };
+    },
+
+    put: function(name, key, value, timeout) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        } else if(!isEmpty(timeout)) {
+            val.et = 1*timeout;
+        }
+        val.lr = new Date().getTime()/1000;
+        val.data = value;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    touch: function(name, key, timeout) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        }
+        val.lr = new Date().getTime()/1000;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    }
+};
+
 function SettingsGenerator(table, doc)
 {
   this.tbl = table;
@@ -3107,12 +3218,9 @@ Pagehacks.prototype = {
             if(isUndef(before)) before = false;
             var ax = document.createElement('a');
             ax.className='gensmall';
+            ax.target=link.target;
             ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
-            if(before) {
-              link.parentNode.insertBefore(ax,link);
-            } else {
-              link.parentNode.insertBefore(ax,link.nextSibling);
-            }
+            link.parentNode.insertBefore(ax,before?link:link.nextSibling);
             ax.href = href;
             return ax;
           }
@@ -3253,6 +3361,8 @@ function initEdgeApe() {
     }
     EM.Pagehacks = new Pagehacks();
     EM.Shouts = new ShoutboxControls();
+
+    EM.Cache = new CacheMonkey();
   }
 }
 
@@ -3274,6 +3384,7 @@ if (SOP_ok && !isEmpty(unsafeWindow.parent.EM)) {
   EM.User = new UserManager();
   unsafeWindow.EM = EM;
 }
+
 Ajax = new AJAXObject();
 Location = window.location.href;
 
