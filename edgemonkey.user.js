@@ -1359,6 +1359,180 @@ SettingsStore.prototype = {
   }
 }
 
+function PNAPI() {
+  ['inbox','outbox','sentbox','savebox'].forEach(function(b) {
+    this[b]=new PNAPI.PNBox(b);
+  },this);
+}
+
+PNAPI.prototype = {
+  sendPN: function(recipient, title, message) {
+  },
+  haveUnread: function(box) {
+  }
+}
+
+PNAPI.PNBox = function (boxname) {
+  this.box = boxname;
+}
+
+PNAPI.PNBox.prototype = {
+  list: function(first,count) {
+    var p1 = Math.floor(first / 50);
+    var pl = Math.floor((first+count-1) / 50);
+    var result = [];
+
+    for (var i=p1; i<=pl;i++) {
+      var cachedResult = EM.Cache.get('pmlisting',this.box+','+i);
+      if(!cachedResult.current) {
+        cachedResult = this.updatePage(i);
+      } else {
+        cachedResult = cachedResult.data;
+      }
+      for (var k=0; k<cachedResult.length;k++) {
+        if (cachedResult[k].pos>=first && cachedResult[k].pos<first+count) {
+          result.push(cachedResult[k]);
+        }
+      }
+    }
+    return result.map(function(ms){
+      return new PNAPI.PN(this.box,ms);
+    },this);
+  },
+  remove: function(msgid) {
+
+  },
+  archive: function(msgid) {
+    if (this.box=='savebox') {
+      return false;
+    }
+  },
+  getCurrentMessages: function (page, table) {
+    var start = page*50;
+
+    if (isUndef(table)) {   // if somebody navigates past the end and table is null, that's info too!
+      var lister = new AJAXObject();
+      var host = document.createElement('div');
+      host.innerHTML = lister.SyncRequest('/privmsg.php?folder='+this.box+'&start='+start, null);
+
+      var table = queryXPathNode(host, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+    }
+    if (!table) {
+      return null;
+    }
+
+    var rows = queryXPathNodeSet(table, './/tr[./td[starts-with(@id,"folderFor")]]');
+    if (!rows || !rows.length) {
+      return [];
+    }
+
+    var messages = [];
+
+    var position = start;
+    rows.forEach(function(row) {
+      messages.push({
+        postID: queryXPathNode(row, './td[2]/span/a[2]').href.match(/p=(\d+)/)[1],
+        pos: position++,
+        read: !queryXPathNode(row, './td[1]/a'),
+        title: this.unescapeTitle(queryXPathNode(row, './td[2]/span/a[2]').textContent),
+        postSpecial: (function(){var a=queryXPathNode(row, './td[2]/span/b'); return a?a.textContent:'';})(),
+        received: queryXPathNode(row, './td[2]/span[2]').textContent.trim().substr(0,3)=='von',
+        partner: queryXPathNode(row, './td[2]/span[2]/span').textContent.trim(),
+        partnerID: (function(){var a=queryXPathNode(row, './td[2]/span[2]/span/a'); return a?a.href.match(/u=(\d+)/)[1]:null;})(),
+        date: this.postDatetoJSDate(queryXPathNode(row,'./td[3]/span').innerHTML)
+      });
+    }, this);
+
+    return messages;
+  },
+  updatePage: function(page,table) {
+    var cachedResult = EM.Cache.get('pmlisting',this.box+','+page).data;
+    var msgs = this.getCurrentMessages(page,table);
+    if (cachedResult && cachedResult.length) {
+      if ((cachedResult[0].postID != msgs[0].postID) ||
+          (cachedResult.length!= msgs.length) ||
+          (cachedResult[msgs.length-1].postID != msgs[msgs.length-1].postID)) {
+        //something changed outside this page
+        EM.Cache.put('pmlisting',this.box+','+(page-1),null,0);
+        EM.Cache.put('pmlisting',this.box+','+(page+1),null,0);
+      }
+    }else if (!cachedResult) {
+      //page wasnt here before...
+      EM.Cache.put('pmlisting',this.box+','+(page-1),null,0);
+    }
+
+    EM.Cache.put('pmlisting',this.box+','+page,msgs,900);
+    return msgs;
+  },
+  postDatetoJSDate: function(pd) {
+    //"Mo 07.12.09<br>23:17"
+    // good thing DF always returns that and ignores user settings...
+    var d = pd.match(/\S+\s(\d+)\.(\d+)\.(\d+)<\S+>(\d+):(\d+)/);
+    return new Date(2000+parseInt(d[3]), d[2]-1, d[1], d[4], d[5], 0).getTime()/1000;
+  },
+  unescapeTitle: function(t) {
+    while(/&amp;|&gt;|&lt;|&quot;/.test(t) && !/[<>"]/.test(t)) {
+        t = t.replace(/&quot;/g, '"');
+        t = t.replace(/&lt;/g, '<');
+        t = t.replace(/&gt;/g, '>');
+        t = t.replace(/&amp;/g, '&');
+    }
+    return t;
+  }
+
+}
+
+PNAPI.PN = function (box,ms) {
+  this.box = box;
+  this.id = ms.postID*1;
+  this.title = ms.title;
+  this.unread = !ms.read;
+  this.date = ms.date;
+  if (ms.received) {
+    this.senderID = ms.partnerID*1;
+    this.sender = ms.partner;
+  } else {
+    this.receiverID = ms.partnerID*1;
+    this.receiver = ms.partner;
+  }
+  if (ms.postSpecial) {
+    this.flag = ms.postSpecial;
+  }
+}
+
+PNAPI.PN.prototype = {
+  getContent: function() {
+    var cachedResult = EM.Cache.get('pmdata',this.id+',text');
+    if (cachedResult.current) {
+      return cachedResult.data;
+    }
+    var get = new AJAXObject();
+    var res = get.SyncRequest('/ajax_get_message_text.php?privmsg_id='+this.id+'&folder='+this.box, null);
+    var re = /\[CDATA\[([\s\S]*?)\]\]/gi;
+    var data = '';
+    var r;
+    while(r = re.exec(res)) {
+      data+=r[1];
+    }
+    var host = document.createElement('div');
+    host.innerHTML=data;
+    data=host.firstChild.innerHTML.split('<hr>')[0].trim();
+    EM.Cache.put('pmdata',this.id+',text',data,1800);
+    return data;
+  },
+  getQuoted: function() {
+    var cachedResult = EM.Cache.get('pmdata',this.id+',quote');
+    if (cachedResult.current) {
+      return cachedResult.data;
+    }
+    var get = new AJAXObject();
+    var host = document.createElement('div');
+    host.innerHTML = get.SyncRequest('/privmsg.php?mode=quote&p='+this.id, null);
+    var data=queryXPathNode(host,'//textarea[@id="message"]').innerHTML;
+    EM.Cache.put('pmdata',this.id+',quote',data,1800);
+    return data;
+  }
+}
 
 
 function ButtonBar() {
@@ -3363,6 +3537,7 @@ function initEdgeApe() {
     EM.Shouts = new ShoutboxControls();
 
     EM.Cache = new CacheMonkey();
+    EM.PN = new PNAPI();
   }
 }
 
