@@ -1455,12 +1455,12 @@ PNAPI.PNBox.prototype = {
           (cachedResult.length!= msgs.length) ||
           (cachedResult[msgs.length-1].postID != msgs[msgs.length-1].postID)) {
         //something changed outside this page
-        EM.Cache.put('pmlisting',this.box+','+(page-1),null,0);
-        EM.Cache.put('pmlisting',this.box+','+(page+1),null,0);
+        EM.Cache.touch('pmlisting',this.box+','+(page-1),-1);
+        EM.Cache.touch('pmlisting',this.box+','+(page+1),-1);
       }
     }else if (!cachedResult) {
       //page wasnt here before...
-      EM.Cache.put('pmlisting',this.box+','+(page-1),null,0);
+      EM.Cache.touch('pmlisting',this.box+','+(page-1),-1);
     }
 
     EM.Cache.put('pmlisting',this.box+','+page,msgs,900);
