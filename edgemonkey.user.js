@@ -1478,7 +1478,14 @@ function PNAPI() {
 PNAPI.prototype = {
   sendPN: function(recipient, title, message) {
   },
-  haveUnread: function(box) {
+  getUnread: function(box,count) {
+    var e = EM.PN[box];
+    if (e) {
+      return e.list(0,count).filter(function(a) {
+        return a.unread;
+      });
+    }
+    return null;
   }
 }
 
@@ -1543,7 +1550,7 @@ PNAPI.PNBox.prototype = {
       messages.push({
         postID: queryXPathNode(row, './td[2]/span/a[2]').href.match(/p=(\d+)/)[1],
         pos: position++,
-        read: !queryXPathNode(row, './td[1]/a'),
+        read: !queryXPathNode(row, './td[1]//img[contains(@src,"folder_new.gif")]'),
         title: this.unescapeTitle(queryXPathNode(row, './td[2]/span/a[2]').textContent),
         postSpecial: (function(){var a=queryXPathNode(row, './td[2]/span/b'); return a?a.textContent:'';})(),
         received: queryXPathNode(row, './td[2]/span[2]').textContent.trim().substr(0,3)=='von',
