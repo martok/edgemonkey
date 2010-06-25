@@ -2836,23 +2836,32 @@ Pagehacks.prototype = {
   },
 
   checkPMAuto: function() {
-    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,document.createElement('div'),
-      function(div) {
-        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(div.innerHTML)) {
-          // no PNs, but nobody would want to know that
-        } else {
-          var a=div.getElementsByTagName('a');
-          for(i=0;i<a.length;i++) {
-            if (a[i].href.match(/window\.close/)) {
-              a[i].parentNode.removeChild(a[i]);
-            } else a[i].removeAttribute('target');
+    var l = EM.PN.inbox.list(0,10);
+    if (l.length) {
+      var s=l.length==1?'Eine neue PN':l.length+' neue PNs';
+      var div = document.createElement('div');
+      var tbl = document.createElement('table');
+      div.appendChild(tbl);
+      div.style.cssText='height:180px;overflow:auto';
+      tbl.className='forumline';
+      tbl.style.cssText='width:100%';
+      l.forEach(function(pn) {
+        with (tbl.insertRow(-1)) {
+          with(insertCell(-1)) {
+            innerHTML='<span class="topictitle"><a href="privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id+
+                       '" class="topictitle">'+pn.title+'</a></span><span class="gensmall"><br>von '+
+                       '<span class="name" style="font-size: 10px;">'+
+                       '<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
+                       pn.sender+'</a></span></span>';
           }
-          div=queryXPathNode(div, './/table[@class=\'forumline\']');
-          div.className='';
-          EM.Notifier.notify('/graphics/Portal-PM.gif','PN eingetroffen',div,'pnarrived',true);
-          div.style.cssText='height:100%';
+          with(insertCell(-1)) {
+            innerHTML='<span class="gensmall">'+new Date(1000*pn.date).toLocaleString()+'</span>';
+            setAttribute('width','30');
+          }
         }
-      });
+      },this);
+      EM.Notifier.notify('/graphics/Portal-PM.gif',s,div,'pnarrived',Notifier.REPLACE|Notifier.POPUP);
+    }
   },
 
   fastSearch: function() {
