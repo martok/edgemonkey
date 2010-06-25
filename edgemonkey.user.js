@@ -1379,6 +1379,11 @@ function PNAPI() {
   },this);
 }
 
+PNAPI.VAPN_Team = 0;
+PNAPI.VAPN_User = 1;
+PNAPI.VAPN_Post = 2;
+PNAPI.VAPN_Topic = 3;
+
 PNAPI.prototype = {
   sendPN: function(recipient, title, message) {
     if("" == EM.User.loggedOnSessionId) {
@@ -1394,6 +1399,24 @@ PNAPI.prototype = {
     };
     var ajax = new AJAXObject();
     var res = ajax.SyncRequest('/privmsg.php', pndata);
+    return /Deine\s+Nachricht\s+wurde\s+gesendet\./.test(res);
+  },
+  sendVAPN: function(reftype,id,subject,message) {
+    if("" == EM.User.loggedOnSessionId) {
+      return false;
+    }
+    var vapndata = {
+      mode:'new',
+      ref_type:reftype,
+      subject: title,
+      message: message,
+      post_submit:'Absenden'
+    };
+    if(reftype != PNAPI.VAPN_Team) {
+        vapndata.id = id;
+    }
+    var ajax = new AJAXObject();
+    var res = ajax.SyncRequest('/vc.php?mode=new&ref_type='+reftype+(reftype == PNAPI.VAPN_Team?'':'&id='+id), vapndata);
     return /Deine\s+Nachricht\s+wurde\s+gesendet\./.test(res);
   },
   haveUnread: function(box) {
