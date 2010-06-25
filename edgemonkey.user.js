@@ -1381,6 +1381,20 @@ function PNAPI() {
 
 PNAPI.prototype = {
   sendPN: function(recipient, title, message) {
+    if("" == EM.User.loggedOnSessionId) {
+      return false;
+    }
+    var pndata = {
+      username: recipient,
+      subject: title,
+      message: message,
+      folder:'inbox',
+      mode:'post',
+      post_submit:'Absenden'
+    };
+    var ajax = new AJAXObject();
+    var res = ajax.SyncRequest('/privmsg.php', pndata);
+    return /Deine\s+Nachricht\s+wurde\s+gesendet\./.test(res);
   },
   haveUnread: function(box) {
   }
