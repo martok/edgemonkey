@@ -1921,7 +1921,7 @@ function Notifier() {
   this.Element = document.createElement('div');
   this.Element.style.cssText = 'position:fixed;left:0;top:0;height:0px;right:0;opacity:0.9;overflow:hidden;'+
                                'background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
-                               '-moz-user-select:none;z-index:999;cursor:default';
+                               '-moz-user-select:none;z-index:999999;cursor:default';
   this.fadeTimer = null;
   document.body.appendChild(this.Element);
 
