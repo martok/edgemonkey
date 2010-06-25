@@ -2917,17 +2917,14 @@ Pagehacks.prototype = {
         with (tbl.insertRow(-1)) {
           with(insertCell(-1)) {
             className='row'+r;
+            var d = new Date(1000*pn.date);
             innerHTML='<span class="topictitle"><a href="privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id+
                        '" class="topictitle" target="_blank">'+pn.title+'</a></span><span class="gensmall"><br>von '+
                        '<span class="name" style="font-size: 10px;">'+
                        '<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
-                       pn.sender+'</a></span></span>';
-          }
-          with(insertCell(-1)) {
-            className='row'+r;
-            var d = new Date(1000*pn.date);
-            innerHTML='<span class="gensmall">'+d.format("l")+'<br>'+d.format("d.m.y")+'<br>'+d.format("H:i")+'</span>';
-            setAttribute('width','50');
+                       pn.sender+'</a>'+
+                       ' am '+d.format("d.m.y")+' um '+d.format("H:i")+
+                       '</span></span>';
           }
         }
         r=r==1?2:1;
