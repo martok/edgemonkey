@@ -1614,7 +1614,7 @@ Notifier.prototype = {
     }
     uniquename='em_notification_'+uniquename;
 
-    detail.style.cssText='display:none';
+    detail.style.display='none';
     this.fadeIn();
 
     var f = document.getElementById(uniquename);
