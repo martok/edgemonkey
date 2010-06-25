@@ -412,6 +412,18 @@ if (!String.prototype.trim) String.prototype.trim = function() {
     }
 })();
 
+RegExp.prototype.execAll=function(data) {
+  var result = [];
+  var r;
+  while((r = this.exec(data))!= null) {
+    result.push(r);
+  }
+  if (result.length)
+    return result;
+  else
+    return null;
+}
+
 function encodeLongShout(text)
 {
   var b = '';
@@ -1511,11 +1523,7 @@ PNAPI.PN.prototype = {
     var get = new AJAXObject();
     var res = get.SyncRequest('/ajax_get_message_text.php?privmsg_id='+this.id+'&folder='+this.box, null);
     var re = /\[CDATA\[([\s\S]*?)\]\]/gi;
-    var data = '';
-    var r;
-    while(r = re.exec(res)) {
-      data+=r[1];
-    }
+    var data = re.execAll(res).map(function(a){ return a[1]; }).join('');
     var host = document.createElement('div');
     host.innerHTML=data;
     data=host.firstChild.innerHTML.split('<hr>')[0].trim();
