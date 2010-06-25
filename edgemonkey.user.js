@@ -2836,7 +2836,7 @@ Pagehacks.prototype = {
   },
 
   checkPMAuto: function() {
-    var l = EM.PN.inbox.list(0,10);
+    var l = EM.PN.getUnread('inbox',10);
     if (l.length) {
       var s=l.length==1?'Eine neue PN':l.length+' neue PNs';
       var div = document.createElement('div');
@@ -2845,20 +2845,26 @@ Pagehacks.prototype = {
       div.style.cssText='height:180px;overflow:auto';
       tbl.className='forumline';
       tbl.style.cssText='width:100%';
+      tbl.setAttribute('cellspacing',1);
+      tbl.setAttribute('cellpadding',4);
+      var r=1;
       l.forEach(function(pn) {
         with (tbl.insertRow(-1)) {
           with(insertCell(-1)) {
+            className='row'+r;
             innerHTML='<span class="topictitle"><a href="privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id+
-                       '" class="topictitle">'+pn.title+'</a></span><span class="gensmall"><br>von '+
+                       '" class="topictitle" target="_blank">'+pn.title+'</a></span><span class="gensmall"><br>von '+
                        '<span class="name" style="font-size: 10px;">'+
                        '<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
                        pn.sender+'</a></span></span>';
           }
           with(insertCell(-1)) {
+            className='row'+r;
             innerHTML='<span class="gensmall">'+new Date(1000*pn.date).toLocaleString()+'</span>';
             setAttribute('width','30');
           }
         }
+        r=r==1?2:1;
       },this);
       EM.Notifier.notify('/graphics/Portal-PM.gif',s,div,'pnarrived',Notifier.REPLACE|Notifier.POPUP);
     }
