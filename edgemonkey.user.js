@@ -1383,6 +1383,9 @@ PNAPI.VAPN_Team = 0;
 PNAPI.VAPN_User = 1;
 PNAPI.VAPN_Post = 2;
 PNAPI.VAPN_Topic = 3;
+PNAPI.VAPN_Synonym = 4;
+PNAPI.VAPN_BlogEntry = 5;
+PNAPI.VAPN_BlogComment = 6;
 
 PNAPI.prototype = {
   sendPN: function(recipient, title, message) {
