@@ -2967,8 +2967,8 @@ Pagehacks.prototype = {
             innerHTML='<span class="topictitle"><a href="privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id+
                        '" class="topictitle" target="_blank">'+pn.title+'</a></span><span class="gensmall"><br>von '+
                        '<span class="name" style="font-size: 10px;">'+
-                       '<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
-                       pn.sender+'</a>'+
+                       (pn.senderID?'<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
+                       pn.sender+'</a>':pn.sender)+
                        ' am '+d.format("d.m.y")+' um '+d.format("H:i")+
                        '</span></span>';
           }
