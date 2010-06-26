@@ -1222,9 +1222,13 @@ function SettingsStore() {
     this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true),
     this.AddSetting( 'Automatisch auf neue PNs pr&uuml;fen', 'pageghack.pnautocheck',[
           ['Nein', 0],
+          ['1 Minute', 1],
+          ['2 Minuten', 2],
+          ['3 Minuten', 3],
           ['5 Minuten', 5],
           ['10 Minuten', 10],
-          ['15 Minuten', 15]
+          ['15 Minuten', 15],
+          ['30 Minuten', 30]
         ], 0)
   ]);
   this.AddCategory('Entwickler', [
