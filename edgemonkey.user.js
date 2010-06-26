@@ -1404,7 +1404,7 @@ PNAPI.prototype = {
     var res = ajax.SyncRequest('/privmsg.php', pndata);
     return /Deine\s+Nachricht\s+wurde\s+gesendet\./.test(res);
   },
-  sendVAPN: function(reftype,id,subject,message) {
+  sendVAPN: function(reftype,id,title,message) {
     if("" == EM.User.loggedOnSessionId) {
       return false;
     }
