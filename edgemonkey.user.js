@@ -1420,7 +1420,7 @@ PNAPI.prototype = {
     }
     var ajax = new AJAXObject();
     var res = ajax.SyncRequest('/vc.php?mode=new&ref_type='+reftype+(reftype == PNAPI.VAPN_Team?'':'&id='+id), vapndata);
-    return /Deine\s+Nachricht\s+wurde\s+gesendet\./.test(res);
+    return /Nachricht\s+erfolgreich\s+gesendet!/.test(res);
   },
   getUnread: function(box,count) {
     var e = EM.PN[box];
