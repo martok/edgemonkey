@@ -1659,7 +1659,7 @@ PNAPI.PNBox.prototype = {
       messages.push({
         postID: queryXPathNode(row, './td[2]/span/a[2]').href.match(/p=(\d+)/)[1],
         pos: position++,
-        read: !queryXPathNode(row, './td[1]//img[contains(@src,"folder_new.gif")]'),
+        read: !queryXPathNode(row, './td[1]//img[contains(@title,"Ungelesene Nachricht")]'),
         title: this.unescapeTitle(queryXPathNode(row, './td[2]/span/a[2]').textContent),
         postSpecial: (function(){var a=queryXPathNode(row, './td[2]/span/b'); return a?a.textContent:'';})(),
         received: queryXPathNode(row, './td[2]/span[2]').textContent.trim().substr(0,3)=='von',
