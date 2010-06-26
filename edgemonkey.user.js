@@ -729,6 +729,8 @@ CacheMonkey.prototype = {
         var val = cacheData[key];
         if(isEmpty(val)) {
             val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        } else if(!isEmpty(timeout)) {
+        	val.et = 1*timeout;
         }
         val.lr = new Date().getTime()/1000;
         cacheData[key] = val;
