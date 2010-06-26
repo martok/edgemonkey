@@ -1687,7 +1687,9 @@ PNAPI.PNBox.prototype = {
       EM.Cache.touch('pmlisting',this.box+','+(page-1),-1);
     }
 
-    EM.Cache.put('pmlisting',this.box+','+page,msgs,900);
+    var time = 60*EM.Settings.GetValue('pageghack','pnautocheck');
+    if (time<60) time=60;
+    EM.Cache.put('pmlisting',this.box+','+page,msgs,time);
     return msgs;
   },
   postDatetoJSDate: function(pd) {
