@@ -1358,11 +1358,13 @@ SettingsStore.prototype = {
     head.className='em-tabbar';
     this.Window.Body.appendChild(head);
     head=head.insertRow(-1);
+    var firstTab = null;
     this.Categories.forEach(function(c){
       if(head.children.length>=4) head=head.parentNode.insertRow(-1);
       var h=head.insertCell(-1);
       h.innerHTML = c.title;
       h.className='em-tabbutton';
+      if (!firstTab) firstTab=h;
       var id = 'page'+Math.ceil(Math.random()*1E6);
       var doc = this.Window.Document;
       addEvent(h, 'click', function(el) {
@@ -1418,18 +1420,18 @@ SettingsStore.prototype = {
         }, this);
       }
     }, this);
-      var ct=4,cs=Math.floor(4/head.children.length);
-      var l=head.children;
-      for (var i=0; i<l.length-1;i++) {
-        l[i].colSpan=cs;
-        ct-=cs;
-      }
-      l[l.length-1].colSpan=ct;
+    var ct=4,cs=Math.floor(4/head.children.length);
+    var l=head.children;
+    for (var i=0; i<l.length-1;i++) {
+      l[i].colSpan=cs;
+      ct-=cs;
+    }
+    l[l.length-1].colSpan=ct;
 
     this.Window.Window.setTimeout(function() {
       var ev = document.createEvent("HTMLEvents");
       ev.initEvent("click", true, false);
-      head.firstChild.dispatchEvent(ev);
+      firstTab.firstChild.dispatchEvent(ev);
     }, 1);
 
     this.Window.ButtonBar = this.Window.Document.createElement('table');
