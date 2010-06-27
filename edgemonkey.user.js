@@ -2048,6 +2048,8 @@ function Notifier() {
   this.List = document.createElement('ul');
   this.Element.appendChild(this.List);
   this.List.style.cssText='list-style-type: none;margin:0;padding:0';
+
+  this._popups={};
 }
 
 Notifier.REPLACE = 1<<0;
@@ -2107,7 +2109,7 @@ Notifier.prototype = {
     var f = document.getElementById(uniquename);
     if (f) {
       if (options & Notifier.REPLACE) {
-        f.parentNode.removeChild(f);
+        this.realRemove(f);
       } else {
         return;
       }
@@ -2161,6 +2163,7 @@ Notifier.prototype = {
     var w = new OverlayWindow(coords.x,coords.y,300,180,'','em_notificationpopup');
     w.InitDropdown();
     a.style.display='';
+    this._popups[e.id]=w;
 
     w.ContentArea.appendChild(a);
     w.OnClose = function(wi) {
@@ -2173,12 +2176,17 @@ Notifier.prototype = {
   remove: function(e) {
     if (typeof e=='string')
       e=document.getElementById(e);
-    this.List.removeChild(e);
+    this.realRemove(e);
     if (!this.List.children.length) {
       this.fadeOut();
     } else {
       this.expand();
     }
+  },
+  realRemove: function(el) {
+    this._popups[el.id].Close();
+    delete this._popups[el.id];
+    this.List.removeChild(el);
   }
 }
 
