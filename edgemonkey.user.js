@@ -1991,7 +1991,7 @@ function ShoutboxReplacer(){
 		"mrg", ":mrgreen:",true,false,
 		/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/, ":mrgreen:",true,false,
 		"mrgreen", ":mrgreen:",true,false,
-		":+mrgreen:+", ":mrgreen:",true,false,
+		":+mrgreen:+", ":mrgreen:",false,false,
 		"FIF", "Fragen in's Forum :mahn:",true,false,
 		"SIWO", "Suche ist weiter oben :mahn:",true,false,
 		//Wall-Hack
@@ -2031,11 +2031,54 @@ ShoutboxReplacer.prototype = {
 			replacement=this.get(i);
 			if(replacement.length<4) continue;
 			s=this.regexp_toString(replacement[0]);
-			if(replacement[2]) s="\\b"+s+"(?=$|"+this.REnoText+")";
+			if(replacement[2]) s="(?:^|\\b)"+s+"(?=$|"+this.REnoText+")";
 			if(replacement[3]) regExp=new RegExp(s,"g");
 			else regExp=new RegExp(s,"gi");
 			str=str.replace(regExp,replacement[1]);
 		}
+		//AutoTagging
+		str = str.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
+					  function($0,before,cmd,brace,free) {
+						var txt = free?free:brace;
+						var re;
+						if (txt=='') return '';
+						switch(cmd) {
+						  case '@': return before+'[user]'+txt+'[/user]';
+						  case 'G@': return before+'[url=http://www.lmgtfy.com/?q='+encodeURIComponent(txt)+']LMGTFY: '+txt+'[/url]';
+						  case '\\@': return before+'[url=http://ls.em.local/'+encodeLongShout(txt)+']...[/url]';
+						  case 'T@': {
+							if(re = resolveForumSelect("\\d+", txt)) {
+							  return before+"[url=http://www."+re.forum+".de/viewtopic.php?t="+
+									  re.found+"]Topic "+re.found+"[/url]";
+							}
+						  } break;
+						  case 'P@': {
+							if(re = resolveForumSelect("\\d+", txt)) {
+							  return before+"[url=http://www."+re.forum+".de/viewtopic.php?p="+
+									  re.found+"#"+re.found+"]Post "+re.found+"[/url]";
+							}
+						  } break;
+						  case 'F@': {
+							if(re = resolveForumSelect("\\d+", txt)) {
+							  return before+"[url=http://www."+re.forum+".de/viewforum.php?f="+
+									  re.found+"]Forum "+re.found+"[/url]";
+							}
+						  } break;
+						  case 'S@': {
+							if(re = resolveForumSelect(".*?", txt)) {
+							  console.log(re);
+							  return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
+									  encodeURIComponent(re.found)+"]"+re.found+"[/url]";
+							}
+						  } break;
+						  case 'K@': {
+							return before+"[url="+txt+"]*klick*[/url]";
+						  } break;
+						}
+						return $0;
+					  });
+					  
+		str = str.replace(/@@/g, '@');
 		return str;
 	},
 
@@ -2151,7 +2194,7 @@ function ShoutboxControls() {
       with (insertCell(-1)) {
         align='left';
         colSpan=3;
-        innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage"'+
+        innerHTML='<textarea class="gensmall" onchange="EM.Shouts.ev_shoutchange(event)" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="EM.Shouts.ev_shoutchange(event)" name="shoutmessage"'+
                   ' id="shoutmessage" style="width:100%; font-size: 11px; height: 4em"></textarea>';
       }
     }
@@ -2173,7 +2216,6 @@ function ShoutboxControls() {
   }
   this.form_text = document.getElementById('shoutmessage');
   this.form_chars = document.getElementById('shoutchars');
-  //addEvent(this.form,'submit',function() {return false });
   this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
   var ifr=this.get_iframe();
@@ -2334,49 +2376,6 @@ ShoutboxControls.prototype = {
       }
     }
 
-    //AutoTagging
-    s = s.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
-                  function($0,before,cmd,brace,free) {
-                    var txt = free?free:brace;
-                    var re;
-                    if (txt=='') return '';
-                    switch(cmd) {
-                      case '@': return before+'[user]'+txt+'[/user]';
-                      case 'G@': return before+'[url=http://www.lmgtfy.com/?q='+encodeURIComponent(txt)+']LMGTFY: '+txt+'[/url]';
-                      case '\\@': return before+'[url=http://ls.em.local/'+encodeLongShout(txt)+']...[/url]';
-                      case 'T@': {
-                        if(re = resolveForumSelect("\\d+", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/viewtopic.php?t="+
-                                  re.found+"]Topic "+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'P@': {
-                        if(re = resolveForumSelect("\\d+", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/viewtopic.php?p="+
-                                  re.found+"#"+re.found+"]Post "+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'F@': {
-                        if(re = resolveForumSelect("\\d+", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/viewforum.php?f="+
-                                  re.found+"]Forum "+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'S@': {
-                        if(re = resolveForumSelect(".*?", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
-                                  encodeURIComponent(re.found)+"]"+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'K@': {
-                        return before+"[url="+txt+"]*klick*[/url]";
-                      } break;
-                    }
-                    return $0;
-                  });
-
-    s = s.replace(/@@/g, '@');
-
     EM.Shouts.form_text.value = s;
 
     if(EM.Settings.GetValue('ui','disableShouting')) {
@@ -2384,6 +2383,12 @@ ShoutboxControls.prototype = {
     }
 
     return true;
+  },
+  
+  ev_shoutchange: function(evt) {
+	var shout = this.form_text.value;
+	shout=this.replacer.do_replace(shout);
+	unsafeWindow.setShoutChars(shout, this.form_chars);
   },
 
   ev_shoutkeys: function(evt) {
@@ -2425,6 +2430,7 @@ ShoutboxControls.prototype = {
       } else {
         EM.Shouts._ACIndex = null;
         EM.Shouts._ACList = null;
+		this.ev_shoutchange(evt);
       }
       if (evt.keyCode== 13) {
         evt.preventDefault();
@@ -2434,7 +2440,6 @@ ShoutboxControls.prototype = {
         }
       }
     }
-    unsafeWindow.shoutBoxKey.apply(window,arguments);
   },
 
   ev_resize: function(delta) {
