@@ -4030,9 +4030,79 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,275,241,'','em_QSM');
+    var w = new OverlayWindow(coords.x,coords.y,275,576,'','em_QSM');
     w.InitDropdown();
     var tbl = w.CreateMenu();
+
+    tbl.addMenuItem(
+        "/graphics/sitemap/home.gif",
+        "/index.php",
+        "Index");
+
+    tbl.addMenuItem(
+        "/graphics/sitemap/users.gif",
+        "/memberlist.php",
+        "Benutzer");
+    tbl.addMenuItem(
+        "/graphics/sitemap/group.gif",
+        "/groupcp.php",
+        "Gruppen");
+
+    tbl.addMenuItem(
+        "/graphics/sitemap/my.gif",
+        "/my.php",
+        "Meine Ecke");
+    tbl.addMenuItem(
+        "/graphics/sitemap/synonyms.gif",
+        "/viewsynonyms.php",
+        "Synonyme");
+
+    tbl.addMenuItem(
+        "/graphics/sitemap/staff.gif",
+        "/staff.php",
+        "Das Team");
+    tbl.addMenuItem(
+        "/graphics/sitemap/blog.gif",
+        "/blogs.php?blog_id=1",
+        "Team-Blog"); //Should be blag ...
+    tbl.addMenuItem(
+        "/graphics/sitemap/rssfeed.gif",
+        "/sites.php?id=13",
+        "Foren-Newsfeeds");
+    tbl.addMenuItem(
+        "/graphics/sitemap/newsfeeds.gif",
+        "/newsfeeds.php",
+        "Weitere Newsfeeds");
+    tbl.addMenuItem(
+        "/graphics/sitemap/museum.gif",
+        "/museum.html",
+        "Museum");
+
+    tbl.addMenuItem(
+        "/graphics/sitemap/help.gif",
+        "/sites.php?id=19",
+        "Hilfe");
+    tbl.addMenuItem(
+        "/graphics/sitemap/guidelines.gif",
+        "/sites.php?id=9",
+        "Richtlinien");
+    tbl.addMenuItem(
+        "/graphics/sitemap/legend.gif",
+        "/sites.php?id=6",
+        "Legende");
+    tbl.addMenuItem(
+        "/graphics/sitemap/df_banner.gif",
+        "/sites.php?id=16",
+        "Banner &amp; Grafiken");
+
+    tbl.addMenuItem(
+        "/graphics/sitemap/copyright.gif",
+        "/sites.php?id=3",
+        "Copyright");
+    tbl.addMenuItem(
+        "/graphics/sitemap/imprint.gif",
+        "/sites.php?id=2",
+        "Impressum");
 
     return false;
   },
