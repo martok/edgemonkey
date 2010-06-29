@@ -1301,6 +1301,7 @@ function SettingsStore() {
     this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
+    this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Sitemap', 'pagehack.quickSitemapMenu', 'bool', true),
     this.AddSetting( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', 'pagehack.extPostSubmission', 'bool', true),
     this.AddSetting( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen', 'pagehack.smileyOverlay',[
           ['Nein', 0],
@@ -3331,6 +3332,9 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','quickSearchMenu')) {
     this.AddQuickSearchMenu();
   }
+  if(EM.Settings.GetValue('pagehack','quickSitemapMenu')) {
+    this.AddQuickSitemapMenu();
+  }
   if(EM.Settings.GetValue('ui','betaFeatures')) {
     this.AddBetaLinks();
   }
@@ -3868,6 +3872,12 @@ Pagehacks.prototype = {
     link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
   },
 
+  AddQuickSitemapMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[12]/a[img]");
+	if(link==null) return;
+    link.setAttribute('onclick','return EM.Pagehacks.QuickSitemapMenu()');
+  },
+
   QuickProfileMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
     var bcr = link.getBoundingClientRect();
@@ -4010,6 +4020,19 @@ Pagehacks.prototype = {
         "/graphics/Open.gif",
         "/search.php?search_id=myopen",
         "Meine offenen Fragen");
+
+    return false;
+  },
+
+  QuickSitemapMenu: function() {
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[12]/a[img]");
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom+10);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,275,241,'','em_QSM');
+    w.InitDropdown();
+    var tbl = w.CreateMenu();
 
     return false;
   },
