@@ -2072,6 +2072,7 @@ ShoutboxReplacer.prototype = {
 							}
 						  } break;
 						  case 'K@': {
+							if(txt.indexOf('http://')!=0) txt='http://'+txt;
 							return before+"[url="+txt+"]*klick*[/url]";
 						  } break;
 						}
@@ -2968,50 +2969,59 @@ Pagehacks.prototype = {
   },
 
   TLColourize: function (tltable, isForum) {
+	if(!tltable) return;
     var entries = queryXPathNodeSet(tltable,"./tbody/tr");
     var col_ofs = (isForum)?1:0;
+    var singlePostMode=false;;
 
     for(var i = 1; i < entries.length - col_ofs; i++) { //Skip entry 0 (table header)
       var row = entries[i];
       var cols = queryXPathNodeSet(row, './td');
-
-      if (cols.length<2 && cols.length && cols[0].className=='catHead'){ // looks like single post mode
-        console.log('Single post mode???');
-        break; 
-      }                                                         // TODO: switch processing mode
-      var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span[1]/a[1]");
-      if (isForum) {
-        var puser_l = queryXPathNode(row,"./td[5]/a[2]");
-        var pcount = queryXPathNode(row,"./td[4]/div");
-      } else {
-        var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
-        var pcount = queryXPathNode(row,"./td[3]/div/span");
+      if(!cols.length) continue;
+      
+      if (cols.length<2){
+        if(i==1 && cols[0].className=='catHead'){ // looks like single post mode
+          singlePostMode=true;
+		}
+        continue;
+     }else if(singlePostMode){
+        var tuser_l = queryXPathNode(row,"./td[1]/span[1]/b[1]/a[1]");
+	 }else{
+        var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span[1]/a[1]");
+        if (isForum) {
+          var puser_l = queryXPathNode(row,"./td[5]/a[2]");
+          var pcount = queryXPathNode(row,"./td[4]/div");
+        } else {
+          var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
+          var pcount = queryXPathNode(row,"./td[3]/div/span");
+        }
       }
       if(tuser_l){
         var t_cssClassAdd = EM.User.helper_getHLStyleByUserLink(tuser_l);
       }else{
         var t_cssClassAdd = "";
       }
-      var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
-
-      var c_cssClassAdd = '';
-      if (pcount.textContent == 0) {
-          c_cssClassAdd += ' emctpl' + 1; //Red
-      } else if (pcount.textContent < 3) {
-          c_cssClassAdd += ' emctpl' + 2; //Orange
-      } else if (pcount.textContent < 10) {
-          c_cssClassAdd += ' emctpl' + 3; //Yellow
-      } else if (pcount.textContent < 40) {
-          c_cssClassAdd += ' emctpl' + 4; //Green
-      } else if (pcount.textContent < 100) {
-          c_cssClassAdd += ' emctpl' + 5; //Blue
-      } else if (pcount.textContent < 500) {
-          c_cssClassAdd += ' emctpl' + 6; //Magenta
-      } else {
-          c_cssClassAdd += ' emctpl' + 7; //Lila
+      if(!singlePostMode){
+        var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
+  
+        var c_cssClassAdd = '';
+        if (pcount.textContent == 0) {
+            c_cssClassAdd += ' emctpl' + 1; //Red
+        } else if (pcount.textContent < 3) {
+            c_cssClassAdd += ' emctpl' + 2; //Orange
+        } else if (pcount.textContent < 10) {
+            c_cssClassAdd += ' emctpl' + 3; //Yellow
+        } else if (pcount.textContent < 40) {
+            c_cssClassAdd += ' emctpl' + 4; //Green
+        } else if (pcount.textContent < 100) {
+            c_cssClassAdd += ' emctpl' + 5; //Blue
+        } else if (pcount.textContent < 500) {
+            c_cssClassAdd += ' emctpl' + 6; //Magenta
+        } else {
+            c_cssClassAdd += ' emctpl' + 7; //Lila
+        }
       }
 
-      //Remove the DF Highlighting to ensure proper colors :P
       var std_own = document.createElement('span');
       std_own.innerHTML = /Highlight/.test(cols[0].className) ? 'B' : '-';
 
@@ -3021,57 +3031,85 @@ Pagehacks.prototype = {
         //Now lets check against the blacklist :P
         cols[0].className += t_cssClassAdd;
         cols[1].className += t_cssClassAdd;
-        if (col_ofs) cols[2].className += rowfix + t_cssClassAdd;
-        cols[2+col_ofs].className += rowfix + c_cssClassAdd;
-        cols[3+col_ofs].className += rowfix + p_cssClassAdd;
 
+        //Remove the DF Highlighting to ensure proper colors :P
         cols[0].className = cols[0].className.replace(/Highlight/, '');
         cols[1].className = cols[1].className.replace(/Highlight/, '');
-        if (col_ofs) cols[2].className = cols[2].className.replace(/Highlight/, '');
-        cols[2+col_ofs].className = cols[2+col_ofs].className.replace(/Highlight/, '');
-        cols[3+col_ofs].className = cols[3+col_ofs].className.replace(/Highlight/, '');
+
+        if(singlePostMode){
+          var cols2=queryXPathNodeSet(entries[i+1], './td');
+          cols2[0].className += t_cssClassAdd;
+          cols2[0].className = cols2[0].className.replace(/Highlight/, '');
+        }else{
+          if (col_ofs) cols[2].className += rowfix + t_cssClassAdd;
+          cols[2+col_ofs].className += rowfix + c_cssClassAdd;
+          cols[3+col_ofs].className += rowfix + p_cssClassAdd;
+          if (col_ofs) cols[2].className = cols[2].className.replace(/Highlight/, '');
+          cols[2+col_ofs].className = cols[2+col_ofs].className.replace(/Highlight/, '');
+          cols[3+col_ofs].className = cols[3+col_ofs].className.replace(/Highlight/, '');
+        }
       }
 
-      //We need to do this here, since we will change HTML later ...
-      var img = queryXPathNode(cols[0], './/img');
-      //Add "Close topic" link ...
       var div = document.createElement('div');
-      div.className+='intbl';
-
-      var cnt = document.createElement('span');
-      cnt.className = 'incell left';
-      cnt.innerHTML = cols[0].innerHTML;
-      cols[0].innerHTML = '';
-
-      //Fix for a bug in TUFKAPL source
-      cnt.id = cols[0].id;
-      cols[0].id = '';
+      div.className='intbl';
 
       var std = document.createElement('span');
       std.className = 'gensmall incell right';
+	  
+	  var strUser=queryXPathNode(tuser_l, './span').textContent;
 
-      var isSelf = tuser_l && (queryXPathNode(tuser_l, './span').textContent == EM.User.loggedOnUser);
+      var isSelf = tuser_l && (strUser == EM.User.loggedOnUser);
 
-      if(img && isSelf && !img.src.match(/answered/) && !img.src.match(/lock/)) {
-        var topicid = img.id.match(/^folderFor(\d+)$/);
-        var std_a = document.createElement('a');
-        std_a.innerHTML = '&#x2714;';
-        std_a.id = 'answerLink'+topicid[1];
-        std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
-        std_a.style.cssText+=' cursor:pointer;';
-        std.appendChild(std_a);
-      }
+      if(singlePostMode){
+		i++;
+		var it_span_user = document.createElement('span');
+		it_span_user.className = 'incell left';
+		it_span_user.innerHTML=cols[0].innerHTML;
+		cols[0].innerHTML='';
+		div.appendChild(it_span_user);
+		if(!isSelf){
+			if(EM.Settings.GetValue('topic','button_stalk')) {
+			  var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk_t, 'topic', 'stalk');
+			  std.appendChild(l_stalk);
+			}
+			if(EM.Settings.GetValue('topic','button_killfile')) {
+			  var l_kill = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_kill, 'topic', 'killfile');
+			  std.appendChild(l_kill);
+			}
+		}
+	  }else{
+		  var img = queryXPathNode(cols[0], './/img');
+		  
+		  var cnt = document.createElement('span');
+		  cnt.className = 'incell left';
+		  cnt.innerHTML = cols[0].innerHTML;
+		  cols[0].innerHTML = '';
 
-      var std_br = document.createElement('br');
-      std.appendChild(std_br);
-      std.appendChild(std_own);
+		  //Fix for a bug in TUFKAPL source
+		  cnt.id = cols[0].id;
+		  cols[0].id = '';
 
-      std.style.cssText+=' vertical-align:top;';
-      std.style.cssText+=' min-width:1.1em;';
-      std.style.cssText+=' min-height:23px;';
+		  div.appendChild(cnt);
 
-      div.appendChild(cnt);
-      div.appendChild(std);
+		  if(img && isSelf && !img.src.match(/answered/) && !img.src.match(/lock/)) {
+			var topicid = img.id.match(/^folderFor(\d+)$/);
+			var std_a = document.createElement('a');
+			std_a.innerHTML = '&#x2714;';
+			std_a.id = 'answerLink'+topicid[1];
+			std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
+			std_a.style.cssText+=' cursor:pointer;';
+			std.appendChild(std_a);
+		  }
+		  var std_br = document.createElement('br');
+		  std.appendChild(std_br);
+		  std.appendChild(std_own);
+
+		  std.style.cssText+=' vertical-align:top;';
+		  std.style.cssText+=' min-width:1.1em;';
+		  std.style.cssText+=' min-height:23px;';
+
+	  }
+	  div.appendChild(std);
 
       cols[0].appendChild(div);
     }
@@ -3251,7 +3289,7 @@ Pagehacks.prototype = {
     var sp = EM.Buttons.mainTable.getElementsByTagName('span');
     var noresult = false;
     for (var i=0; i<sp.length; i++) {
-      if (sp[i].firstChild.textContent.match( /Keine Beitr.*?ge entsprechen Deinen Kriterien./ )) {
+      if (sp[i].textContent.match( /Keine Beitr.*?ge entsprechen Deinen Kriterien./ )) {
         sp[i].innerHTML+='<br><br><a href="javascript:history.go(-1)">Zur&uuml;ck zum Suchformular</a>';
         sp[i].innerHTML+='<br><br><a href="/index.php">Zur&uuml;ck zum Index</a>';
         noresult = true;
