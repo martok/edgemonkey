@@ -1550,8 +1550,6 @@ function ShoutboxReplacer(){
 		);
 	this.fixedReplacements=this.length();
 	this.allowedTextChars="\\w\\-=@\\(\\)\\[\\]\\{\\}äöüÄÖÜß";
-	this.REText="["+this.allowedTextChars+"]";
-	this.REnoText="[^"+this.allowedTextChars+"]";
 	this.load();
 }
 
@@ -1565,15 +1563,26 @@ ShoutboxReplacer.prototype = {
 	},
 	
 	do_replace: function (str){
-		var regExp,s,replacement;
+		var regExp,s,replacement,sRepl;
+		var reg=/(^|[^\\])(\\*)\$(\d+)(?=$|\D)/g; //RegExp to increase references
 		for(var i=0;i<this.length();i++){
 			replacement=this.get(i);
 			if(replacement.length<4) continue;
 			s=this.regexp_toString(replacement[0]);
-			if(replacement[2]) s="(?:^|\\b)"+s+"(?=$|"+this.REnoText+")";
+			sRepl=replacement[1];
+			if(replacement[2]){
+				sRepl="$1"+sRepl.replace(reg,function (str, start, bs, digit, offset, s){
+					if(bs.length % 2==1) return str;//odd count of backslashes -->escape $
+					return start+bs+"$"+(digit*1+1);
+				});
+				var noText=this.allowedTextChars;
+				if(s[0]==':') noText+=':';
+				noText='[^'+noText+']';
+				s="(^|"+noText+")"+s+"(?=$|"+noText+")";
+			}
 			if(replacement[3]) regExp=new RegExp(s,"g");
 			else regExp=new RegExp(s,"gi");
-			str=str.replace(regExp,replacement[1]);
+			str=str.replace(regExp,sRepl);
 		}
 		//AutoTagging
 		str = str.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß:\/]+[\w\-=@\(\[\]\{\}äöüÄÖÜß]))/g,
