@@ -3618,9 +3618,14 @@ Pagehacks.prototype = {
       if(!linkUser){
         linkUser=tdProfile;
         var spanUser = queryXPathNode(linkUser, "span[1]/b");
+		if(!spanUser) spanUser = queryXPathNode(linkUser, "b[1]/span[1]");
       }else{
         var spanUser = queryXPathNode(linkUser, "span[1]");
       }
+	  if(!spanUser){
+		console.log("Error on higlighter");
+		continue;
+	  }
   	  var idPost = queryXPathNode(tdProfile, "a[1]");
       if(idPost) idPost = idPost.name;
       else{
@@ -3630,7 +3635,6 @@ Pagehacks.prototype = {
         tdProfile.insertBefore(newA,tdProfile.firstChild);
       }
       
-	
       var strUser = spanUser.textContent;
       var isSelf=strUser==EM.User.loggedOnUser
 	    var cssClassAdd = EM.User.helper_getHLStyleByUserLink(linkUser);
