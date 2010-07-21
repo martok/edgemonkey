@@ -1604,8 +1604,178 @@ UserManager.prototype = {
 
 }
 
+function ShoutboxReplacer(){
+	//suchString, Replacement, WortGrenzen, CaseSensitive
+	this.replacements = new Array(
+		"benbe", "BenBE",true,false,
+		"cih", "ich",true,false,
+		"mrg", ":mrgreen:",true,false,
+		/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/, ":mrgreen:",true,false,
+		"mrgreen", ":mrgreen:",true,false,
+		":+mrgreen:+", ":mrgreen:",false,false,
+		"FIF", "Fragen in's Forum :mahn:",true,false,
+		"SIWO", "Suche ist weiter oben :mahn:",true,false,
+		//Wall-Hack
+		":wall:", ":autsch:",true,false,
+		//Wikipedia Link support
+		/\[\[(\w\w):(\w+)\|(.*?)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]",true,false,
+		/\[\[(\w+)\|(.*?)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]",true,false,
+		/\[\[(\w\w):(\w+)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]",true,false,
+		/\[\[(\w+)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]",true,false,
+		/RFC\s?0*((?!0)\d+)/, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]",true,false,
+		//Implement /me-Tags ;-)
+		/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false,
+		//User-Tag-Verlinkung
+		"@GTA", "[user=\"GTA-Place\"]GTA-Place[/user]",true,false,
+		"@TUFKAPL", "[user=\"Christian S.\"]TUFKAPL[/user]",true,false,
+		"@Wolle", "[user=\"Wolle92\"]Wolle92[/user]",true,false
+		);
+	this.fixedReplacements=this.length();
+	this.allowedTextChars="\\w\\-=@\\(\\)\\[\\]\\{\\}äöüÄÖÜß";
+	this.load();
+}
+
+ShoutboxReplacer.prototype = {
+	regexp_toString: function (regE){
+		if(regE instanceof RegExp){
+			var s=regE.toString();
+			s=s.substr(1,s.lastIndexOf('/')-1);
+			return s;
+		}else return regE;
+	},
+	
+	do_replace: function (str){
+		var regExp,s,replacement,sRepl;
+		var reg=/(^|[^\\])(\\*)\$(\d+)(?=$|\D)/g; //RegExp to increase references
+		for(var i=0;i<this.length();i++){
+			replacement=this.get(i);
+			if(replacement.length<4) continue;
+			s=this.regexp_toString(replacement[0]);
+			sRepl=replacement[1];
+			if(replacement[2]){
+				sRepl="$1"+sRepl.replace(reg,function (str, start, bs, digit, offset, s){
+					if(bs.length % 2==1) return str;//odd count of backslashes -->escape $
+					return start+bs+"$"+(digit*1+1);
+				});
+				var noText=this.allowedTextChars;
+				noText='[^'+noText+']';
+				s="(^|"+noText+")"+s+"(?=$|"+noText+")";
+			}
+			if(replacement[3]) regExp=new RegExp(s,"g");
+			else regExp=new RegExp(s,"gi");
+			for(var j=0;j<2;j++){
+				str=str.replace(regExp,sRepl);
+			}
+		}
+		//AutoTagging
+		str = str.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß:\/]+[\w\-=@\(\[\]\{\}äöüÄÖÜß]))/g,
+					  function($0,before,cmd,brace,free) {
+						var txt = free?free:brace;
+						var re;
+						if (txt=='') return '';
+						switch(cmd) {
+						  case '@': return before+'[user]'+txt+'[/user]';
+						  case 'G@': return before+'[url=http://www.lmgtfy.com/?q='+encodeURIComponent(txt)+']LMGTFY: '+txt+'[/url]';
+						  case '\\@': return before+'[url=http://ls.em.local/'+encodeLongShout(txt)+']...[/url]';
+						  case 'T@': {
+							if(re = resolveForumSelect("\\d+", txt)) {
+							  return before+"[url=http://www."+re.forum+".de/viewtopic.php?t="+
+									  re.found+"]Topic "+re.found+"[/url]";
+							}
+						  } break;
+						  case 'P@': {
+							if(re = resolveForumSelect("\\d+", txt)) {
+							  return before+"[url=http://www."+re.forum+".de/viewtopic.php?p="+
+									  re.found+"#"+re.found+"]Post "+re.found+"[/url]";
+							}
+						  } break;
+						  case 'F@': {
+							if(re = resolveForumSelect("\\d+", txt)) {
+							  return before+"[url=http://www."+re.forum+".de/viewforum.php?f="+
+									  re.found+"]Forum "+re.found+"[/url]";
+							}
+						  } break;
+						  case 'S@': {
+							if(re = resolveForumSelect(".*?", txt)) {
+							  console.log(re);
+							  return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
+									  encodeURIComponent(re.found)+"]"+re.found+"[/url]";
+							}
+						  } break;
+						  case 'K@': {
+							if(txt.indexOf('://')<0) txt='http://'+txt;
+							return before+"[url="+txt+"]*klick*[/url]";
+						  } break;
+						}
+						return $0;
+					  });
+					  
+		str = str.replace(/@@/g, '@');
+		return str;
+	},
+	
+	getSearchString: function (index){
+		if(index<0 || index>=this.length()) return "";
+		return this.regexp_toString(this.replacements[index*4]);
+	},
+	
+	findSearchString: function (sSearch){
+		sSearch=this.regexp_toString(sSearch);
+		for(var i=0; i<this.length(); i++){
+			if(this.getSearchString(i)==sSearch) return i;
+		}
+		return -1;
+	},
+	
+	length: function (){
+		return Math.floor(this.replacements.length/4);
+	},
+	
+	get: function (index){
+		if(index<0 || index>=this.length()) return new Array();
+		index*=4;
+		return this.replacements.slice(index,index+4);
+	},
+	
+	add: function (sSearch,sReplace,useWordbounds,caseSensitive,doSave){
+		if(isUndef(sSearch) || isUndef(sReplace)) return;
+		var index=this.findSearchString(sSearch);
+		if(index<0){
+			//add new
+			index=this.length();
+		}else if(index<this.fixedReplacements) return; //Don't overwrite standart
+		index*=4;
+		this.replacements[index]=sSearch;
+		this.replacements[index+1]=sReplace;
+		this.replacements[index+2]=(useWordbounds!=false); //standart is true
+		this.replacements[index+3]=(caseSensitive==true); //standart is false
+		if(doSave!=false) this.save();
+	},
+	
+	remove: function (sSearch){
+		var index=this.findSearchString(sSearch);
+		if(index>=0){
+			this.replacements.splice(index*4,4);
+			this.save();
+		}
+	},
+	
+	load: function (){
+		var newEntries=EM.Settings.load_field('sb-replacements');
+		if(isUndef(newEntries)) return;
+		for(var i=0; i<newEntries.length-3; i+=4){
+			this.add(newEntries[i],newEntries[i+1],newEntries[i+2],newEntries[i+3],false);
+		}
+	},
+	
+	save: function (){
+		EM.Settings.store_field('sb-replacements',this.replacements);
+	}
+}
 
 function ShoutboxControls() {
+  this.replacer=new ShoutboxReplacer();
+  
   this.shout_obj = document.getElementById('sidebar_shoutbox');
 
   this.get_iframe = function () {
@@ -1656,7 +1826,7 @@ function ShoutboxControls() {
       with (insertCell(-1)) {
         align='left';
         colSpan=3;
-        innerHTML='<textarea class="gensmall" onchange="shoutBoxKey()" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="shoutBoxKey()" name="shoutmessage"'+
+        innerHTML='<textarea class="gensmall" onchange="EM.Shouts.ev_shoutchange(event)" onkeydown="EM.Shouts.ev_shoutkeys(event)" onkeyup="EM.Shouts.ev_shoutchange(event)" name="shoutmessage"'+
                   ' id="shoutmessage" style="width:100%; font-size: 11px; height: 4em"></textarea>';
       }
     }
@@ -1678,7 +1848,6 @@ function ShoutboxControls() {
   }
   this.form_text = document.getElementById('shoutmessage');
   this.form_chars = document.getElementById('shoutchars');
-  //addEvent(this.form,'submit',function() {return false });
   this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
   var ifr=this.get_iframe();
@@ -1777,18 +1946,9 @@ ShoutboxControls.prototype = {
 
   ev_sb_post: function (evt) {
     var s = EM.Shouts.form_text.value;
-    s = s.replace(/\bbenbe\b/gi, "BenBE");
-    s = s.replace(/\bcih\b/g, "ich");
-    s = s.replace(/\bnciht\b/g, "nicht");
-    s = s.replace(/\bmrg\b/gi, ":mrgreen:");
-    s = s.replace(/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/gi, ":mrgreen:");
-    s = s.replace(/\bmrgreen\b/gi, ":mrgreen:");
-    s = s.replace(/:+mrgreen:+/gi, ":mrgreen:");
-    s = s.replace(/\bFIF\b/g, "Fragen in's Forum :mahn:");
-    s = s.replace(/\bSIWO\b/g, "Suche ist weiter oben :mahn:");
-
-    //Wall-Hack
-    s = s.replace(/:wall:/g, ":autsch:");
+	
+	//replace some stuff
+    s=this.replacer.do_replace(s);
 
     //Check for references to the branch
     if(/http:\/\/(?:branch|trunk)\./i.test(s)) {
@@ -1797,12 +1957,6 @@ ShoutboxControls.prototype = {
         return false;
       }
     }
-
-    //Wikipedia Link Support ...
-    s = s.replace(/\[\[(\w\w):(\w+)\|(.*?)\]\]/gi, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]");
-    s = s.replace(/\[\[(\w+)\|(.*?)\]\]/gi, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]");
-    s = s.replace(/\[\[(\w\w):(\w+)\]\]/gi, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]");
-    s = s.replace(/\[\[(\w+)\]\]/gi, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]");
 
     //Check for brackets in the shout (possible BBCodes
     if(/[\[\]]/i.test(s)) {
@@ -1854,59 +2008,6 @@ ShoutboxControls.prototype = {
       }
     }
 
-    //User-Tag-Verlinkung
-    s = s.replace(/^@(GTA):/g, "[user=\"GTA-Place\"]GTA-Place[/user]:");
-    s = s.replace(/^@(TUFKAPL):/g, "[user=\"Christian S.\"]TUFKAPL[/user]:");
-    s = s.replace(/^@(Wolle):/g, "[user=\"Wolle92\"]Wolle92[/user]:");
-
-    //AutoTagging
-    s = s.replace(/(^|\s)([\w\\]?@(?!@))(?:(?:\{(.+?)\})(?=$|[^\}])|([\w\.\-=@\(\)\[\]\{\}äöüÄÖÜß]+[\w\-=@\(\)\[\]\{\}äöüÄÖÜß]))/g,
-                  function($0,before,cmd,brace,free) {
-                    var txt = free?free:brace;
-                    var re;
-                    if (txt=='') return '';
-                    switch(cmd) {
-                      case '@': return before+'[user]'+txt+'[/user]';
-                      case 'G@': return before+'[url=http://www.lmgtfy.com/?q='+encodeURIComponent(txt)+']LMGTFY: '+txt+'[/url]';
-                      case '\\@': return before+'[url=http://ls.em.local/'+encodeLongShout(txt)+']...[/url]';
-                      case 'T@': {
-                        if(re = resolveForumSelect("\\d+", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/viewtopic.php?t="+
-                                  re.found+"]Topic "+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'P@': {
-                        if(re = resolveForumSelect("\\d+", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/viewtopic.php?p="+
-                                  re.found+"#"+re.found+"]Post "+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'F@': {
-                        if(re = resolveForumSelect("\\d+", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/viewforum.php?f="+
-                                  re.found+"]Forum "+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'S@': {
-                        if(re = resolveForumSelect(".*?", txt)) {
-                          return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
-                                  encodeURIComponent(re.found)+"]"+re.found+"[/url]";
-                        }
-                      } break;
-                      case 'K@': {
-                        return before+"[url="+txt+"]*klick*[/url]";
-                      } break;
-                    }
-                    return $0;
-                  });
-    s = s.replace(/@@/g, '@');
-
-    s = s.replace(/\bRFC\s?0*((?!0)\d+)\b/g, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]");
-
-
-    //Implement /me-Tags (if present) ;-)
-    s = s.replace(/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]");
-
     EM.Shouts.form_text.value = s;
 
     if(EM.Settings.GetValue('ui','disableShouting')) {
@@ -1914,6 +2015,12 @@ ShoutboxControls.prototype = {
     }
 
     return true;
+  },
+  
+  ev_shoutchange: function(evt) {
+	var shout = this.form_text.value;
+	shout=this.replacer.do_replace(shout);
+	unsafeWindow.setShoutChars(shout, this.form_chars);
   },
 
   ev_shoutkeys: function(evt) {
@@ -1955,6 +2062,7 @@ ShoutboxControls.prototype = {
       } else {
         EM.Shouts._ACIndex = null;
         EM.Shouts._ACList = null;
+		this.ev_shoutchange(evt);
       }
       if (evt.keyCode== 13) {
         evt.preventDefault();
@@ -1964,7 +2072,6 @@ ShoutboxControls.prototype = {
         }
       }
     }
-    unsafeWindow.shoutBoxKey.apply(window,arguments);
   },
 
   ev_resize: function(delta) {
