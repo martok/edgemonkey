@@ -1777,7 +1777,6 @@ UserManager.prototype = {
     if(isUndef(group)) {
       group='topic';
     }
-
     if (isEmpty(user_link)) {
       return '';
     }
@@ -3000,6 +2999,11 @@ Pagehacks.prototype = {
         var t_cssClassAdd = EM.User.helper_getHLStyleByUserLink(tuser_l);
       }else{
         var t_cssClassAdd = "";
+        tuser_l = queryXPathNode(row,"./td[2]/span[2]/span[1]");
+		if(!tuser_l){
+			console.log('No user link');
+			continue;
+		}
       }
       if(!singlePostMode){
         var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
