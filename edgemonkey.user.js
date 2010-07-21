@@ -1576,7 +1576,6 @@ ShoutboxReplacer.prototype = {
 					return start+bs+"$"+(digit*1+1);
 				});
 				var noText=this.allowedTextChars;
-				if(s[0]==':') noText+=':';
 				noText='[^'+noText+']';
 				s="(^|"+noText+")"+s+"(?=$|"+noText+")";
 			}
