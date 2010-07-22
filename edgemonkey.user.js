@@ -1542,167 +1542,28 @@ UserManager.prototype = {
 }
 
 function Notifier() {
-  this.Element = document.createElement('div');
-  this.Element.style.cssText = 'position:fixed;left:0;top:0;height:0px;right:0;opacity:0.9;overflow:hidden;'+
-                               'background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
-                               '-moz-user-select:none;z-index:999999;cursor:default';
-  this.fadeTimer = null;
-  document.body.appendChild(this.Element);
-
-  this.Close = document.createElement('span');
-  this.Element.appendChild(this.Close);
-  this.Close.style.cssText='height:14px;width:14px;float:right;margin:8px 4px;cursor:pointer;background: url("chrome://global/skin/icons/close.png")';
-  this.Close.innerHTML='&nbsp;';
-  var t=this;
-  addEvent(t.Close, 'click', function() {
-    t.fadeOut();
-  });
-
-  this.List = document.createElement('ul');
-  this.Element.appendChild(this.List);
-  this.List.style.cssText='list-style-type: none;margin:0;padding:0';
-
-  this._popups={};
+  this.container=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
+  previousNode(this.container).style.paddingRight='12px';
+  this.container.className="overall_menu";
+  this.PNs = new Notifier.Field(this,'privstuff',
+     '<span style="background: url(\'/graphics/Portal-PM.gif\') 0pt -10px; width: 21px; height: 16px;display:table-cell" />',
+     'bla');
 }
-
-Notifier.REPLACE = 1<<0;
-Notifier.POPUP   = 1<<1;
 
 Notifier.prototype = {
-  fadeIn: function() {
-    this.targetHeight=30;
-    this.fade();
-    this.List.style.visibility='visible';
-  },
-  fadeOut: function() {
-    this.List.style.visibility='hidden';
-    if(this.List.children.length) {
-      this.targetHeight=3;
-      var t=this;
-      t.fadeEvent = addEvent(t.Element, 'mouseover', function() {
-        t.fadeIn();
-        removeEvent(t.Element, 'mouseover',t.fadeEvent);
-      });
-    } else {
-      this.targetHeight=0;
-    }
-    this.fade();
-  },
-  fade: function() {
-    if(this.fadeTimer) {
-      window.clearTimeout(this.fadeTimer);
-      this.fadeTimer = null;
-    }
-    var h = parseInt(this.Element.style.height);
-    var step = 2;
-    if (Math.abs(h-this.targetHeight)<step) {
-      this.Element.style.height = this.targetHeight+'px';
-    } else {
-      this.Element.style.height = (h + Math.sign(this.targetHeight-h)*step)+'px';
-      this.fadeTimer = window.setTimeout('EM.Notifier.fade()', 10);
-    }
-  },
-  notify: function(icon,title,detail,uniquename,options) {
-    if (typeof detail=='string') {
-      var k=document.createElement('div');
-      k.innerHTML=detail;
-      detail=k;
-    }
-    if (isEmpty(options)) {
-      options=0;
-    }
-    if (isEmpty(uniquename)) {
-      uniquename=Math.floor(Math.random()*1E6);
-    }
-    uniquename='em_notification_'+uniquename;
-
-    detail.style.display='none';
-    this.fadeIn();
-
-    var f = document.getElementById(uniquename);
-    if (f) {
-      if (options & Notifier.REPLACE) {
-        this.realRemove(f);
-      } else {
-        return;
-      }
-    }
-    f = document.createElement('li');
-    f.id=uniquename;
-    f.style.cssText='float:left;display:inline;overflow:hidden;height:20px; background-color:#EFEFF4;'+
-                    '-moz-border-radius:5px;padding:3px;margin-left:5px;cursor:pointer';
-    f.innerHTML = '<a><img border="0" style="width: 19px; height: 18px;" src="'+icon+'" alt="'+title+'" class="navbar">'+title+'</a>';
-    var c = document.createElement('img');
-    f.appendChild(c);
-    f.appendChild(detail);
-
-    this.List.appendChild(f);
-    var t=this;
-    addEvent(f, 'click', function() {
-      t.expand(f);
-      t.popup(f);
-    });
-
-    c.style.cssText='height:16px;width:16px; margin-top:2px;float:right;cursor:pointer';
-    c.src=data.close;
-    addEvent(c,'click',function(el,e) {
-      e.preventDefault();
-      e.stopPropagation();
-      t.remove(f.id);
-    });
-
-    this.expand(f);
-    if (options & Notifier.POPUP) {
-      setTimeout(function() {t.popup(f);}, 150);
-    }
-  },
-  expand: function(e) {
-    this.collapseAll();
-    if (isEmpty(e)) {
-      e = this.List.lastElementChild;
-    }
-    e.style.width='';
-  },
-  collapseAll: function() {
-    for (var i=0; i<this.List.children.length; i++) {
-      var e=this.List.children[i];
-      e.style.width='20px';
-    }
-  },
-  popup: function(e) {
-    var a = e.lastElementChild;
-    var coords = new Point(e.getBoundingClientRect().left, e.getBoundingClientRect().bottom);
-    coords.TranslateWindow();
-    var w = new OverlayWindow(coords.x,coords.y,300,180,'','em_notificationpopup');
-    w.InitDropdown();
-    a.style.display='';
-    this._popups[e.id]=w;
-
-    w.ContentArea.appendChild(a);
-    w.OnClose = function(wi) {
-      var el=document.getElementById(e.id);
-      var d=wi.ContentArea.lastElementChild;
-      if (el && el.children.length==2) el.appendChild(d);
-      d.style.display='none';
-    }
-  },
-  remove: function(e) {
-    if (typeof e=='string')
-      e=document.getElementById(e);
-    this.realRemove(e);
-    if (!this.List.children.length) {
-      this.fadeOut();
-    } else {
-      this.expand();
-    }
-  },
-  realRemove: function(el) {
-    this._popups[el.id].Close();
-    delete this._popups[el.id];
-    this.List.removeChild(el);
-  }
 }
 
+Notifier.Field = function(parent,id,img,text) {
+  this.field = document.createElement('div');
+  parent.container.appendChild(this.field);
+  this.field.innerHTML='<a onclick="" href="" class="dfnav">'+img+'</a>';
+  this.field.style.cssText='display:table;padding-right:12px';
+  this.text = document.createElement('a');
+  this.text.style.cssText='display:table-cell;vertical-align:middle';
+  this.text.className='dfnav';
+  this.field.appendChild(this.text);
+  this.text.innerHTML=text;
+}
 
 function ShoutboxControls() {
   this.shout_obj = document.getElementById('sidebar_shoutbox');
