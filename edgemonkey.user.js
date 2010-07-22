@@ -1549,16 +1549,20 @@ function Notifier() {
      '<img src="/graphics/PN.gif" border="0"/>',
      'PNs');
   this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
-  this.PNs.setTextAction('http://branch.delphi-forum.de/privmsg.php?folder=inbox');
+  this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
 
   this.EMStuff = new Notifier.Field(this,'notmen_EM',
      '<img src="/graphics/Group.gif" border="0"/>',
      'EM');
+  this.EMStuff.setImageAction('javascript:EM.Notifier.AlertDropdown()');
+  this.EMStuff.setTextAction('javascript:EM.Notifier.AlertDropdown()');
   this.EMStuff.setWidth('0px');
+  this._alerts=[];
 }
 
 Notifier.prototype = {
   MenuPNDropdown: function() {
+    this.PNs.setHighlight(false);
     var link = this.PNs.field;
     var bcr = link.getBoundingClientRect();
     var coords = new Point(bcr.left, bcr.bottom-5);
@@ -1581,6 +1585,32 @@ Notifier.prototype = {
         );
     w.ContentArea.appendChild(tbl);
     w.ContentArea.appendChild(document.createElement('div'));
+  },
+  AlertDropdown: function() {
+    this.EMStuff.setHighlight(false);
+    this.EMStuff.setText('EM');
+    this.EMStuff.setWidth('0px');
+    var link = this.EMStuff.field;
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom-5);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_Alerts');
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+
+    this._alerts.reverse().forEach(function(el) {
+      tbl.addMenuItem(el.icon, el.href, el.title, el.html);
+    },this);
+    this._alerts=[];
+    w.ContentArea.appendChild(tbl);
+  },
+  addAlert: function(icon, title, href, html) {
+    this._alerts.push({"icon": icon, "title":title, "href":href, "html":html});
+    this.EMStuff.setText(this._alerts.length+' Meldungen');
+    this.EMStuff.setWidth('');
+    this.EMStuff.setHighlight(true);
   }
 }
 
