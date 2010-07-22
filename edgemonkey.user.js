@@ -1553,17 +1553,60 @@ function Notifier() {
 Notifier.prototype = {
 }
 
+Notifier.BLINKTIME=700;
+
 Notifier.Field = function(parent,id,img,text) {
+  var cnt2 = document.createElement('div');
+  cnt2.id=id;
+  cnt2.style.cssText='display:table-cell;vertical-align:middle';
+  parent.container.appendChild(cnt2);
+
+  var cnt = document.createElement('div');
+  cnt2.appendChild(cnt);
+  cnt.style.cssText='overflow:hidden;';
+
   this.field = document.createElement('div');
-  parent.container.appendChild(this.field);
-  this.field.innerHTML='<a onclick="" href="" class="dfnav">'+img+'</a>';
+  cnt.appendChild(this.field);
   this.field.style.cssText='display:table;padding-right:12px';
+
+  this.field.innerHTML='<a href="" class="dfnav">'+img+'</a>';
+
   this.text = document.createElement('a');
   this.text.style.cssText='display:table-cell;vertical-align:middle';
   this.text.className='dfnav';
   this.field.appendChild(this.text);
   this.text.innerHTML=text;
+
+  this._hilight=null;
 }
+
+Notifier.Field.prototype = {
+  setImageAction: function(act) {
+    this.field.firstChild.href=act;
+  },
+  setTextAction: function(act) {
+    this.text.href=act;
+  },
+  setText: function(text) {
+    this.text.innerHTML=text;
+  },
+  setWidth: function(w) {
+    this.field.parentNode.style.width=w;
+  },
+  setHighlight: function(hl) {
+    window.clearTimeout(this._hilight);
+    this.field.firstChild.style.visibility='';
+    this._hilight=null;
+    if (hl) {
+      var t = this;
+      this._hilight = window.setTimeout(function() {
+        t.field.firstChild.style.visibility=t.field.firstChild.style.visibility?'':'hidden';
+        t._hilight = window.setTimeout(arguments.callee,Notifier.BLINKTIME);
+      },Notifier.BLINKTIME);
+    }
+  }
+}
+
 
 function ShoutboxControls() {
   this.shout_obj = document.getElementById('sidebar_shoutbox');
