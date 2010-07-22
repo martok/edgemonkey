@@ -1545,12 +1545,43 @@ function Notifier() {
   this.container=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
   previousNode(this.container).style.paddingRight='12px';
   this.container.className="overall_menu";
-  this.PNs = new Notifier.Field(this,'privstuff',
-     '<span style="background: url(\'/graphics/Portal-PM.gif\') 0pt -10px; width: 21px; height: 16px;display:table-cell" />',
-     'bla');
+  this.PNs = new Notifier.Field(this,'notmen_PN',
+     '<img src="/graphics/PN.gif" border="0"/>',
+     'PNs');
+  this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
+  this.PNs.setTextAction('http://branch.delphi-forum.de/privmsg.php?folder=inbox');
+
+  this.EMStuff = new Notifier.Field(this,'notmen_EM',
+     '<img src="/graphics/Group.gif" border="0"/>',
+     'EM');
+  this.EMStuff.setWidth('0px');
 }
 
 Notifier.prototype = {
+  MenuPNDropdown: function() {
+    var link = this.PNs.field;
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom-5);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPN');
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+
+    tbl.addMenuItem(
+        "/graphics/Portal-PM.gif",
+        "/privmsg.php?folder=inbox",
+        "Private Nachrichten",
+        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
+        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
+        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
+        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
+        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
+        );
+    w.ContentArea.appendChild(tbl);
+    w.ContentArea.appendChild(document.createElement('div'));
+  }
 }
 
 Notifier.BLINKTIME=700;
@@ -2877,21 +2908,11 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,328,148,'','em_QPM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
 
-    tbl.addMenuItem(
-        "/graphics/Portal-PM.gif",
-        "/privmsg.php?folder=inbox",
-        "Private Nachrichten",
-        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
-        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
-        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
-        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
-        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
-        );
     tbl.addMenuItem(
         "/graphics/Drafts.gif",
         "/drafts.php",
