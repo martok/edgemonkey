@@ -1439,25 +1439,22 @@ PNAPI.PNBox = function (boxname) {
 
 PNAPI.PNBox.prototype = {
   list: function(first,count) {
-    var p1 = Math.floor(first / 50);
-    var pl = Math.floor((first+count-1) / 50);
     var result = [];
 
-    for (var i=p1; i<=pl;i++) {
-      var cachedResult = EM.Cache.get('pmlisting',this.box+','+i);
-      if(!cachedResult.current) {
-        cachedResult = this.updatePage(i);
-      } else {
-        cachedResult = cachedResult.data;
-      }
-      for (var k=0; k<cachedResult.length;k++) {
-        if (cachedResult[k].pos>=first && cachedResult[k].pos<first+count) {
-          result.push(cachedResult[k]);
-        }
-      }
+    var cachedResult = EM.Cache.get('pmlisting',this.box);
+    if(!cachedResult.current) {
+      cachedResult = this.forceUpdate(first,count);
+    } else {
+      cachedResult = cachedResult.data;
     }
-    return result.map(function(ms){
-      return new PNAPI.PN(this.box,ms);
+    result = cachedResult.slice(first,first+count);
+    return result.map(function(id){
+      var cachedResult = EM.Cache.get('pmlisting',id);
+      if(cachedResult.current) {
+        ms = cachedResult.data;
+        return new PNAPI.PN(this.box,id,ms);
+      }
+      return null;
     },this);
   },
   remove: function(msgid) {
@@ -1467,63 +1464,6 @@ PNAPI.PNBox.prototype = {
     if (this.box=='savebox') {
       return false;
     }
-  },
-  getCurrentMessages: function (page, table) {
-    var start = page*50;
-
-    if (isUndef(table)) {   // if somebody navigates past the end and table is null, that's info too!
-      var lister = new AJAXObject();
-      var host = document.createElement('div');
-      host.innerHTML = lister.SyncRequest('/privmsg.php?folder='+this.box+'&start='+start, null);
-
-      var table = queryXPathNode(host, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
-    }
-    if (!table) {
-      return null;
-    }
-
-    var rows = queryXPathNodeSet(table, './/tr[./td[starts-with(@id,"folderFor")]]');
-    if (!rows || !rows.length) {
-      return [];
-    }
-
-    var messages = [];
-
-    var position = start;
-    rows.forEach(function(row) {
-      messages.push({
-        postID: queryXPathNode(row, './td[2]/span/a[2]').href.match(/p=(\d+)/)[1],
-        pos: position++,
-        read: !queryXPathNode(row, './td[1]//img[contains(@title,"Ungelesene Nachricht")]'),
-        title: this.unescapeTitle(queryXPathNode(row, './td[2]/span/a[2]').textContent),
-        postSpecial: (function(){var a=queryXPathNode(row, './td[2]/span/b'); return a?a.textContent:'';})(),
-        received: queryXPathNode(row, './td[2]/span[2]').textContent.trim().substr(0,3)=='von',
-        partner: queryXPathNode(row, './td[2]/span[2]/span').textContent.trim(),
-        partnerID: (function(){var a=queryXPathNode(row, './td[2]/span[2]/span/a'); return a?a.href.match(/u=(\d+)/)[1]:null;})(),
-        date: this.postDatetoJSDate(queryXPathNode(row,'./td[3]/span').innerHTML)
-      });
-    }, this);
-
-    return messages;
-  },
-  updatePage: function(page,table) {
-    var cachedResult = EM.Cache.get('pmlisting',this.box+','+page).data;
-    var msgs = this.getCurrentMessages(page,table);
-    if (cachedResult && cachedResult.length) {
-      if ((cachedResult[0].postID != msgs[0].postID) ||
-          (cachedResult.length!= msgs.length) ||
-          (cachedResult[msgs.length-1].postID != msgs[msgs.length-1].postID)) {
-        //something changed outside this page
-        EM.Cache.touch('pmlisting',this.box+','+(page-1),-1);
-        EM.Cache.touch('pmlisting',this.box+','+(page+1),-1);
-      }
-    }else if (!cachedResult) {
-      //page wasnt here before...
-      EM.Cache.touch('pmlisting',this.box+','+(page-1),-1);
-    }
-
-    EM.Cache.put('pmlisting',this.box+','+page,msgs,900);
-    return msgs;
   },
   postDatetoJSDate: function(pd) {
     //"Mo 07.12.09<br>23:17"
@@ -1543,9 +1483,9 @@ PNAPI.PNBox.prototype = {
 
 }
 
-PNAPI.PN = function (box,ms) {
+PNAPI.PN = function (box,id,ms) {
   this.box = box;
-  this.id = ms.postID*1;
+  this.id = id*1;
   this.title = ms.title;
   this.unread = !ms.read;
   this.date = ms.date;
