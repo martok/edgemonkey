@@ -1441,20 +1441,31 @@ PNAPI.PNBox.prototype = {
   list: function(first,count) {
     var result = [];
 
+    //check if EVERYTHING is current
+    var isCurrent=true;
     var cachedResult = EM.Cache.get('pmlisting',this.box);
     if(!cachedResult.current) {
-      cachedResult = this.forceUpdate(first,count);
+      isCurrent=false;
     } else {
-      cachedResult = cachedResult.data;
+      isCurrent = cachedResult.data.slice(first,first+count).some(function(id){
+        var info = EM.Cache.get('pmlisting',id);
+        return !info.current;
+      },this);
     }
-    result = cachedResult.slice(first,first+count);
-    return result.map(function(id){
+    if (!isCurrent) {
+      //something may not be okay, refresh required part
+      console.log('PNAPI', 'Need to refresh ',this.box,' range ',first,',',count);
+      this.forceUpdate(first,count);
+    }
+    //ok, now we definitely have it in cache
+
+    //answer from there
+    var list = EM.Cache.get('pmlisting',this.box);
+    list=list.data.slice(first,first+count);
+    return list.map(function(id){
       var cachedResult = EM.Cache.get('pmlisting',id);
-      if(cachedResult.current) {
-        ms = cachedResult.data;
-        return new PNAPI.PN(this.box,id,ms);
-      }
-      return null;
+      var ms = cachedResult.data;
+      return new PNAPI.PN(this.box,id,ms);
     },this);
   },
   remove: function(msgid) {
@@ -1479,8 +1490,46 @@ PNAPI.PNBox.prototype = {
         t = t.replace(/&amp;/g, '&');
     }
     return t;
-  }
+  },
+  forceUpdate: function (first,count) {
+    var p0=Math.floor(first / 50);
+    var p1=Math.floor((first+count-1) / 50);
+    var lister = new AJAXObject();
+    for (var i=p0; i<=p1;i++) {
+      var start = i*50;
+      var host = document.createElement('div');
+      host.innerHTML = lister.SyncRequest('/privmsg.php?folder='+this.box+'&start='+start, null);
+      var table = queryXPathNode(host, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+      this.applyTableData(start, table);
+    }
+  },
+  applyTableData: function(index,table) {
+    console.log('PNAPI', 'Importing ',this.box,' starting from ',index);
+    //first, parse the new data:
+    var rows = queryXPathNodeSet(table, './/tr[./td[starts-with(@id,"folderFor")]]');
+    var current = [];
+    if (rows && rows.length) {
+      var position = index;
+      rows.forEach(function(row) {
+        // extract everything we may want to know later
+        current.push({
+          postID: queryXPathNode(row, './td[2]/span/a[2]').href.match(/p=(\d+)/)[1],
+          pos: position++,
+          read: !queryXPathNode(row, './td[1]//img[contains(@title,"Ungelesene Nachricht")]'),
+          title: this.unescapeTitle(queryXPathNode(row, './td[2]/span/a[2]').textContent),
+          postSpecial: (function(){var a=queryXPathNode(row, './td[2]/span/b'); return a?a.textContent:'';})(),
+          received: queryXPathNode(row, './td[2]/span[2]').textContent.trim().substr(0,3)=='von',
+          partner: queryXPathNode(row, './td[2]/span[2]/span').textContent.trim(),
+          partnerID: (function(){var a=queryXPathNode(row, './td[2]/span[2]/span/a'); return a?a.href.match(/u=(\d+)/)[1]:null;})(),
+          date: this.postDatetoJSDate(queryXPathNode(row,'./td[3]/span').innerHTML)
+        });
+      }, this);
+    }
+    console.log('PNAPI', 'Found ',current.length,' messages to merge');
 
+    var list = EM.Cache.get('pmlisting',this.box);
+    if (!list || !list.data) list = [];
+  }
 }
 
 PNAPI.PN = function (box,id,ms) {
