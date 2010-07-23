@@ -1556,8 +1556,9 @@ function Notifier() {
      'EM');
   this.EMStuff.setImageAction('javascript:EM.Notifier.AlertDropdown()');
   this.EMStuff.setTextAction('javascript:EM.Notifier.AlertDropdown()');
-  this.EMStuff.setWidth('0px');
   this._alerts=[];
+  this._alertID=0;
+  this._updateText();
 }
 
 Notifier.prototype = {
@@ -1588,29 +1589,56 @@ Notifier.prototype = {
   },
   AlertDropdown: function() {
     this.EMStuff.setHighlight(false);
-    this.EMStuff.setText('EM');
-    this.EMStuff.setWidth('0px');
+    if (!this._alerts.length)
+      return;
     var link = this.EMStuff.field;
     var bcr = link.getBoundingClientRect();
     var coords = new Point(bcr.left, bcr.bottom-5);
     coords.TranslateWindow();
 
     var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_Alerts');
+    this.window = w;
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
 
-    this._alerts.reverse().forEach(function(el) {
-      tbl.addMenuItem(el.icon, el.href, el.title, el.html);
+    [].concat(this._alerts).reverse().forEach(function(el) {
+      var collhtml='<img border="0" align="top" title="ausblenden" src="./graphics/code_half.gif"'+
+                   ' onclick="EM.Notifier.removeAlert('+el.id+')" style="cursor:pointer">&nbsp;';
+      tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
     },this);
-    this._alerts=[];
     w.ContentArea.appendChild(tbl);
+    w.ContentArea.style.overflow='auto';
+    w.ContentArea.style.height='187px';
+    var t=this;
+    w.OnClose = function() {
+      t.window=null;
+    };
+  },
+  _updateText: function() {
+    if (this._alerts.length) {
+      this.EMStuff.setText(this._alerts.length+' Meldungen');
+      this.EMStuff.setWidth('');
+    } else {
+      this.EMStuff.setText('EM');
+      this.EMStuff.setWidth('0px');
+    }
   },
   addAlert: function(icon, title, href, html) {
-    this._alerts.push({"icon": icon, "title":title, "href":href, "html":html});
-    this.EMStuff.setText(this._alerts.length+' Meldungen');
-    this.EMStuff.setWidth('');
+    this._alerts.push({"id":++this._alertID,"icon": icon, "title":title, "href":href, "html":html});
+    this._updateText();
     this.EMStuff.setHighlight(true);
+    return this._alertID;
+  },
+  removeAlert: function(id) {
+    this._alerts = this._alerts.filter(function(e) {
+      return e.id!==id;
+    },this);
+    this._updateText();
+    if (this.window) {
+      this.window.Close();
+      this.AlertDropdown();
+    }
   }
 }
 
