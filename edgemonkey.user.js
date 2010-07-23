@@ -672,7 +672,11 @@ function addMenuItem(tbl,icon,link,text,extralinks){
     with (tbl.insertRow(-1)) {
       with (insertCell(-1)) {
         className = 'row2';
-        innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
+        if (typeof extralinks=="string") {
+          innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
+        } else {
+          appendChild(extralinks);
+        }
       }
     }
   }
@@ -1596,7 +1600,15 @@ Notifier.prototype = {
     [].concat(this._alerts).reverse().forEach(function(el) {
       var collhtml='<img border="0" align="top" title="ausblenden" src="./graphics/code_half.gif"'+
                    ' onclick="EM.Notifier.removeAlert('+el.id+')" style="cursor:pointer">&nbsp;';
-      tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
+      if (typeof el.html=="string") {
+        tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
+      } else {
+        var d=document.createElement('span');
+        d.className='gensmall';
+        d.innerHTML=collhtml;
+        d.appendChild(el.html);
+        tbl.addMenuItem(el.icon, el.href, el.title, d);
+      }
     },this);
     w.ContentArea.appendChild(tbl);
     w.ContentArea.style.overflow='auto';
