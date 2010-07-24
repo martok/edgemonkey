@@ -2094,7 +2094,7 @@ Notifier.prototype = {
     var coords = new Point(bcr.left, bcr.bottom-5);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPN');
+    var w = new OverlayWindow(coords.x,coords.y,328,173,'','em_QPN');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
@@ -2109,6 +2109,20 @@ Notifier.prototype = {
         "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
         "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
         );
+    var l = EM.PN.inbox.list(0,4);
+    l.forEach(function(pn) {
+      var d = new Date(1000*pn.date);
+      tbl.addMenuItem(
+        '/templates/subSilver/images/folder'+(pn.unread?'_new':'')+'.gif',
+        '/privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id,
+        pn.title,
+        'von <span class="name" style="font-size: 10px;">'+
+          (pn.senderID?'<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
+           pn.sender+'</a>':pn.sender)+
+          ' am '+d.format("d.m.y")+' um '+d.format("H:i")+
+        '</span></span>');
+    },this);
+
     w.ContentArea.appendChild(tbl);
     w.ContentArea.appendChild(document.createElement('div'));
   },
@@ -2997,32 +3011,8 @@ Pagehacks.prototype = {
     var l = EM.PN.getUnread('inbox',10);
     if (l.length) {
       var s=l.length==1?'Eine neue PN':l.length+' neue PNs';
-      var div = document.createElement('div');
-      var tbl = document.createElement('table');
-      div.appendChild(tbl);
-      div.style.cssText='height:180px;overflow:auto';
-      tbl.className='forumline';
-      tbl.style.cssText='width:100%';
-      tbl.setAttribute('cellspacing',1);
-      tbl.setAttribute('cellpadding',4);
-      var r=1;
-      l.forEach(function(pn) {
-        with (tbl.insertRow(-1)) {
-          with(insertCell(-1)) {
-            className='row'+r;
-            var d = new Date(1000*pn.date);
-            innerHTML='<span class="topictitle"><a href="privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id+
-                       '" class="topictitle" target="_blank">'+pn.title+'</a></span><span class="gensmall"><br>von '+
-                       '<span class="name" style="font-size: 10px;">'+
-                       (pn.senderID?'<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
-                       pn.sender+'</a>':pn.sender)+
-                       ' am '+d.format("d.m.y")+' um '+d.format("H:i")+
-                       '</span></span>';
-          }
-        }
-        r=r==1?2:1;
-      },this);
-      EM.Notifier.notify('/graphics/Portal-PM.gif',s,div,'pnarrived',Notifier.REPLACE|Notifier.POPUP);
+      EM.Notifier.PNs.setText(s);
+      EM.Notifier.PNs.setHighlight(true);
     }
   },
 
