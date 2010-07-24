@@ -1387,6 +1387,8 @@ PNAPI.VAPN_Synonym = 4;
 PNAPI.VAPN_BlogEntry = 5;
 PNAPI.VAPN_BlogComment = 6;
 
+PNAPI.LIFETIME = 60;
+
 PNAPI.prototype = {
   sendPN: function(recipient, title, message) {
     if("" == EM.User.loggedOnSessionId) {
@@ -1447,10 +1449,10 @@ PNAPI.PNBox.prototype = {
     if(!cachedResult.current) {
       isCurrent=false;
     } else {
-      isCurrent = cachedResult.data.slice(first,first+count).some(function(id){
+      isCurrent = !(cachedResult.data.slice(first,first+count).some(function(id){
         var info = EM.Cache.get('pmlisting',id);
         return !info.current;
-      },this);
+      },this));
     }
     if (!isCurrent) {
       //something may not be okay, refresh required part
@@ -1528,7 +1530,50 @@ PNAPI.PNBox.prototype = {
     console.log('PNAPI', 'Found ',current.length,' messages to merge');
 
     var list = EM.Cache.get('pmlisting',this.box);
-    if (!list || !list.data) list = [];
+    if (list && list.data) {
+      list = list.data;
+    } else {
+      list = [];
+    }
+
+    var _box = this.box;
+    function CD(el) {
+      //reformat data for cache
+      return {
+        box: _box,
+        received: el.received,
+        partner: el.partner,
+        partnerID: el.partnerID,
+        date: el.date,
+        read: el.read,
+        title: el.title,
+        special: el.postSpecial
+      };
+    };
+
+    var refel = [index,0];
+    while (refel[1]<current.length) {
+      var i = list.indexOf(current[refel[1]].postID,refel[0]);
+      if (i<0){
+        list.splice(refel[0],0,current[refel[1]].postID);
+      } else {
+        if(i==refel[0]) {  //where it should be
+          list[i] = current[refel[1]].postID;
+        } else {
+          if (i>refel[0]) {  //elements missing now
+            list.slice(refel[0],i-refel[0]).forEach(function(id) {
+              EM.Cache.touch('pmlisting',id,-1);
+            });
+            list.splice(refel[0],i-refel[0]);
+            list[refel[0]]=current[refel[1]].postID;
+          }
+        }
+      }
+      EM.Cache.put('pmlisting',current[refel[1]].postID, CD(current[refel[1]]), PNAPI.LIFETIME);
+      refel[1]++;
+      refel[0]++;
+    }
+    EM.Cache.put('pmlisting',this.box,list,PNAPI.LIFETIME);
   }
 }
 
