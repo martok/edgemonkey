@@ -1537,9 +1537,14 @@ UserManager.prototype = {
 }
 
 function Notifier() {
-  this.container=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
-  previousNode(this.container).style.paddingRight='12px';
-  this.container.className="overall_menu";
+  var c=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
+  previousNode(c).style.paddingRight='12px';
+  c.className="overall_menu";
+
+  this.container = document.createElement('div');
+  this.container.className="intbl";
+  c.appendChild(this.container);
+
   this.PNs = new Notifier.Field(this,'notmen_PN',
      '<img src="/graphics/PN.gif" border="0"/>',
      'PNs');
@@ -1650,7 +1655,8 @@ Notifier.BLINKTIME=700;
 Notifier.Field = function(parent,id,img,text) {
   var cnt2 = document.createElement('div');
   cnt2.id=id;
-  cnt2.style.cssText='display:table-cell;vertical-align:middle';
+  cnt2.className="incell";
+  cnt2.style.cssText='vertical-align:middle';
   parent.container.appendChild(cnt2);
 
   var cnt = document.createElement('div');
