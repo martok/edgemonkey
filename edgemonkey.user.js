@@ -2114,8 +2114,13 @@ Notifier.prototype = {
         "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
         "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
         );
-    var l = EM.PN.inbox.list(0,4);
-    l.forEach(function(pn) {
+    var l = EM.PN.inbox.list(0,20);
+    l.sort(function(a,b) {
+      if (a.unread && !b.unread) return 1;
+      if (!a.unread && b.unread) return -1;
+      return a.date-b.date;
+    });
+    l.slice(-4).forEach(function(pn) {
       var d = new Date(1000*pn.date);
       tbl.addMenuItem(
         '/templates/subSilver/images/folder'+(pn.unread?'_new':'')+'.gif',
