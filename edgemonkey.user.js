@@ -1558,7 +1558,7 @@ PNAPI.VAPN_Synonym = 4;
 PNAPI.VAPN_BlogEntry = 5;
 PNAPI.VAPN_BlogComment = 6;
 
-PNAPI.LIFETIME = 60;
+PNAPI.LIFETIME = 600;
 
 PNAPI.prototype = {
   sendPN: function(recipient, title, message) {
@@ -1745,6 +1745,7 @@ PNAPI.PNBox.prototype = {
       refel[0]++;
     }
     EM.Cache.put('pmlisting',this.box,list,PNAPI.LIFETIME);
+    console.log('PNAPI', 'Caching for',PNAPI.LIFETIME,'secs');
   }
 }
 
@@ -2994,6 +2995,7 @@ function Pagehacks() {
   if(1*EM.Settings.GetValue('pageghack','pnautocheck')) {
     var min = EM.Settings.GetValue('pageghack','pnautocheck');
     if(1 > 1 * min) min = 1;
+    PNAPI.LIFETIME = min * 60 - 30; // 30s less => definitely expired on next regular check
     window.setInterval('EM.Pagehacks.checkPMAuto()', min * 60000);
   }
 }
