@@ -2998,6 +2998,8 @@ function Pagehacks() {
     PNAPI.LIFETIME = min * 60 - 30; // 30s less => definitely expired on next regular check
     window.setInterval('EM.Pagehacks.checkPMAuto()', min * 60000);
   }
+  // do a first check, regardless of when regular checks will occur (if at all)
+  window.setTimeout('EM.Pagehacks.checkPMAuto()', 30*1000);
 }
 
 Pagehacks.prototype = {
