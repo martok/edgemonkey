@@ -1214,6 +1214,7 @@ function SettingsStore() {
   ]);
   this.AddCategory('Ergonomie', [
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', 'pagehack.quickProfMenu', 'bool', true),
+    this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
     this.AddSetting( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', 'pagehack.extPostSubmission', 'bool', true),
@@ -2082,6 +2083,9 @@ function Notifier() {
      'PNs');
   this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
   this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
+  if (!EM.Settings.GetValue('pagehack','privmenu')) {
+    this.PNs.setWidth('0px');
+  }
 
   this.EMStuff = new Notifier.Field(this,'notmen_EM',
      '<img src="/graphics/Group.gif" border="0"/>',
@@ -2101,12 +2105,13 @@ Notifier.prototype = {
     var coords = new Point(bcr.left, bcr.bottom-5);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,173,'','em_QPN');
+    var w = new OverlayWindow(coords.x,coords.y,328,EM.Settings.GetValue('pagehack','privmenu')?187:167,'','em_QPN');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
 
-    tbl.addMenuItem(
+    if (EM.Settings.GetValue('pagehack','privmenu')) {
+      tbl.addMenuItem(
         "/graphics/Portal-PM.gif",
         "/privmsg.php?folder=inbox",
         "Private Nachrichten",
@@ -2116,6 +2121,7 @@ Notifier.prototype = {
         "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
         "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
         );
+    }
     var l = EM.PN.inbox.list(0,20);
     if (EM.Settings.GetValue('pageghack','pndropkeepbottom')) {
       l.sort(function(a,b) {
@@ -2124,7 +2130,7 @@ Notifier.prototype = {
         return b.date-a.date;
       });
     }
-    l.slice(0,4).reverse().forEach(function(pn) {
+    l.slice(0,EM.Settings.GetValue('pagehack','privmenu')?4:5).reverse().forEach(function(pn) {
       var d = new Date(1000*pn.date);
       tbl.addMenuItem(
         '/templates/subSilver/images/folder'+(pn.unread?'_new':'')+'.gif',
@@ -3030,6 +3036,7 @@ Pagehacks.prototype = {
     if (l.length) {
       var s=l.length==1?'Eine neue PN':l.length+' neue PNs';
       EM.Notifier.PNs.setText(s);
+      EM.Notifier.PNs.setWidth('');
       EM.Notifier.PNs.setHighlight(true);
     }
   },
@@ -3514,11 +3521,23 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,148,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,328,EM.Settings.GetValue('pagehack','privmenu')?148:187,'','em_QPM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
 
+    if (!EM.Settings.GetValue('pagehack','privmenu')) {
+      tbl.addMenuItem(
+        "/graphics/Portal-PM.gif",
+        "/privmsg.php?folder=inbox",
+        "Private Nachrichten",
+        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
+        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
+        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
+        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
+        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
+        );
+    }
     tbl.addMenuItem(
         "/graphics/Drafts.gif",
         "/drafts.php",
