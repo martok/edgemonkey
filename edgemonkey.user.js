@@ -1224,6 +1224,7 @@ function SettingsStore() {
         ], 1),
     this.AddSetting( '"Meine offenen Fragen" um Inline-Markieren erweitern', 'pagehack.answeredLinks', 'bool', true),
     this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true),
+    this.AddSetting( 'PN-Dropdown: Ungelesene unten halten', 'pageghack.pndropkeepbottom', 'bool', true),
     this.AddSetting( 'Automatisch auf neue PNs pr&uuml;fen', 'pageghack.pnautocheck',[
           ['Nein', 0],
           ['1 Minute', 1],
@@ -2116,12 +2117,14 @@ Notifier.prototype = {
         "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
         );
     var l = EM.PN.inbox.list(0,20);
-    l.sort(function(a,b) {
-      if (a.unread && !b.unread) return 1;
-      if (!a.unread && b.unread) return -1;
-      return a.date-b.date;
-    });
-    l.slice(-4).forEach(function(pn) {
+    if (EM.Settings.GetValue('pageghack','pndropkeepbottom')) {
+      l.sort(function(a,b) {
+        if (a.unread && !b.unread) return -1;
+        if (!a.unread && b.unread) return 1;
+        return b.date-a.date;
+      });
+    }
+    l.slice(0,4).reverse().forEach(function(pn) {
       var d = new Date(1000*pn.date);
       tbl.addMenuItem(
         '/templates/subSilver/images/folder'+(pn.unread?'_new':'')+'.gif',
@@ -3023,7 +3026,7 @@ Pagehacks.prototype = {
   },
 
   checkPMAuto: function() {
-    var l = EM.PN.getUnread('inbox',10);
+    var l = EM.PN.getUnread('inbox',20);
     if (l.length) {
       var s=l.length==1?'Eine neue PN':l.length+' neue PNs';
       EM.Notifier.PNs.setText(s);
