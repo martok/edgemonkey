@@ -1625,7 +1625,7 @@ Notifier.prototype = {
   },
   _updateText: function() {
     if (this._alerts.length) {
-      this.EMStuff.setText(this._alerts.length+' Meldungen');
+      this.EMStuff.setText(this._alerts.length+' Meldung'+((this._alerts.length>1)?'en':''));
       this.EMStuff.setWidth('');
     } else {
       this.EMStuff.setText('EM');
