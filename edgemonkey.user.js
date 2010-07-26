@@ -1377,6 +1377,17 @@ function PNAPI() {
   ['inbox','outbox','sentbox','savebox'].forEach(function(b) {
     this[b]=new PNAPI.PNBox(b);
   },this);
+  if (window.location.href.match(/\/privmsg.php/) &&
+      !window.location.search.match(/mode=/)) {
+    var box = window.location.search.match(/folder=([^&]+)/);
+    box = (box&&box.length)?box[1]:'inbox';
+    var start = window.location.search.match(/start=(\d+)/);
+    start = (start&&start.length)?start[1]*1:0;
+
+    console.log('PNAPI', 'Refreshing',box,'from index',start);
+    var table = queryXPathNode(document, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+    this[box].applyTableData(start, table);
+  }
 }
 
 PNAPI.VAPN_Team = 0;
