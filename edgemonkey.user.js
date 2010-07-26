@@ -672,10 +672,10 @@ function addMenuItem(tbl,icon,link,text,extralinks){
     with (tbl.insertRow(-1)) {
       with (insertCell(-1)) {
         className = 'row2';
-        if (typeof extralinks=="string") {
-          innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
-        } else {
+        if (isHTMLElement(extralinks)) {
           appendChild(extralinks);
+        } else {
+          innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
         }
       }
     }
@@ -1605,14 +1605,14 @@ Notifier.prototype = {
     [].concat(this._alerts).reverse().forEach(function(el) {
       var collhtml='<img border="0" align="top" title="ausblenden" src="./graphics/code_half.gif"'+
                    ' onclick="EM.Notifier.removeAlert('+el.id+')" style="cursor:pointer">&nbsp;';
-      if (typeof el.html=="string") {
-        tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
-      } else {
+      if (isHTMLElement(el.html)) {
         var d=document.createElement('span');
         d.className='gensmall';
         d.innerHTML=collhtml;
         d.appendChild(el.html);
         tbl.addMenuItem(el.icon, el.href, el.title, d);
+      } else {
+        tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
       }
     },this);
     w.ContentArea.appendChild(tbl);
