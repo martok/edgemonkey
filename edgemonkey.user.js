@@ -2105,7 +2105,7 @@ Notifier.prototype = {
     var coords = new Point(bcr.left, bcr.bottom-5);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,EM.Settings.GetValue('pagehack','privmenu')?187:167,'','em_QPN');
+    var w = new OverlayWindow(coords.x,coords.y,400,EM.Settings.GetValue('pagehack','privmenu')?187:167,'','em_QPN');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
