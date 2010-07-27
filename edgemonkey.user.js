@@ -1385,8 +1385,9 @@ function PNAPI() {
     start = (start&&start.length)?start[1]*1:0;
 
     console.log('PNAPI', 'Refreshing',box,'from index',start);
-    var table = queryXPathNode(document, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+    var table = queryXPathNode(document, '//table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
     this[box].applyTableData(start, table);
+    console.log('PNAPI','Refreshing done');
   }
 }
 
