@@ -1662,6 +1662,15 @@ PNAPI.PNBox.prototype = {
       return false;
     }
   },
+  getMessage: function(msgid) {
+    var cachedResult = EM.Cache.get('pmlisting',msgid);
+    if (cachedResult.data) {
+      var ms = cachedResult.data;
+      return new PNAPI.PN(this.box,msgid,ms);
+    } else {
+      return null;
+    }
+  },
   postDatetoJSDate: function(pd) {
     //"Mo 07.12.09<br>23:17"
     // good thing DF always returns that and ignores user settings...
@@ -2156,13 +2165,38 @@ Notifier.prototype = {
         '/templates/subSilver/images/folder'+(pn.unread?'_new':'')+'.gif',
         '/privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id,
         pn.title,
-        'von <span class="name" style="font-size: 10px;">'+
-          (pn.senderID?'<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
-           pn.sender+'</a>':pn.sender)+
-          ' am '+d.format("d.m.y")+' um '+d.format("H:i")+
-        '</span></span>');
+        '<span class="intbl">'+
+          '<span class="incell left"> von '+
+            (pn.senderID?'<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
+             pn.sender+'</a>':pn.sender)+
+            ' am '+d.format("d.m.y")+' um '+d.format("H:i")+'</span>'+
+          '<span class="incell right"><a href="javascript:EM.Notifier.MenuPNView('+pn.id+')"'+
+            ' id="pn_dd_'+pn.id+'">Schnellansicht...</a></span></span>');
     },this);
     w.ContentArea.removeChild(w.ContentArea.lastElementChild);
+  },
+  MenuPNView: function(id) {
+    var link= document.getElementById('pn_dd_'+id);
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom-5);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,328,166,'','em_pnview');
+    w.InitDropdown();
+    var msg = EM.PN.inbox.getMessage(id);
+    w.ContentArea.innerHTML =
+     msg?
+      '<div style="background-color: rgb(225, 230, 236); font-family: Verdana,Arial,Helvetica,sans-serif; margin: 5px;">'+
+      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 150px;" class="postbody">'+
+      msg.getContent()+
+      '<hr><div style="float: right; position: relative; bottom: 3px;">'+
+        '<a class="gensmall" href="privmsg.php?mode=reply&amp;p='+id+'">Auf Nachricht antworten</a>'+
+        '&nbsp;&nbsp;<a class="gensmall" href="privmsg.php?mode=quote&amp;p='+id+'">Nachricht zitieren</a>'+
+      '</div></div></div>':
+      '<div style="background-color: rgb(225, 230, 236); font-family: Verdana,Arial,Helvetica,sans-serif; margin: 5px;">'+
+      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 150px;" class="postbody">'+
+      'Nachricht nicht gefunden!'+
+      '</div></div>';
   },
   AlertDropdown: function() {
     this.EMStuff.setHighlight(false);
