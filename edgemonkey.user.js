@@ -2178,24 +2178,25 @@ Notifier.prototype = {
   },
   MenuPNView: function(id) {
     var link= document.getElementById('pn_dd_'+id);
-    var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom-5);
+    var bcr = link.parentNode.parentNode.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,166,'','em_pnview');
+    var w = new OverlayWindow(coords.x,coords.y,442,196,'','em_pnview');
     w.InitDropdown();
     var msg = EM.PN.inbox.getMessage(id);
     w.ContentArea.innerHTML =
      msg?
       '<div style="background-color: rgb(225, 230, 236); font-family: Verdana,Arial,Helvetica,sans-serif; margin: 5px;">'+
-      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 150px;" class="postbody">'+
+      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 180px;" class="postbody">'+
+       '<div style="float: right; position: relative; bottom: 3px;">'+
+       '<a class="gensmall" href="privmsg.php?mode=reply&amp;p='+id+'">Auf Nachricht antworten</a>'+
+       '&nbsp;&nbsp;<a class="gensmall" href="privmsg.php?mode=quote&amp;p='+id+'">Nachricht zitieren</a>'+
+       '</div><hr style="clear:both">'+
       msg.getContent()+
-      '<hr><div style="float: right; position: relative; bottom: 3px;">'+
-        '<a class="gensmall" href="privmsg.php?mode=reply&amp;p='+id+'">Auf Nachricht antworten</a>'+
-        '&nbsp;&nbsp;<a class="gensmall" href="privmsg.php?mode=quote&amp;p='+id+'">Nachricht zitieren</a>'+
-      '</div></div></div>':
+      '</div></div>':
       '<div style="background-color: rgb(225, 230, 236); font-family: Verdana,Arial,Helvetica,sans-serif; margin: 5px;">'+
-      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 150px;" class="postbody">'+
+      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 180px;" class="postbody">'+
       'Nachricht nicht gefunden!'+
       '</div></div>';
   },
