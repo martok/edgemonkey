@@ -339,7 +339,7 @@ function isEmpty(what)
 function isHTMLElement(what)
 {
   return !isEmpty(what) &&
-   ((what instanceof HTMLElement) || (what.tagName));
+   ((what instanceof HTMLElement) || (what.nodeType));
 }
 
 //http://www.infocamp.de/javascript_htmlspecialchars.php
@@ -853,10 +853,10 @@ function addMenuItem(tbl,icon,link,text,extralinks){
     with (tbl.insertRow(-1)) {
       with (insertCell(-1)) {
         className = 'row2';
-        if (typeof extralinks=="string") {
-          innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
-        } else {
+        if (isHTMLElement(extralinks)) {
           appendChild(extralinks);
+        } else {
+          innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
         }
       }
     }
@@ -1550,6 +1550,17 @@ function PNAPI() {
   ['inbox','outbox','sentbox','savebox'].forEach(function(b) {
     this[b]=new PNAPI.PNBox(b);
   },this);
+  if (window.location.href.match(/\/privmsg.php/) &&
+      !window.location.search.match(/mode=/)) {
+    var box = window.location.search.match(/folder=([^&]+)/);
+    box = (box&&box.length)?box[1]:'inbox';
+    var start = window.location.search.match(/start=(\d+)/);
+    start = (start&&start.length)?start[1]*1:0;
+
+    console.log('PNAPI', 'Refreshing',box,'from index',start);
+    var table = queryXPathNode(document, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+    this[box].applyTableData(start, table);
+  }
 }
 
 PNAPI.VAPN_Team = 0;
@@ -2164,14 +2175,14 @@ Notifier.prototype = {
     [].concat(this._alerts).reverse().forEach(function(el) {
       var collhtml='<img border="0" align="top" title="ausblenden" src="./graphics/code_half.gif"'+
                    ' onclick="EM.Notifier.removeAlert('+el.id+')" style="cursor:pointer">&nbsp;';
-      if (typeof el.html=="string") {
-        tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
-      } else {
+      if (isHTMLElement(el.html)) {
         var d=document.createElement('span');
         d.className='gensmall';
         d.innerHTML=collhtml;
         d.appendChild(el.html);
         tbl.addMenuItem(el.icon, el.href, el.title, d);
+      } else {
+        tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
       }
     },this);
     w.ContentArea.appendChild(tbl);
@@ -2184,7 +2195,7 @@ Notifier.prototype = {
   },
   _updateText: function() {
     if (this._alerts.length) {
-      this.EMStuff.setText(this._alerts.length+' Meldungen');
+      this.EMStuff.setText(this._alerts.length+' Meldung'+((this._alerts.length>1)?'en':''));
       this.EMStuff.setWidth('');
     } else {
       this.EMStuff.setText('EM');
