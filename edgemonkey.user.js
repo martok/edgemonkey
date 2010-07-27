@@ -1643,7 +1643,7 @@ ShoutboxReplacer.prototype = {
 			return s;
 		}else return regE;
 	},
-	
+
 	do_replace: function (str){
 		var regExp,s,replacement,sRepl;
 		var reg=/(^|[^\\])(\\*)\$(\d+)(?=$|\D)/g; //RegExp to increase references
@@ -1709,16 +1709,16 @@ ShoutboxReplacer.prototype = {
 						}
 						return $0;
 					  });
-					  
+
 		str = str.replace(/@@/g, '@');
 		return str;
 	},
-	
+
 	getSearchString: function (index){
 		if(index<0 || index>=this.length()) return "";
 		return this.regexp_toString(this.replacements[index*4]);
 	},
-	
+
 	findSearchString: function (sSearch){
 		sSearch=this.regexp_toString(sSearch);
 		for(var i=0; i<this.length(); i++){
@@ -1726,17 +1726,17 @@ ShoutboxReplacer.prototype = {
 		}
 		return -1;
 	},
-	
+
 	length: function (){
 		return Math.floor(this.replacements.length/4);
 	},
-	
+
 	get: function (index){
 		if(index<0 || index>=this.length()) return new Array();
 		index*=4;
 		return this.replacements.slice(index,index+4);
 	},
-	
+
 	add: function (sSearch,sReplace,useWordbounds,caseSensitive,doSave){
 		if(isUndef(sSearch) || isUndef(sReplace)) return;
 		var index=this.findSearchString(sSearch);
@@ -1751,7 +1751,7 @@ ShoutboxReplacer.prototype = {
 		this.replacements[index+3]=(caseSensitive==true); //standart is false
 		if(doSave!=false) this.save();
 	},
-	
+
 	remove: function (sSearch){
 		var index=this.findSearchString(sSearch);
 		if(index>=0){
@@ -1759,7 +1759,7 @@ ShoutboxReplacer.prototype = {
 			this.save();
 		}
 	},
-	
+
 	load: function (){
 		var newEntries=EM.Settings.load_field('sb-replacements');
 		if(isUndef(newEntries)) return;
@@ -1767,7 +1767,7 @@ ShoutboxReplacer.prototype = {
 			this.add(newEntries[i],newEntries[i+1],newEntries[i+2],newEntries[i+3],false);
 		}
 	},
-	
+
 	save: function (){
 		EM.Settings.store_field('sb-replacements',this.replacements);
 	}
@@ -1775,7 +1775,7 @@ ShoutboxReplacer.prototype = {
 
 function ShoutboxControls() {
   this.replacer=new ShoutboxReplacer();
-  
+
   this.shout_obj = document.getElementById('sidebar_shoutbox');
 
   this.get_iframe = function () {
@@ -1946,7 +1946,7 @@ ShoutboxControls.prototype = {
 
   ev_sb_post: function (evt) {
     var s = EM.Shouts.form_text.value;
-	
+
 	//replace some stuff
     s=this.replacer.do_replace(s);
 
@@ -2016,7 +2016,7 @@ ShoutboxControls.prototype = {
 
     return true;
   },
-  
+
   ev_shoutchange: function(evt) {
 	var shout = this.form_text.value;
 	shout=this.replacer.do_replace(shout);
