@@ -331,7 +331,7 @@ function isEmpty(what)
 function isHTMLElement(what)
 {
   return !isEmpty(what) &&
-   ((what instanceof HTMLElement) || (what.tagName));
+   ((what instanceof HTMLElement) || (what.nodeType));
 }
 
 //http://www.infocamp.de/javascript_htmlspecialchars.php
