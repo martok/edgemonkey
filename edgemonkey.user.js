@@ -2120,7 +2120,16 @@ Notifier.prototype = {
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
-
+    w.ContentArea.appendChild(document.createElement('div'));
+    with(w.ContentArea.lastElementChild) {
+      innerHTML='<div class="incell" style="vertical-align:middle;text-align:center">Lade Nachrichten....<br>'+
+                '<br><img src="chrome://global/skin/icons/loading_16.png"></div>';
+      className='intbl';
+      with(style) {
+        height='100px';
+        width='100%';
+      }
+    }
     if (EM.Settings.GetValue('pagehack','privmenu')) {
       tbl.addMenuItem(
         "/graphics/Portal-PM.gif",
@@ -2153,9 +2162,7 @@ Notifier.prototype = {
           ' am '+d.format("d.m.y")+' um '+d.format("H:i")+
         '</span></span>');
     },this);
-
-    w.ContentArea.appendChild(tbl);
-    w.ContentArea.appendChild(document.createElement('div'));
+    w.ContentArea.removeChild(w.ContentArea.lastElementChild);
   },
   AlertDropdown: function() {
     this.EMStuff.setHighlight(false);
