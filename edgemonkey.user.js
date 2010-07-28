@@ -3662,13 +3662,13 @@ function UpdateMonkey() {
     this.running = false;
 
     this.settings = {
-		enabled: EM.Settings.GetValue('update','enable'),
-		installed: EM.Settings.GetValue('update','installed'),
-		updateType: EM.Settings.GetValue('update','update_type'),
-		updateSource: EM.Settings.GetValue('update','source_repo'),
-		updateBranch: EM.Settings.GetValue('update','source_branch'),
-		updateTimeout: EM.Settings.GetValue('update','check_every')
-	};
+      enabled: EM.Settings.GetValue('update','enable'),
+      installed: EM.Settings.GetValue('update','installed'),
+      updateType: EM.Settings.GetValue('update','update_type'),
+      updateSource: EM.Settings.GetValue('update','source_repo'),
+      updateBranch: EM.Settings.GetValue('update','source_branch'),
+      updateTimeout: EM.Settings.GetValue('update','check_every')
+    };
 
     this.ghapi = {
         parent: this,
@@ -3954,98 +3954,98 @@ UpdateMonkey.prototype = {
         var obj = this;
         this.actionPush(
             function(a) {
-            	//Check the cache for the various commits we need ...
-				var mode = 1*a.data.updateType;
-				var repo = a.data.updateSource;
-				var branch = a.data.updateBranch;
+              //Check the cache for the various commits we need ...
+              var mode = 1*a.data.updateType;
+              var repo = a.data.updateSource;
+              var branch = a.data.updateBranch;
 
-				if(!mode) {
-					repo = 'martok#edgemonkey';
-				}
-				if(2 > mode) {
-					branch = 'master';
-				}
+              if(!mode) {
+                repo = 'martok#edgemonkey';
+              }
+              if(2 > mode) {
+                branch = 'master';
+              }
 
-				var commit = null;
-				var c = null;
-				switch(mode) {
-					case 0:		//Only use tags
-						var mostcurrent = new Date(0);
-		                for(var tag in obj.tags[repo]) {
-		                	c = obj.tags[repo][tag];
-		                	var rev_date = new Date();
-		                	rev_date.setISO8601(obj.commits[c].committed_date);
-		                    if(rev_date > mostcurrent) {
-		                    	commit = c;
-		                    	mostcurrent = rev_date;
-		                    }
-		                }
-						break;
-					case 1:		//Use the master branch
-					case 2:		//Use a custom branch
-						c = obj.branches[repo][branch];
-	                    if(isEmpty(obj.commits[c])) {
-	                    	break;
-	                    }
-	                    commit = c;
-						break;
-					default:
-						obj.failMonkeyMessage('Unknown Update mode!');
-						return;
-				}
+              var commit = null;
+              var c = null;
+              switch(mode) {
+                case 0:    //Only use tags
+                  var mostcurrent = new Date(0);
+                          for(var tag in obj.tags[repo]) {
+                            c = obj.tags[repo][tag];
+                            var rev_date = new Date();
+                            rev_date.setISO8601(obj.commits[c].committed_date);
+                              if(rev_date > mostcurrent) {
+                                commit = c;
+                                mostcurrent = rev_date;
+                              }
+                          }
+                  break;
+                case 1:    //Use the master branch
+                case 2:    //Use a custom branch
+                  c = obj.branches[repo][branch];
+                            if(isEmpty(obj.commits[c])) {
+                              break;
+                            }
+                            commit = c;
+                  break;
+                default:
+                  obj.failMonkeyMessage('Unknown Update mode!');
+                  return;
+              }
 
-				if(!isEmpty(commit)) {
-					console.log('OLD: ' + a.data.installed);
-					console.log('NEW: ' + commit);
-					if(commit.trim() != (''+a.data.installed).trim()) {
-						console.log('UpdateMonkey haz njuz!');
-						ur = repo.match(/^([^#]+)#([^#]+)$/);
-						EM.Cache.put('updatemonkey.networks', 'update',
-							{user:ur[1], repo:ur[2], branch:branch, tag:tag, commit:commit, mode:mode}, obj.settings.updateTimeout);
-						obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
-					}
-				}
+              if(!isEmpty(commit)) {
+                console.log('OLD: ' + a.data.installed);
+                console.log('NEW: ' + commit);
+                if(commit.trim() != (''+a.data.installed).trim()) {
+                  console.log('UpdateMonkey haz njuz!');
+                  ur = repo.match(/^([^#]+)#([^#]+)$/);
+                  EM.Cache.put('updatemonkey.networks', 'update',
+                    {user:ur[1], repo:ur[2], branch:branch, tag:tag, commit:commit, mode:mode}, obj.settings.updateTimeout);
+                  obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
+                }
+              }
 
-                a.done(a);
+              a.done(a);
             },
             function(a) {
-            	//Check the cache for the various commits we need ...
-				var mode = 1*a.data.updateType;
-				var repo = a.data.updateSource;
-				var branch = a.data.updateBranch;
+              //Check the cache for the various commits we need ...
+              var mode = 1*a.data.updateType;
+              var repo = a.data.updateSource;
+              var branch = a.data.updateBranch;
 
-				if(!mode) {
-					repo = 'martok#edgemonkey';
-				}
-				if(2 > mode) {
-					branch = 'master';
-				}
+              if(!mode) {
+                repo = 'martok#edgemonkey';
+              }
+              if(2 > mode) {
+                branch = 'master';
+              }
 
-				switch(mode) {
-					case 0:		//Only use tags
-						if(isEmpty(obj.tags[repo])) {
-							return false;
-						}
-		                for(var tag in obj.tags[repo]) {
-		                    if(isEmpty(obj.commits[obj.tags[repo][tag]])) {
-		                    	return false;
-		                    }
-		                }
-						break;
-					case 1:		//Use the master branch
-					case 2:		//Use a custom branch
-						if(isEmpty(obj.branches[repo])) {
-							return false;
-						}
-	                    if(isEmpty(obj.commits[obj.branches[repo][branch]])) {
-	                    	return false;
-	                    }
-						break;
-					default:
-						obj.failMonkeyMessage('Unknown Update mode!');
-						return true;
-				}
-                return true;
+              switch(mode) {
+                case 0:    //Only use tags
+                  if(isEmpty(obj.tags[repo])) {
+                    return false;
+                  }
+                          for(var tag in obj.tags[repo]) {
+                              if(isEmpty(obj.commits[obj.tags[repo][tag]])) {
+                                return false;
+                              }
+                          }
+                  break;
+                case 1:    //Use the master branch
+                case 2:    //Use a custom branch
+                  if(isEmpty(obj.branches[repo])) {
+                    return false;
+                  }
+                            if(isEmpty(obj.commits[obj.branches[repo][branch]])) {
+                              return false;
+                            }
+                  break;
+                default:
+                  obj.failMonkeyMessage('Unknown Update mode!');
+                  return true;
+              }
+              return true;
             },
             function(a) {
                 obj.actionDone(a);
@@ -4055,50 +4055,50 @@ UpdateMonkey.prototype = {
     },
 
     checkUpdate: function() {
-    	if(!this.settings.enabled) {
-    		return true;
-    	}
-		var update = EM.Cache.get('updatemonkey.networks', 'update');
-		if(update.current) {
-			var u = update.data;
-			this.notifyUpdate(u.user, u.repo,u.branch,u.tag,u.commit,u.mode);
-			return;
-		}
+      if(!this.settings.enabled) {
+        return true;
+      }
+      var update = EM.Cache.get('updatemonkey.networks', 'update');
+      if(update.current) {
+        var u = update.data;
+        this.notifyUpdate(u.user, u.repo,u.branch,u.tag,u.commit,u.mode);
+        return;
+      }
 
-        this.updateNetwork();
-        this.checkUpdateAvail();
+      this.updateNetwork();
+      this.checkUpdateAvail();
     },
 
     notifyUpdate: function(user,repo,branch,tag,commit,mode) {
-    	var e = document.createElement('div');
-    	e.innerHTML = '<div class="dfnav">Neues Update</div><br/>'+
-    		'<div class="gensmall">Ein neuer Update von EdgeMonkey wurde gefunden.</div>' +
-    		'<table>'+
-    		'<tr><td><span class="gensmall">Benutzer:</span></td><td><span class="gensmall">' + user + '</span></td></tr>' +
-    		'<tr><td><span class="gensmall">Repository:</span></td><td><span class="gensmall">' + repo + '</span></td></tr>' +
-    		'<tr><td><span class="gensmall">Branch:</span></td><td><span class="gensmall">' + branch + '</span></td></tr>' +
-    		(isEmpty(tag)?'':'<tr><td><span class="gensmall">Tag:</span></td><td><span class="gensmall">' + tag + '</span></td></tr>' )+
-    		'<tr><td><span class="gensmall">Commit:</span></td><td><span class="gensmall"><a href="http://github.com/'+user+'/'+repo+'/commit/'+commit+'/" target="_blank">' + commit.substr(0,16) + '</a></span></td></tr>' +
-    		'</table><br/>' +
-    		'<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
-    		'<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
+      var e = document.createElement('div');
+      e.innerHTML = '<div class="dfnav">Neues Update</div><br/>'+
+        '<div class="gensmall">Ein neuer Update von EdgeMonkey wurde gefunden.</div>' +
+        '<table>'+
+        '<tr><td><span class="gensmall">Benutzer:</span></td><td><span class="gensmall">' + user + '</span></td></tr>' +
+        '<tr><td><span class="gensmall">Repository:</span></td><td><span class="gensmall">' + repo + '</span></td></tr>' +
+        '<tr><td><span class="gensmall">Branch:</span></td><td><span class="gensmall">' + branch + '</span></td></tr>' +
+        (isEmpty(tag)?'':'<tr><td><span class="gensmall">Tag:</span></td><td><span class="gensmall">' + tag + '</span></td></tr>' )+
+        '<tr><td><span class="gensmall">Commit:</span></td><td><span class="gensmall"><a href="http://github.com/'+user+'/'+repo+'/commit/'+commit+'/" target="_blank">' + commit.substr(0,16) + '</a></span></td></tr>' +
+        '</table><br/>' +
+        '<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
+        '<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
 
-		EM.Notifier.notify(
-			'/graphics/Profil-Sidebar.gif',
-			'Neues EM-Update',
-			e,
-			'updatemonkey_haz_update',
-			Notifier.REPLACE
-		);
+      EM.Notifier.notify(
+        '/graphics/Profil-Sidebar.gif',
+        'Neues EM-Update',
+        e,
+        'updatemonkey_haz_update',
+        Notifier.REPLACE
+      );
 
     },
 
     installUpdate: function(commit) {
-    	console.log('install:'+commit);
-		EM.Settings.SetValue('update','installed',commit);
-		Settings_SaveToDisk();
-		EM.Cache.touch('updatemonkey.networks', 'update', -1);
-		return true;
+      console.log('install:'+commit);
+      EM.Settings.SetValue('update','installed',commit);
+      Settings_SaveToDisk();
+      EM.Cache.touch('updatemonkey.networks', 'update', -1);
+      return true;
     }
 }
 
