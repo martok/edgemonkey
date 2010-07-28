@@ -4071,8 +4071,8 @@ UpdateMonkey.prototype = {
 
     notifyUpdate: function(user,repo,branch,tag,commit,mode) {
       var e = document.createElement('div');
-      e.innerHTML = '<div class="dfnav">Neues Update</div><br/>'+
-        '<div class="gensmall">Ein neuer Update von EdgeMonkey wurde gefunden.</div>' +
+      e.innerHTML =
+        '<div class="gensmall">Ein neues Update von EdgeMonkey wurde gefunden.</div>' +
         '<table>'+
         '<tr><td><span class="gensmall">Benutzer:</span></td><td><span class="gensmall">' + user + '</span></td></tr>' +
         '<tr><td><span class="gensmall">Repository:</span></td><td><span class="gensmall">' + repo + '</span></td></tr>' +
@@ -4083,14 +4083,12 @@ UpdateMonkey.prototype = {
         '<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
         '<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
 
-      EM.Notifier.notify(
+      EM.Notifier.addAlert(
         '/graphics/Profil-Sidebar.gif',
         'Neues EM-Update',
-        e,
-        'updatemonkey_haz_update',
-        Notifier.REPLACE
+        'http://github.com/'+user+'/'+repo+'/commit/'+commit+'/',
+        e
       );
-
     },
 
     installUpdate: function(commit) {
