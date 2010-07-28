@@ -339,7 +339,7 @@ function isEmpty(what)
 function isHTMLElement(what)
 {
   return !isEmpty(what) &&
-   ((what instanceof HTMLElement) || (what.tagName));
+   ((what instanceof HTMLElement) || (what.nodeType));
 }
 
 //http://www.infocamp.de/javascript_htmlspecialchars.php
@@ -850,7 +850,11 @@ function addMenuItem(tbl,icon,link,text,extralinks){
     with (tbl.insertRow(-1)) {
       with (insertCell(-1)) {
         className = 'row2';
-        innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
+        if (isHTMLElement(extralinks)) {
+          appendChild(extralinks);
+        } else {
+          innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
+        }
       }
     }
   }
@@ -1028,21 +1032,17 @@ function bringToFront(obj)
 function OverlayWindow(x,y,w,h,content,id)
 {
   //Fix Popups that open to much to the right ...
-  console.log("x:"+x+",y:"+y+",w:"+w+",h:"+h);
   if (x+w+10 > unsafeWindow.innerWidth - 30){
       x = unsafeWindow.innerWidth - 30 - w - 10;
   }
 
-  console.log('Overlay start');
   this.Outer = this.createElement('div');
   this.Outer.className='overlayWin';
   this.Outer.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h+';width:'+w+';height:'+h;
   this.id = id;
 
-  console.log('Overlay Frame Window');
   this.Frame = this.createElement('div');
 
-  console.log('Overlay Drop Shadow');
   this.Shadows = [];
   var pwn = this.Outer;
   var swtop = 0;
@@ -1066,7 +1066,6 @@ function OverlayWindow(x,y,w,h,content,id)
   this.Frame.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);'+
                                    'border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
 
-  console.log('Overlay Content Area');
   this.ContentArea=this.createElement('div');
   this.Frame.appendChild(this.ContentArea);
   this.ContentArea.innerHTML=content;
@@ -1074,7 +1073,6 @@ function OverlayWindow(x,y,w,h,content,id)
 
   this.BringToFront();
   this.showing=true;
-  console.log('Overlay finish');
   document.getElementsByTagName('body')[0].appendChild(this.Outer);
   document.overlayWindows.add(this);
 }
@@ -1087,12 +1085,10 @@ OverlayWindow.prototype = {
   },
 
   InitWindow: function() {
-    console.log('Overlay Caption Bar Window');
     this.TitleBar=this.createElement('div');
     this.Frame.insertBefore(this.TitleBar, this.ContentArea);
     this.TitleBar.style.cssText='text-align:right;background:url(../templates/subSilver/images/cellpic3.gif);padding:3px;cursor:move;';
 
-    console.log('Overlay Caption Bar Close Button');
     this.moving = false;
     this.evmousedown = addEvent(this.TitleBar,'mousedown',function(dv,event) {
       var win = dv.Window;
@@ -1134,7 +1130,6 @@ OverlayWindow.prototype = {
   },
 
   InitDropdown: function() {
-    console.log('Overlay Caption Bar Window');
     this.Outer.style.zIndex=1000;
 
     this.evgmousedown = addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
@@ -1840,155 +1835,170 @@ UserManager.prototype = {
 }
 
 function Notifier() {
-  this.Element = document.createElement('div');
-  this.Element.style.cssText = 'position:fixed;left:0;top:0;height:0px;right:0;opacity:0.9;overflow:hidden;'+
-                               'background: url("./graphics/slices/df_slice-14.gif") repeat scroll 0 -6px transparent;'+
-                               '-moz-user-select:none;z-index:999;cursor:default';
-  this.fadeTimer = null;
-  document.body.appendChild(this.Element);
+  var c=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
+  previousNode(c).style.paddingRight='12px';
+  c.className="overall_menu";
 
-  this.Close = document.createElement('span');
-  this.Element.appendChild(this.Close);
-  this.Close.style.cssText='height:14px;width:14px;float:right;margin:8px 4px;cursor:pointer;background: url("chrome://global/skin/icons/close.png")';
-  this.Close.innerHTML='&nbsp;';
-  var t=this;
-  addEvent(t.Close, 'click', function() {
-    t.fadeOut();
-  });
+  this.container = document.createElement('div');
+  this.container.className="intbl";
+  c.appendChild(this.container);
 
-  this.List = document.createElement('ul');
-  this.Element.appendChild(this.List);
-  this.List.style.cssText='list-style-type: none;margin:0;padding:0';
+  this.PNs = new Notifier.Field(this,'notmen_PN',
+     '<img src="/graphics/PN.gif" border="0"/>',
+     'PNs');
+  this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
+  this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
+
+  this.EMStuff = new Notifier.Field(this,'notmen_EM',
+     '<img src="/graphics/Group.gif" border="0"/>',
+     'EM');
+  this.EMStuff.setImageAction('javascript:EM.Notifier.AlertDropdown()');
+  this.EMStuff.setTextAction('javascript:EM.Notifier.AlertDropdown()');
+  this._alerts=[];
+  this._alertID=0;
+  this._updateText();
 }
 
-Notifier.REPLACE = 1<<0;
-Notifier.POPUP   = 1<<1;
-
 Notifier.prototype = {
-  fadeIn: function() {
-    this.targetHeight=30;
-    this.fade();
-    this.List.style.visibility='visible';
-  },
-  fadeOut: function() {
-    this.List.style.visibility='hidden';
-    if(this.List.children.length) {
-      this.targetHeight=3;
-      var t=this;
-      t.fadeEvent = addEvent(t.Element, 'mouseover', function() {
-        t.fadeIn();
-        removeEvent(t.Element, 'mouseover',t.fadeEvent);
-      });
-    } else {
-      this.targetHeight=0;
-    }
-    this.fade();
-  },
-  fade: function() {
-    if(this.fadeTimer) {
-      window.clearTimeout(this.fadeTimer);
-      this.fadeTimer = null;
-    }
-    var h = parseInt(this.Element.style.height);
-    var step = 2;
-    if (Math.abs(h-this.targetHeight)<step) {
-      this.Element.style.height = this.targetHeight+'px';
-    } else {
-      this.Element.style.height = (h + Math.sign(this.targetHeight-h)*step)+'px';
-      this.fadeTimer = window.setTimeout('EM.Notifier.fade()', 10);
-    }
-  },
-  notify: function(icon,title,detail,uniquename,options) {
-    if (typeof detail=='string') {
-      var k=document.createElement('div');
-      k.innerHTML=detail;
-      detail=k;
-    }
-    if (isEmpty(options)) {
-      options=0;
-    }
-    if (isEmpty(uniquename)) {
-      uniquename=Math.floor(Math.random()*1E6);
-    }
-    uniquename='em_notification_'+uniquename;
-
-    detail.style.cssText='display:none';
-    this.fadeIn();
-
-    var f = document.getElementById(uniquename);
-    if (f) {
-      if (options & Notifier.REPLACE) {
-        f.parentNode.removeChild(f);
-      } else {
-        return;
-      }
-    }
-    f = document.createElement('li');
-    f.id=uniquename;
-    f.style.cssText='float:left;display:inline;overflow:hidden;height:20px; background-color:#EFEFF4;'+
-                    '-moz-border-radius:5px;padding:3px;margin-left:5px;cursor:pointer';
-    f.innerHTML = '<a><img border="0" style="width: 19px; height: 18px;" src="'+icon+'" alt="'+title+'" class="navbar">'+title+'</a>';
-    var c = document.createElement('img');
-    f.appendChild(c);
-    f.appendChild(detail);
-
-    this.List.appendChild(f);
-    var t=this;
-    addEvent(f, 'click', function() {
-      t.expand(f);
-      t.popup(f);
-    });
-
-    c.style.cssText='height:16px;width:16px; margin-top:2px;float:right;cursor:pointer';
-    c.src=data.close;
-    addEvent(c,'click',function(el,e) {
-      e.preventDefault();
-      e.stopPropagation();
-      t.remove(f.id);
-    });
-
-    this.expand(f);
-    if (options & Notifier.POPUP) {
-      setTimeout(function() {t.popup(f);}, 150);
-    }
-  },
-  expand: function(e) {
-    this.collapseAll();
-    if (isEmpty(e)) {
-      e = this.List.lastElementChild;
-    }
-    e.style.width='';
-  },
-  collapseAll: function() {
-    for (var i=0; i<this.List.children.length; i++) {
-      var e=this.List.children[i];
-      e.style.width='20px';
-    }
-  },
-  popup: function(e) {
-    var a = e.lastElementChild;
-    var coords = new Point(e.getBoundingClientRect().left, e.getBoundingClientRect().bottom);
+  MenuPNDropdown: function() {
+    this.PNs.setHighlight(false);
+    var link = this.PNs.field;
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom-5);
     coords.TranslateWindow();
-    var w = new OverlayWindow(coords.x,coords.y,300,180,'','em_notificationpopup');
-    w.InitDropdown();
-    a.style.display='';
 
-    w.ContentArea.appendChild(a);
-    w.OnClose = function(wi) {
-      var el=document.getElementById(e.id);
-      var d=wi.ContentArea.lastElementChild;
-      if (el && el.children.length==2) el.appendChild(d);
-      d.style.display='none';
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPN');
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+
+    tbl.addMenuItem(
+        "/graphics/Portal-PM.gif",
+        "/privmsg.php?folder=inbox",
+        "Private Nachrichten",
+        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
+        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
+        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
+        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
+        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
+        );
+    w.ContentArea.appendChild(tbl);
+    w.ContentArea.appendChild(document.createElement('div'));
+  },
+  AlertDropdown: function() {
+    this.EMStuff.setHighlight(false);
+    if (!this._alerts.length)
+      return;
+    var link = this.EMStuff.field;
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom-5);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_Alerts');
+    this.window = w;
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+
+    [].concat(this._alerts).reverse().forEach(function(el) {
+      var collhtml='<img border="0" align="top" title="ausblenden" src="./graphics/code_half.gif"'+
+                   ' onclick="EM.Notifier.removeAlert('+el.id+')" style="cursor:pointer">&nbsp;';
+      if (isHTMLElement(el.html)) {
+        var d=document.createElement('span');
+        d.className='gensmall';
+        d.innerHTML=collhtml;
+        d.appendChild(el.html);
+        tbl.addMenuItem(el.icon, el.href, el.title, d);
+      } else {
+        tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
+      }
+    },this);
+    w.ContentArea.appendChild(tbl);
+    w.ContentArea.style.overflow='auto';
+    w.ContentArea.style.height='187px';
+    var t=this;
+    w.OnClose = function() {
+      t.window=null;
+    };
+  },
+  _updateText: function() {
+    if (this._alerts.length) {
+      this.EMStuff.setText(this._alerts.length+' Meldung'+((this._alerts.length>1)?'en':''));
+      this.EMStuff.setWidth('');
+    } else {
+      this.EMStuff.setText('EM');
+      this.EMStuff.setWidth('0px');
     }
   },
-  remove: function(e) {
-    if (typeof e=='string')
-      e=document.getElementById(e);
-    this.List.removeChild(e);
-    if (!this.List.children.length) {
-      this.fadeOut();
-    } else {
-      this.expand();
+  addAlert: function(icon, title, href, html) {
+    this._alerts.push({"id":++this._alertID,"icon": icon, "title":title, "href":href, "html":html});
+    this._updateText();
+    this.EMStuff.setHighlight(true);
+    return this._alertID;
+  },
+  removeAlert: function(id) {
+    this._alerts = this._alerts.filter(function(e) {
+      return e.id!==id;
+    },this);
+    this._updateText();
+    if (this.window) {
+      this.window.Close();
+      this.AlertDropdown();
+    }
+  }
+}
+
+Notifier.BLINKTIME=700;
+
+Notifier.Field = function(parent,id,img,text) {
+  var cnt2 = document.createElement('div');
+  cnt2.id=id;
+  cnt2.className="incell";
+  cnt2.style.cssText='vertical-align:middle';
+  parent.container.appendChild(cnt2);
+
+  var cnt = document.createElement('div');
+  cnt2.appendChild(cnt);
+  cnt.style.cssText='overflow:hidden;';
+
+  this.field = document.createElement('div');
+  cnt.appendChild(this.field);
+  this.field.style.cssText='display:table;padding-right:12px';
+
+  this.field.innerHTML='<a href="" class="dfnav">'+img+'</a>';
+
+  this.text = document.createElement('a');
+  this.text.style.cssText='display:table-cell;vertical-align:middle';
+  this.text.className='dfnav';
+  this.field.appendChild(this.text);
+  this.text.innerHTML=text;
+
+  this._hilight=null;
+}
+
+Notifier.Field.prototype = {
+  setImageAction: function(act) {
+    this.field.firstChild.href=act;
+  },
+  setTextAction: function(act) {
+    this.text.href=act;
+  },
+  setText: function(text) {
+    this.text.innerHTML=text;
+  },
+  setWidth: function(w) {
+    this.field.parentNode.style.width=w;
+  },
+  setHighlight: function(hl) {
+    window.clearTimeout(this._hilight);
+    this.field.firstChild.style.visibility='';
+    this._hilight=null;
+    if (hl) {
+      var t = this;
+      this._hilight = window.setTimeout(function() {
+        t.field.firstChild.style.visibility=t.field.firstChild.style.visibility?'':'hidden';
+        t._hilight = window.setTimeout(arguments.callee,Notifier.BLINKTIME);
+      },Notifier.BLINKTIME);
     }
   }
 }
@@ -2278,7 +2288,6 @@ ShoutboxControls.prototype = {
                       } break;
                       case 'S@': {
                         if(re = resolveForumSelect(".*?", txt)) {
-                          console.log(re);
                           return before+"[url=http://www."+re.forum+".de/search.php?search_keywords="+
                                   encodeURIComponent(re.found)+"]"+re.found+"[/url]";
                         }
@@ -2565,7 +2574,6 @@ function SmileyWindow(target) {
   this.Target = target;
   var pt = new Point(0,0);
   pt.CenterInWindow(440,290);
-  console.log(pt);
   this.win = new OverlayWindow(pt.x,pt.y,440,290,'','em_SmileyWin');
   if(EM.Settings.GetValue('pagehack','smileyOverlay')==1) {
     this.win.InitWindow();
@@ -3175,7 +3183,6 @@ Pagehacks.prototype = {
   FixPostingDialog: function () {
     //Get the Content Main Table
     var sp = EM.Buttons.mainTable;
-    console.log(sp);
 
     if(isUndef(sp) || null == sp) {
       return;
@@ -3183,10 +3190,8 @@ Pagehacks.prototype = {
 
     //Get the Information Table
     sp = queryXPathNode(sp, "tbody/tr[2]/td/div/table");
-    console.log(sp);
 
     var t = queryXPathNode(sp, "tbody/tr[1]/th/b");
-    console.log(t);
     if(isUndef(t) || null == t) {
       return;
     }
@@ -3197,7 +3202,6 @@ Pagehacks.prototype = {
 
     //Get the Information Span with all those links ...
     sp = queryXPathNode(sp, "tbody/tr[2]/td/table/tbody/tr[2]/td/span");
-    console.log(sp);
 
     sp.innerHTML+='<br><br><a href="/search.php?search_id=unread">Hier klicken</a>, um die ungelesenen Themen anzuzeigen';
   },
@@ -3266,21 +3270,11 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,328,148,'','em_QPM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
 
-    tbl.addMenuItem(
-        "/graphics/Portal-PM.gif",
-        "/privmsg.php?folder=inbox",
-        "Private Nachrichten",
-        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
-        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
-        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
-        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
-        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
-        );
     tbl.addMenuItem(
         "/graphics/Drafts.gif",
         "/drafts.php",
