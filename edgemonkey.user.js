@@ -412,6 +412,16 @@ if (!String.prototype.trim) String.prototype.trim = function() {
     }
 })();
 
+function EventQueue() {}
+EventQueue.prototype=Array.prototype;
+EventQueue.prototype.fire=function(data){
+  for (var i=0; i<this.length; i++) {
+    if (!this[i](data))
+      return false;
+  }
+  return true;
+};
+
 function encodeLongShout(text)
 {
   var b = '';
@@ -1077,6 +1087,8 @@ function SettingsStore() {
       this.cookies[k] = Deserialize(unescape(res[2]));
     }
   }
+
+  this.onSettingChanged = new EventQueue();
 }
 
 var Settings_SaveToDisk = function () { // global deklarieren
@@ -1229,6 +1241,7 @@ SettingsStore.prototype = {
   },
 
   ev_SaveDialog: function(evt) {
+    var old=eval(uneval(EM.Settings.Values));
     with (EM.Settings.Window) {
       EM.Settings.Categories.forEach(function(c){
         c.settings.forEach(function(s) {
@@ -1244,6 +1257,14 @@ SettingsStore.prototype = {
         }, this);
       }, this);
     }
+    var diff={};
+    for (key in old) {
+      if (old[key]!=EM.Settings.Values[key]) {
+        diff[key]=EM.Settings.Values[key];
+      }
+    }
+
+    EM.Settings.onSettingChanged.fire({Old:old, Modified:diff});
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
       window.location.reload(false);
