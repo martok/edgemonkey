@@ -502,6 +502,16 @@ Date.prototype.toISO8601String = function (format, offset) {
     return str;
 }
 
+function EventQueue() {}
+EventQueue.prototype=Array.prototype;
+EventQueue.prototype.fire=function(data){
+  for (var i=0; i<this.length; i++) {
+    if (!this[i](data))
+      return false;
+  }
+  return true;
+};
+
 function encodeLongShout(text)
 {
   var b = '';
@@ -1318,6 +1328,8 @@ function SettingsStore() {
       this.cookies[k] = Deserialize(unescape(res[2]));
     }
   }
+
+  this.onSettingChanged = new EventQueue();
 }
 
 var Settings_SaveToDisk = function () { // global deklarieren
@@ -1387,11 +1399,13 @@ SettingsStore.prototype = {
     head.className='em-tabbar';
     this.Window.Body.appendChild(head);
     head=head.insertRow(-1);
+    var firstTab = null;
     this.Categories.forEach(function(c){
       if(head.children.length>=4) head=head.parentNode.insertRow(-1);
       var h=head.insertCell(-1);
       h.innerHTML = c.title;
       h.className='em-tabbutton';
+      if (!firstTab) firstTab=h;
       var id = 'page'+Math.ceil(Math.random()*1E6);
       var doc = this.Window.Document;
       addEvent(h, 'click', function(el) {
@@ -1447,18 +1461,18 @@ SettingsStore.prototype = {
         }, this);
       }
     }, this);
-      var ct=4,cs=Math.floor(4/head.children.length);
-      var l=head.children;
-      for (var i=0; i<l.length-1;i++) {
-        l[i].colSpan=cs;
-        ct-=cs;
-      }
-      l[l.length-1].colSpan=ct;
+    var ct=4,cs=Math.floor(4/head.children.length);
+    var l=head.children;
+    for (var i=0; i<l.length-1;i++) {
+      l[i].colSpan=cs;
+      ct-=cs;
+    }
+    l[l.length-1].colSpan=ct;
 
     this.Window.Window.setTimeout(function() {
       var ev = document.createEvent("HTMLEvents");
       ev.initEvent("click", true, false);
-      head.firstChild.dispatchEvent(ev);
+      firstTab.firstChild.dispatchEvent(ev);
     }, 1);
 
     this.Window.ButtonBar = this.Window.Document.createElement('table');
@@ -1468,6 +1482,7 @@ SettingsStore.prototype = {
   },
 
   ev_SaveDialog: function(evt) {
+    var old=eval(uneval(EM.Settings.Values));
     with (EM.Settings.Window) {
       EM.Settings.Categories.forEach(function(c){
         c.settings.forEach(function(s) {
@@ -1483,6 +1498,14 @@ SettingsStore.prototype = {
         }, this);
       }, this);
     }
+    var diff={};
+    for (key in old) {
+      if (old[key]!=EM.Settings.Values[key]) {
+        diff[key]=EM.Settings.Values[key];
+      }
+    }
+
+    EM.Settings.onSettingChanged.fire({Old:old, Modified:diff});
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
       window.location.reload(false);
