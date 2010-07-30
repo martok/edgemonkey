@@ -3741,6 +3741,8 @@ function UpdateMonkey() {
             this.request('GET', 'http://github.com/api/v2/json/commits/show/'+user+'/'+repo+'/'+commit,null,null,cb,cbdata);
         }
     };
+
+    EM.Settings.onSettingChanged.push(this.evSettingChanged);
 }
 UpdateMonkey.prototype.updateEngine = function(stage, success, response) {}; //Telling JS something it doesn't believe me without telling it directly
 UpdateMonkey.prototype = {
@@ -4124,6 +4126,14 @@ UpdateMonkey.prototype = {
       Settings_SaveToDisk();
       EM.Cache.touch('updatemonkey.networks', 'update', -1);
       return true;
+    },
+
+    evSettingChanged: function(data) {
+      if (!(isUndef(data.Modified['update.update_type']) &&
+          isUndef(data.Modified['update.source_repo']) &&
+          isUndef(data.Modified['update.source_branch']))) {
+        EM.Cache.touch('updatemonkey.networks', 'update', -1);
+      }
     }
 }
 
