@@ -309,6 +309,8 @@ function last_child(node,kind)
 
 function previousNode(node)
 {
+  if (!isHTMLElement(node))
+    return null;
   var res=node.previousSibling;
   while (res!=null && res.nodeType!=1) {
     res = res.previousSibling;
@@ -318,6 +320,8 @@ function previousNode(node)
 
 function nextNode(node)
 {
+  if (!isHTMLElement(node))
+    return null;
   var res=node.nextSibling;
   while (res!=null && res.nodeType!=1) {
     res = res.nextSibling;
