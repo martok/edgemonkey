@@ -1294,12 +1294,50 @@ function SettingsStore() {
           ['Stable Releases (Release Tags)', 0],
           ['Testing Releases (Master Branch)', 1],
           ['Unstable Releases (Custom Branch)', 2]
-        ], 0),
+        ], 0, {
+        onChange: function (t,w,e) {
+            var src = w.getControl('update_source_repo');
+            var brn = w.getControl('update_source_branch');
+            src.disabled=w.getValue('update_update_type')==0;
+            brn.disabled=w.getValue('update_update_type')!=2;
+
+            if (!brn.disabled) {
+              //simulate change to get elected^W^W^W load branches
+              var ev = document.createEvent("HTMLEvents");
+              ev.initEvent("change", true, false);
+              src.dispatchEvent(ev);
+            }
+          }
+        }),
     this.AddSetting( 'Quelle für Updates','update.source_repo', [
           ['BenBE', 'BenBE#edgemonkey'],
           ['Kha', 'Kha#edgemonkey'],
           ['martok', 'martok#edgemonkey']
-        ], 'martok#edgemonkey'),
+        ], 'martok#edgemonkey', {
+        onChange: function (t,w,e) {
+            if (w.getValue('update_update_type')!=2)
+              return;
+            var repo = w.getValue('update_source_repo').split('#');
+            var brn = w.getControl('update_source_branch');
+            var b=brn.value;
+            if (isEmpty(e)) {
+              //initial change-> display current setting
+              b=EM.Settings.GetValue('update','source_branch');
+            }
+            for (var i=brn.options.length-1; i>=0; i--) {
+              brn.remove(i);
+            }
+            EM.Updater.updateBranches(repo[0],repo[1],function(upd,branches) {
+              var lst=[];
+              for (var branch in branches) {
+                lst.push(branch);
+              }
+              lst.sort().forEach(function(br) {
+                brn.options[brn.options.length]=new Option(br,br,br==b);
+              });
+            });
+          }
+        }),
     this.AddSetting( 'Source Branch (Nur bei Unstable Releases)','update.source_branch', [
           ['master', 'master']
         ], 'master'),
@@ -3838,7 +3876,7 @@ UpdateMonkey.prototype = {
         );
     },
 
-    updateBranches: function(user,repo) {
+    updateBranches: function(user,repo,callback) {
         console.log('branches:'+user+','+repo);
         var obj = this;
         this.actionPush(
@@ -3876,6 +3914,8 @@ UpdateMonkey.prototype = {
                 for(var branch in branches) {
                     obj.updateCommit(a.data.user,a.data.repo,branches[branch]);
                 }
+                if (!isEmpty(callback))
+                  callback(obj, branches);
                 obj.actionDone(a);
             },
             {
