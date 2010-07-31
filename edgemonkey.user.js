@@ -1542,6 +1542,8 @@ UserManager.prototype = {
 
 function Notifier() {
   var c=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
+  if (isEmpty(c))
+    return;
   previousNode(c).style.paddingRight='12px';
   c.className="overall_menu";
 
