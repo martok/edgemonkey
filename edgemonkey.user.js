@@ -503,7 +503,7 @@ Date.prototype.toISO8601String = function (format, offset) {
 }
 
 function EventQueue() {}
-EventQueue.prototype=Array.prototype;
+EventQueue.prototype= new Array();
 EventQueue.prototype.fire=function(data){
   for (var i=0; i<this.length; i++) {
     if (!this[i](data))
@@ -1438,6 +1438,7 @@ SettingsStore.prototype = {
     this.Window.Body.appendChild(head);
     head=head.insertRow(-1);
     var firstTab = null;
+    var onChanges = [];
     this.Categories.forEach(function(c){
       if(head.children.length>=4) head=head.parentNode.insertRow(-1);
       var h=head.insertCell(-1);
@@ -1489,6 +1490,7 @@ SettingsStore.prototype = {
           var w = this.Window;
           if (s.events.onChange) {
             e.addEventListener('change',function(e) { s.events.onChange(e.target,w,e); },true);
+            onChanges.push(function() {s.events.onChange(e,w,null)});
           }
           if (s.events.onExit) {
             e.addEventListener('blur',function(e) { s.events.onExit(e.target,w,e); },true);
@@ -1517,6 +1519,8 @@ SettingsStore.prototype = {
     this.Window.ButtonBar.className = 'forumline';
     this.Window.ButtonBar.style.cssText = 'width:98%; margin:5px;';
     this.Window.Body.appendChild(this.Window.ButtonBar);
+
+    onChanges.forEach(function(f) {f()});
   },
 
   ev_SaveDialog: function(evt) {
@@ -1901,6 +1905,8 @@ UserManager.prototype = {
 
 function Notifier() {
   var c=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
+  if (isEmpty(c))
+    return;
   previousNode(c).style.paddingRight='12px';
   c.className="overall_menu";
 
