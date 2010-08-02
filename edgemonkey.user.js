@@ -268,7 +268,15 @@ var data = {
     'w7xiZXJsYXNzZW4gU2llIGJlc3NlciB3ZWl0ZXJoaW4gZGVuIFVzZXJuIGltIEhlaXNlLUZvcnVtLjwvdHNwYW4%2BCiAgICAgIDx0c3BhbiBzb2RpcG9kaTpyb2xlPSJsaW5lIiB4PSIzODQuMCIgeT0iNjIyLjQyNTY2Ij4gPC90c3Bhbj4KICAgICAgPHRzcGFuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2MzQuOTI1Nj'+
     'YiPlNvbGx0ZW4gU2llIG51biwgZW50Z2VnZW4gZGllc2VyIFdhcm51bmcgdW5kIHRyb3R6IGRlbjwvdHNwYW4%2BCiAgICAgIDx0c3BhbiBzb2RpcG9kaTpyb2xlPSJsaW5lIiB4PSIzODQuMCIgeT0iNjQ3LjQyNTY2Ij5tw7ZnbGljaGVuIEdlZmFocmVuIHVuZCBGb2xnZW4sIGRpZXNlIGdldHJvbGx0ZTwvdHNwYW4%2BCiAgICAgIDx0c3'+
     'BhbiBzb2RpcG9kaTpyb2xlPSJsaW5lIiB4PSIzODQuMCIgeT0iNjU5LjkyNTY2Ij5JbnRlcm5ldGRpc2t1c3Npb24gZGVubm9jaCBiZXRyZXRlbiB3b2xsZW4sPC90c3Bhbj4KICAgICAgPHRzcGFuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2NzIuNDI1NjYiPnNvIGtsaWNrZW4gc2llPC90c3Bhbj4KICAgICAgPHRzcG'+
-    'FuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2ODQuOTI1NzIiPiA8L3RzcGFuPgogICAgPC90ZXh0Pg0KICA8L2c%2BDQo8L3N2Zz4%3D'
+    'FuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2ODQuOTI1NzIiPiA8L3RzcGFuPgogICAgPC90ZXh0Pg0KICA8L2c%2BDQo8L3N2Zz4%3D',
+  close:
+    'data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%10%00%00%00%10%08%06%00%00%00%1F%F3%FFa%00%00%00%04gAMA%00%00%AF%C87%05%8A%E9%00%00%00%19tEXtSoftware%00Adobe%20ImageReadyq%C9e%3C%00%00%02!IDAT8%CB%95%93%EBN%13Q%14%85%89%89%C9%89%CF%A0V%89%86%C8%'+
+    '91%80%C4%1BB%5B%06(%AD%0D%08%26%D0%FB%85%5E%A4%80%B4%A5%ED%A4M%A16%EA%0FM%7C%12%9F%0BD%C5%DE%B0%D2%99v%3A%D3%E5%AE%98J-%25%E1%C7N%CEd%CE%FA%F6%AC%B5%F7%0C%00%18%B8L%D5%D7B%D7%CE%3Ew_%103%3A*%DEW%EC%0Fr%D9%ED%8D%D7lNC%2F%A0-%CE%EC%A2%95%CEB%8B\'%7B%20u_%80%D'+
+    '7%03a46%B6%F0%EB%E5%CA%E7%EA%E2%D2%BD%7F%80%BFb%E4%DF%A1E%A5%25D47%B7%3B%10%D9%BB%C6%A9%3B%9A%D18%90%CB%A3%7D%3E6%5B%E3%E5%19%D3%95S%40*%CDZ%09Qk%ED%BE%01%3E~%82%96%CD%B5%01h%04B%5C%F6%F89u%87%B2%1D%03%E8%BD%EC%0F%E0x%FE%B9Z%16%E6%AEvY%D0b%09%A6%BE%8E%A9%9'+
+    'A%98%01%DE%7F%80%9AJ%A3%1E%0C%83%BAC%D9%8A%02%D9%BD%3F%E7%8A%C9B%E2Yvn%88%CD%C8%26k%84%D6%D5ft%87%EC%BC%05%F6%F2%24%CC%01%99%2Cd%8F%0F%959%B3Z%9E%9Ea%FD%A7p%1A%16%93%5C%5E%0DY%B2%E3%F6%01%0E7%20%A6Q%99%9D%D7JF%81%FD%7F%BF%07%209%3D%EDQ%014%0D%D8%9C%C0%8A%1'+
+    'D%D8I%92o%0B%0A%13S%FCB%80%E4ps%C9%E5%81%12%8E%00I%91%84)%20Fv(%40y%D5%8E%B2%DE%88%EFc%E3%FC%5C%40%CD%EE%E2%92%D3%0D%25%B4%0E%D0%18%25%87%0B%14%96Z%9C2h\'%8B%CB%40d%03%B5%17%CB(%3C%7C%8C%C3%A1a%DE%05%A0%CD%E2%D4%1DJ%F0%15uM%40%A2O%A7%B0%D4%E2%A4%81%15%9EL%B'+
+    '0%A3%F1Gj%D5d%06%82!%9CX%AC8%1A%19%C5%C1%ADA%DE%01%D0f%095%9B%03J%20%04i%D5%01%0AK-%3E%D3w%02%FB62%C6%BE%0E%DFW%7F%1A%05H%D6%05%FC%18%7D%80%FD%1B%3A%A1%CB%02m%96P%5DXB%C90%ADQX%3Di%1F%DE%1Db_%06%EF%A8g%C5%3D!%96%F4F%A1%F0t%92%F5%FB%99%0Et%B7%D9%FE%F5%9B%C2'+
+    '%85c%BCl%FD%06r%BB%A4%C7%DB%ED%BE%14%00%00%00%00IEND%AEB%60%82'
 }
 
 function queryXPath(node,xpath){
@@ -368,6 +376,10 @@ String.prototype.equals = function (what) {
 // FF 3.1+ has it native (JS 1.8.1)
 if (!String.prototype.trim) String.prototype.trim = function() {
   return this.replace(/^\s*/,'').replace(/\s*$/,'');
+};
+
+Math.sign = function(a) {
+  return a>0?1:(a<0?-1:0);
 };
 
 (function() {
@@ -665,7 +677,11 @@ function addMenuItem(tbl,icon,link,text,extralinks){
     with (tbl.insertRow(-1)) {
       with (insertCell(-1)) {
         className = 'row2';
-        innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
+        if (isHTMLElement(extralinks)) {
+          appendChild(extralinks);
+        } else {
+          innerHTML = "<span class=\"gensmall\">"+extralinks+"</span>";
+        }
       }
     }
   }
@@ -983,6 +999,7 @@ OverlayWindow.prototype = {
     if (this.evgmousedown) removeGlobalEvent('mousedown',this.evgmousedown,true);
 
     document.overlayWindows.remove(this);
+    if (this.OnClose) this.OnClose(this);
   },
   BringToFront: function() {
     return bringToFront(this.Outer);
@@ -1631,6 +1648,178 @@ UserManager.prototype = {
     return cssClassAdd;
   }
 
+}
+
+function Notifier() {
+  var c=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
+  if (isEmpty(c))
+    return;
+  previousNode(c).style.paddingRight='12px';
+  c.className="overall_menu";
+
+  this.container = document.createElement('div');
+  this.container.className="intbl";
+  c.appendChild(this.container);
+
+  this.PNs = new Notifier.Field(this,'notmen_PN',
+     '<img src="/graphics/PN.gif" border="0"/>',
+     'PNs');
+  this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
+  this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
+
+  this.EMStuff = new Notifier.Field(this,'notmen_EM',
+     '<img src="/graphics/Group.gif" border="0"/>',
+     'EM');
+  this.EMStuff.setImageAction('javascript:EM.Notifier.AlertDropdown()');
+  this.EMStuff.setTextAction('javascript:EM.Notifier.AlertDropdown()');
+  this._alerts=[];
+  this._alertID=0;
+  this._updateText();
+}
+
+
+Notifier.prototype = {
+  MenuPNDropdown: function() {
+    this.PNs.setHighlight(false);
+    var link = this.PNs.field;
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom-5);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPN');
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+
+    tbl.addMenuItem(
+        "/graphics/Portal-PM.gif",
+        "/privmsg.php?folder=inbox",
+        "Private Nachrichten",
+        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
+        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
+        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
+        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
+        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
+        );
+    w.ContentArea.appendChild(tbl);
+    w.ContentArea.appendChild(document.createElement('div'));
+  },
+  AlertDropdown: function() {
+    this.EMStuff.setHighlight(false);
+    if (!this._alerts.length)
+      return;
+    var link = this.EMStuff.field;
+    var bcr = link.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom-5);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_Alerts');
+    this.window = w;
+    w.InitDropdown();
+
+    var tbl = w.CreateMenu();
+
+    [].concat(this._alerts).reverse().forEach(function(el) {
+      var collhtml='<img border="0" align="top" title="ausblenden" src="./graphics/code_half.gif"'+
+                   ' onclick="EM.Notifier.removeAlert('+el.id+')" style="cursor:pointer">&nbsp;';
+      if (isHTMLElement(el.html)) {
+        var d=document.createElement('span');
+        d.className='gensmall';
+        d.innerHTML=collhtml;
+        d.appendChild(el.html);
+        tbl.addMenuItem(el.icon, el.href, el.title, d);
+      } else {
+        tbl.addMenuItem(el.icon, el.href, el.title, collhtml+el.html);
+      }
+    },this);
+    w.ContentArea.appendChild(tbl);
+    w.ContentArea.style.overflow='auto';
+    w.ContentArea.style.height='187px';
+    var t=this;
+    w.OnClose = function() {
+      t.window=null;
+    };
+  },
+  _updateText: function() {
+    if (this._alerts.length) {
+      this.EMStuff.setText(this._alerts.length+' Meldung'+((this._alerts.length>1)?'en':''));
+      this.EMStuff.setWidth('');
+    } else {
+      this.EMStuff.setText('EM');
+      this.EMStuff.setWidth('0px');
+    }
+  },
+  addAlert: function(icon, title, href, html) {
+    this._alerts.push({"id":++this._alertID,"icon": icon, "title":title, "href":href, "html":html});
+    this._updateText();
+    this.EMStuff.setHighlight(true);
+    return this._alertID;
+  },
+  removeAlert: function(id) {
+    this._alerts = this._alerts.filter(function(e) {
+      return e.id!==id;
+    },this);
+    this._updateText();
+    if (this.window) {
+      this.window.Close();
+      this.AlertDropdown();
+    }
+  }
+}
+
+Notifier.BLINKTIME=700;
+
+Notifier.Field = function(parent,id,img,text) {
+  var cnt2 = document.createElement('div');
+  cnt2.id=id;
+  cnt2.className="incell";
+  cnt2.style.cssText='vertical-align:middle';
+  parent.container.appendChild(cnt2);
+
+  var cnt = document.createElement('div');
+  cnt2.appendChild(cnt);
+  cnt.style.cssText='overflow:hidden;';
+
+  this.field = document.createElement('div');
+  cnt.appendChild(this.field);
+  this.field.style.cssText='display:table;padding-right:12px';
+
+  this.field.innerHTML='<a href="" class="dfnav">'+img+'</a>';
+
+  this.text = document.createElement('a');
+  this.text.style.cssText='display:table-cell;vertical-align:middle';
+  this.text.className='dfnav';
+  this.field.appendChild(this.text);
+  this.text.innerHTML=text;
+
+  this._hilight=null;
+}
+
+Notifier.Field.prototype = {
+  setImageAction: function(act) {
+    this.field.firstChild.href=act;
+  },
+  setTextAction: function(act) {
+    this.text.href=act;
+  },
+  setText: function(text) {
+    this.text.innerHTML=text;
+  },
+  setWidth: function(w) {
+    this.field.parentNode.style.width=w;
+  },
+  setHighlight: function(hl) {
+    window.clearTimeout(this._hilight);
+    this.field.firstChild.style.visibility='';
+    this._hilight=null;
+    if (hl) {
+      var t = this;
+      this._hilight = window.setTimeout(function() {
+        t.field.firstChild.style.visibility=t.field.firstChild.style.visibility?'':'hidden';
+        t._hilight = window.setTimeout(arguments.callee,Notifier.BLINKTIME);
+      },Notifier.BLINKTIME);
+    }
+  }
 }
 
 function ShoutboxReplacer(){
@@ -2505,13 +2694,21 @@ Pagehacks.prototype = {
   },
 
   checkPMAuto: function() {
-    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,null,
-      function(html) {
-        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(html)) {
+    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,document.createElement('div'),
+      function(div) {
+        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(div.innerHTML)) {
           // no PNs, but nobody would want to know that
         } else {
-          //do something (later)
-          //window.open('/privmsg.php?mode=newpm', '_phpbbprivmsg', 'HEIGHT=225,resizable=yes,WIDTH=400');
+          var a=div.getElementsByTagName('a');
+          for(i=0;i<a.length;i++) {
+            if (a[i].href.match(/window\.close/)) {
+              a[i].parentNode.removeChild(a[i]);
+            } else a[i].removeAttribute('target');
+          }
+          div=queryXPathNode(div, './/table[@class=\'forumline\']');
+          div.className='';
+          EM.Notifier.notify('/graphics/Portal-PM.gif','PN eingetroffen',div,'pnarrived',true);
+          div.style.cssText='height:100%';
         }
       });
   },
@@ -2999,21 +3196,11 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,328,148,'','em_QPM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
 
-    tbl.addMenuItem(
-        "/graphics/Portal-PM.gif",
-        "/privmsg.php?folder=inbox",
-        "Private Nachrichten",
-        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
-        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
-        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
-        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
-        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
-        );
     tbl.addMenuItem(
         "/graphics/Drafts.gif",
         "/drafts.php",
@@ -3469,6 +3656,7 @@ function initEdgeApe() {
   else
   {
     EM.Buttons = new ButtonBar();
+    EM.Notifier = new Notifier();
 
     with(EM.Buttons) {
       addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
