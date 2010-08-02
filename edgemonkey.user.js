@@ -1309,7 +1309,7 @@ function SettingsStore() {
             }
           }
         }),
-    this.AddSetting( 'Quelle für Updates','update.source_repo', [
+    this.AddSetting( 'Quelle f&uuml;r Updates','update.source_repo', [
           ['BenBE', 'BenBE#edgemonkey'],
           ['Kha', 'Kha#edgemonkey'],
           ['martok', 'martok#edgemonkey']
