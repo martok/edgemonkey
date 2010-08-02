@@ -428,6 +428,83 @@ Math.sign = function(a) {
     }
 })();
 
+RegExp.prototype.execAll=function(data) {
+  var result = [];
+  var r;
+  while((r = this.exec(data))!= null) {
+    result.push(r);
+  }
+  if (result.length)
+    return result;
+  else
+    return null;
+}
+
+//http://jacwright.com/projects/javascript/date_format
+// Simulates PHP's date function
+Date.prototype.format = function(format) {
+  var returnStr = '';
+  var replace = {
+    shortMonths: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+    longMonths: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+    shortDays: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+    longDays: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+
+    // Day
+    d: function() { return (this.getDate() < 10 ? '0' : '') + this.getDate(); },
+    D: function() { return replace.shortDays[this.getDay()]; },
+    j: function() { return this.getDate(); },
+    l: function() { return replace.longDays[this.getDay()]; },
+    N: function() { return this.getDay() + 1; },
+    S: function() { return (this.getDate() % 10 == 1 && this.getDate() != 11 ? 'st' : (this.getDate() % 10 == 2 && this.getDate() != 12 ? 'nd' : (this.getDate() % 10 == 3 && this.getDate() != 13 ? 'rd' : 'th'))); },
+    w: function() { return this.getDay(); },
+    z: function() { return "Not Yet Supported"; },
+    // Week
+    W: function() { return "Not Yet Supported"; },
+    // Month
+    F: function() { return replace.longMonths[this.getMonth()]; },
+    m: function() { return (this.getMonth() < 9 ? '0' : '') + (this.getMonth() + 1); },
+    M: function() { return replace.shortMonths[this.getMonth()]; },
+    n: function() { return this.getMonth() + 1; },
+    t: function() { return "Not Yet Supported"; },
+    // Year
+    L: function() { return (((this.getFullYear()%4==0)&&(this.getFullYear()%100 != 0)) || (this.getFullYear()%400==0)) ? '1' : '0'; },
+    o: function() { return "Not Supported"; },
+    Y: function() { return this.getFullYear(); },
+    y: function() { return ('' + this.getFullYear()).substr(2); },
+    // Time
+    a: function() { return this.getHours() < 12 ? 'am' : 'pm'; },
+    A: function() { return this.getHours() < 12 ? 'AM' : 'PM'; },
+    B: function() { return "Not Yet Supported"; },
+    g: function() { return this.getHours() % 12 || 12; },
+    G: function() { return this.getHours(); },
+    h: function() { return ((this.getHours() % 12 || 12) < 10 ? '0' : '') + (this.getHours() % 12 || 12); },
+    H: function() { return (this.getHours() < 10 ? '0' : '') + this.getHours(); },
+    i: function() { return (this.getMinutes() < 10 ? '0' : '') + this.getMinutes(); },
+    s: function() { return (this.getSeconds() < 10 ? '0' : '') + this.getSeconds(); },
+    // Timezone
+    e: function() { return "Not Yet Supported"; },
+    I: function() { return "Not Supported"; },
+    O: function() { return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + (Math.abs(this.getTimezoneOffset() / 60)) + '00'; },
+    P: function() { return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + (Math.abs(this.getTimezoneOffset() / 60)) + ':' + (Math.abs(this.getTimezoneOffset() % 60) < 10 ? '0' : '') + (Math.abs(this.getTimezoneOffset() % 60)); },
+    T: function() { var m = this.getMonth(); this.setMonth(0); var result = this.toTimeString().replace(/^.+ \(?([^\)]+)\)?$/, '$1'); this.setMonth(m); return result;},
+    Z: function() { return -this.getTimezoneOffset() * 60; },
+    // Full Date/Time
+    c: function() { return this.format("Y-m-d") + "T" + this.format("H:i:sP"); },
+    r: function() { return this.toString(); },
+    U: function() { return this.getTime() / 1000; }
+  };
+  for (var i = 0; i < format.length; i++) {
+    var curChar = format.charAt(i);
+    if (replace[curChar]) {
+      returnStr += replace[curChar].call(this);
+    } else {
+      returnStr += curChar;
+    }
+  }
+  return returnStr;
+};
+
 function EventQueue() {}
 EventQueue.prototype= new Array();
 EventQueue.prototype.fire=function(data){
@@ -565,6 +642,119 @@ function removeGlobalEvent(eventName, functionObject, wantCapture)
     document.body.removeEventListener(eventName, functionObject, c);
 }
 
+
+function CacheMonkey(){
+    this.data = {};
+
+    this.load();
+}
+
+CacheMonkey.prototype = {
+    load: function(){
+        this.data = EM.Settings.load_field('cachemonkey',this.data);
+    },
+
+    store: function(){
+        EM.Settings.store_field('cachemonkey',this.data);
+    },
+
+    checkCurrent: function(value){
+        return (new Date().getTime()/1000) < (1*value.lr + 1*value.et);
+    },
+
+    clear: function(name) {
+        this.data[name] = {};
+        this.store();
+    },
+
+    clearAll: function() {
+        this.data = {};
+        this.store();
+    },
+
+    clean: function() {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            return;
+        }
+        for(var key in cacheData) {
+            var value = this.get(name, key);
+            if(!value.current && (new Date().getTime()/1000) > (value.lastRefresh + 5 * value.expireTimeout)) {
+                delete cacheData[key];
+            }
+        }
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    cleanAll: function(name) {
+        for(var name in this.data) {
+            this.clean(name);
+        }
+    },
+
+    get: function(name, key) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            return {
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
+                };
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            return {
+                lastRefresh:null,
+                expireTimeout:0,
+                current:false,
+                data:null
+                };
+        }
+        return {
+            lastRefresh:1*val.lr,
+            expireTimeout:1*val.et,
+            current:this.checkCurrent(val),
+            data:val.data
+            };
+    },
+
+    put: function(name, key, value, timeout) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        } else if(!isEmpty(timeout)) {
+            val.et = 1*timeout;
+        }
+        val.lr = new Date().getTime()/1000;
+        val.data = value;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    },
+
+    touch: function(name, key, timeout) {
+        var cacheData = this.data[name];
+        if(isEmpty(cacheData)) {
+            cacheData = {};
+        }
+        var val = cacheData[key];
+        if(isEmpty(val)) {
+            val = {lr:0, et:isEmpty(timeout)?86400:1*timeout, data:null};
+        } else if(!isEmpty(timeout)) {
+        	val.et = 1*timeout;
+        }
+        val.lr = new Date().getTime()/1000;
+        cacheData[key] = val;
+        this.data[name] = cacheData;
+        this.store();
+    }
+};
 
 function SettingsGenerator(table, doc)
 {
@@ -1038,6 +1228,7 @@ function SettingsStore() {
   ]);
   this.AddCategory('Ergonomie', [
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', 'pagehack.quickProfMenu', 'bool', true),
+    this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
     this.AddSetting( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', 'pagehack.extPostSubmission', 'bool', true),
@@ -1048,11 +1239,16 @@ function SettingsStore() {
         ], 1),
     this.AddSetting( '"Meine offenen Fragen" um Inline-Markieren erweitern', 'pagehack.answeredLinks', 'bool', true),
     this.AddSetting( 'Links auf Unterforen mit SessionID versehen', 'ui.addsid', 'bool', true),
+    this.AddSetting( 'PN-Dropdown: Ungelesene unten halten', 'pageghack.pndropkeepbottom', 'bool', true),
     this.AddSetting( 'Automatisch auf neue PNs pr&uuml;fen', 'pageghack.pnautocheck',[
           ['Nein', 0],
+          ['1 Minute', 1],
+          ['2 Minuten', 2],
+          ['3 Minuten', 3],
           ['5 Minuten', 5],
           ['10 Minuten', 10],
-          ['15 Minuten', 15]
+          ['15 Minuten', 15],
+          ['30 Minuten', 30]
         ], 0)
   ]);
   this.AddCategory('Entwickler', [
@@ -1379,6 +1575,279 @@ SettingsStore.prototype = {
   }
 }
 
+function PNAPI() {
+  ['inbox','outbox','sentbox','savebox'].forEach(function(b) {
+    this[b]=new PNAPI.PNBox(b);
+  },this);
+  if (window.location.href.match(/\/privmsg.php/) &&
+      !window.location.search.match(/mode=/)) {
+    var box = window.location.search.match(/folder=([^&]+)/);
+    box = (box&&box.length)?box[1]:'inbox';
+    var start = window.location.search.match(/start=(\d+)/);
+    start = (start&&start.length)?start[1]*1:0;
+
+    console.log('PNAPI', 'Refreshing',box,'from index',start);
+    var table = queryXPathNode(document, '//table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+    this[box].applyTableData(start, table);
+    console.log('PNAPI','Refreshing done');
+  }
+}
+
+PNAPI.VAPN_Team = 0;
+PNAPI.VAPN_User = 1;
+PNAPI.VAPN_Post = 2;
+PNAPI.VAPN_Topic = 3;
+PNAPI.VAPN_Synonym = 4;
+PNAPI.VAPN_BlogEntry = 5;
+PNAPI.VAPN_BlogComment = 6;
+
+PNAPI.LIFETIME = 600;
+
+PNAPI.prototype = {
+  sendPN: function(recipient, title, message) {
+    if("" == EM.User.loggedOnSessionId) {
+      return false;
+    }
+    var pndata = {
+      username: recipient,
+      subject: title,
+      message: message,
+      folder:'inbox',
+      mode:'post',
+      post_submit:'Absenden'
+    };
+    var ajax = new AJAXObject();
+    var res = ajax.SyncRequest('/privmsg.php', pndata);
+    return /Deine\s+Nachricht\s+wurde\s+gesendet\./.test(res);
+  },
+  sendVAPN: function(reftype,id,title,message) {
+    if("" == EM.User.loggedOnSessionId) {
+      return false;
+    }
+    var vapndata = {
+      mode:'new',
+      ref_type:reftype,
+      subject: title,
+      message: message,
+      post_submit:'Absenden'
+    };
+    if(reftype != PNAPI.VAPN_Team) {
+        vapndata.id = id;
+    }
+    var ajax = new AJAXObject();
+    var res = ajax.SyncRequest('/vc.php?mode=new&ref_type='+reftype+(reftype == PNAPI.VAPN_Team?'':'&id='+id), vapndata);
+    return /Nachricht\s+erfolgreich\s+gesendet!/.test(res);
+  },
+  getUnread: function(box,count) {
+    var e = EM.PN[box];
+    if (e) {
+      return e.list(0,count).filter(function(a) {
+        return a.unread;
+      });
+    }
+    return null;
+  }
+}
+
+PNAPI.PNBox = function (boxname) {
+  this.box = boxname;
+}
+
+PNAPI.PNBox.prototype = {
+  list: function(first,count) {
+    var result = [];
+
+    //check if EVERYTHING is current
+    var isCurrent=true;
+    var cachedResult = EM.Cache.get('pmlisting',this.box);
+    if(!cachedResult.current) {
+      isCurrent=false;
+    } else {
+      isCurrent = !(cachedResult.data.slice(first,first+count).some(function(id){
+        var info = EM.Cache.get('pmlisting',id);
+        return !info.current;
+      },this));
+    }
+    if (!isCurrent) {
+      //something may not be okay, refresh required part
+      console.log('PNAPI', 'Need to refresh ',this.box,' range ',first,',',count);
+      this.forceUpdate(first,count);
+    }
+    //ok, now we definitely have it in cache
+
+    //answer from there
+    var list = EM.Cache.get('pmlisting',this.box);
+    list=list.data.slice(first,first+count);
+    return list.map(function(id){
+      var cachedResult = EM.Cache.get('pmlisting',id);
+      var ms = cachedResult.data;
+      return new PNAPI.PN(this.box,id,ms);
+    },this);
+  },
+  remove: function(msgid) {
+
+  },
+  archive: function(msgid) {
+    if (this.box=='savebox') {
+      return false;
+    }
+  },
+  getMessage: function(msgid) {
+    var cachedResult = EM.Cache.get('pmlisting',msgid);
+    if (cachedResult.data) {
+      var ms = cachedResult.data;
+      return new PNAPI.PN(this.box,msgid,ms);
+    } else {
+      return null;
+    }
+  },
+  postDatetoJSDate: function(pd) {
+    //"Mo 07.12.09<br>23:17"
+    // good thing DF always returns that and ignores user settings...
+    var d = pd.match(/\S+\s(\d+)\.(\d+)\.(\d+)<\S+>(\d+):(\d+)/);
+    return new Date(2000+parseInt(d[3]), d[2]-1, d[1], d[4], d[5], 0).getTime()/1000;
+  },
+  unescapeTitle: function(t) {
+    while(/&amp;|&gt;|&lt;|&quot;/.test(t) && !/[<>"]/.test(t)) {
+        t = t.replace(/&quot;/g, '"');
+        t = t.replace(/&lt;/g, '<');
+        t = t.replace(/&gt;/g, '>');
+        t = t.replace(/&amp;/g, '&');
+    }
+    return t;
+  },
+  forceUpdate: function (first,count) {
+    var p0=Math.floor(first / 50);
+    var p1=Math.floor((first+count-1) / 50);
+    var lister = new AJAXObject();
+    for (var i=p0; i<=p1;i++) {
+      var start = i*50;
+      var host = document.createElement('div');
+      host.innerHTML = lister.SyncRequest('/privmsg.php?folder='+this.box+'&start='+start, null);
+      var table = queryXPathNode(host, '/table[@class="overall"]/tbody/tr[2]/td/div/form/table[@class="forumline"]');
+      this.applyTableData(start, table);
+    }
+  },
+  applyTableData: function(index,table) {
+    console.log('PNAPI', 'Importing ',this.box,' starting from ',index);
+    //first, parse the new data:
+    var rows = queryXPathNodeSet(table, './/tr[./td[starts-with(@id,"folderFor")]]');
+    var current = [];
+    if (rows && rows.length) {
+      var position = index;
+      rows.forEach(function(row) {
+        // extract everything we may want to know later
+        current.push({
+          postID: queryXPathNode(row, './td[2]/span/a[2]').href.match(/p=(\d+)/)[1],
+          pos: position++,
+          read: !queryXPathNode(row, './td[1]//img[contains(@title,"Ungelesene Nachricht")]'),
+          title: this.unescapeTitle(queryXPathNode(row, './td[2]/span/a[2]').textContent),
+          postSpecial: (function(){var a=queryXPathNode(row, './td[2]/span/b'); return a?a.textContent:'';})(),
+          received: queryXPathNode(row, './td[2]/span[2]').textContent.trim().substr(0,3)=='von',
+          partner: queryXPathNode(row, './td[2]/span[2]/span').textContent.trim(),
+          partnerID: (function(){var a=queryXPathNode(row, './td[2]/span[2]/span/a'); return a?a.href.match(/u=(\d+)/)[1]:null;})(),
+          date: this.postDatetoJSDate(queryXPathNode(row,'./td[3]/span').innerHTML)
+        });
+      }, this);
+    }
+    console.log('PNAPI', 'Found ',current.length,' messages to merge');
+
+    var list = EM.Cache.get('pmlisting',this.box);
+    if (list && list.data) {
+      list = list.data;
+    } else {
+      list = [];
+    }
+
+    var _box = this.box;
+    function CD(el) {
+      //reformat data for cache
+      return {
+        box: _box,
+        received: el.received,
+        partner: el.partner,
+        partnerID: el.partnerID,
+        date: el.date,
+        read: el.read,
+        title: el.title,
+        special: el.postSpecial
+      };
+    };
+
+    var refel = [index,0];
+    while (refel[1]<current.length) {
+      var i = list.indexOf(current[refel[1]].postID,refel[0]);
+      if (i<0){
+        list.splice(refel[0],0,current[refel[1]].postID);
+      } else {
+        if(i==refel[0]) {  //where it should be
+          list[i] = current[refel[1]].postID;
+        } else {
+          if (i>refel[0]) {  //elements missing now
+            list.slice(refel[0],i-refel[0]).forEach(function(id) {
+              EM.Cache.touch('pmlisting',id,-1);
+            });
+            list.splice(refel[0],i-refel[0]);
+            list[refel[0]]=current[refel[1]].postID;
+          }
+        }
+      }
+      EM.Cache.put('pmlisting',current[refel[1]].postID, CD(current[refel[1]]), PNAPI.LIFETIME);
+      refel[1]++;
+      refel[0]++;
+    }
+    EM.Cache.put('pmlisting',this.box,list,PNAPI.LIFETIME);
+    console.log('PNAPI', 'Caching for',PNAPI.LIFETIME,'secs');
+  }
+}
+
+PNAPI.PN = function (box,id,ms) {
+  this.box = box;
+  this.id = id*1;
+  this.title = ms.title;
+  this.unread = !ms.read;
+  this.date = ms.date;
+  if (ms.received) {
+    this.senderID = ms.partnerID*1;
+    this.sender = ms.partner;
+  } else {
+    this.receiverID = ms.partnerID*1;
+    this.receiver = ms.partner;
+  }
+  if (ms.postSpecial) {
+    this.flag = ms.postSpecial;
+  }
+}
+
+PNAPI.PN.prototype = {
+  getContent: function() {
+    var cachedResult = EM.Cache.get('pmdata',this.id+',text');
+    if (cachedResult.current) {
+      return cachedResult.data;
+    }
+    var get = new AJAXObject();
+    var res = get.SyncRequest('/ajax_get_message_text.php?privmsg_id='+this.id+'&folder='+this.box, null);
+    var re = /\[CDATA\[([\s\S]*?)\]\]/gi;
+    var data = re.execAll(res).map(function(a){ return a[1]; }).join('');
+    var host = document.createElement('div');
+    host.innerHTML=data;
+    data=host.firstChild.innerHTML.split('<hr>')[0].trim();
+    EM.Cache.put('pmdata',this.id+',text',data,1800);
+    return data;
+  },
+  getQuoted: function() {
+    var cachedResult = EM.Cache.get('pmdata',this.id+',quote');
+    if (cachedResult.current) {
+      return cachedResult.data;
+    }
+    var get = new AJAXObject();
+    var host = document.createElement('div');
+    host.innerHTML = get.SyncRequest('/privmsg.php?mode=quote&p='+this.id, null);
+    var data=queryXPathNode(host,'//textarea[@id="message"]').innerHTML;
+    EM.Cache.put('pmdata',this.id+',quote',data,1800);
+    return data;
+  }
+}
 
 
 function ButtonBar() {
@@ -1666,6 +2135,9 @@ function Notifier() {
      'PNs');
   this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
   this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
+  if (!EM.Settings.GetValue('pagehack','privmenu')) {
+    this.PNs.setWidth('0px');
+  }
 
   this.EMStuff = new Notifier.Field(this,'notmen_EM',
      '<img src="/graphics/Group.gif" border="0"/>',
@@ -1686,12 +2158,22 @@ Notifier.prototype = {
     var coords = new Point(bcr.left, bcr.bottom-5);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_QPN');
+    var w = new OverlayWindow(coords.x,coords.y,400,EM.Settings.GetValue('pagehack','privmenu')?187:167,'','em_QPN');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
-
-    tbl.addMenuItem(
+    w.ContentArea.appendChild(document.createElement('div'));
+    with(w.ContentArea.lastElementChild) {
+      innerHTML='<div class="incell" style="vertical-align:middle;text-align:center">Lade Nachrichten....<br>'+
+                '<br><img src="chrome://global/skin/icons/loading_16.png"></div>';
+      className='intbl';
+      with(style) {
+        height='100px';
+        width='100%';
+      }
+    }
+    if (EM.Settings.GetValue('pagehack','privmenu')) {
+      tbl.addMenuItem(
         "/graphics/Portal-PM.gif",
         "/privmsg.php?folder=inbox",
         "Private Nachrichten",
@@ -1701,8 +2183,54 @@ Notifier.prototype = {
         "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
         "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
         );
-    w.ContentArea.appendChild(tbl);
-    w.ContentArea.appendChild(document.createElement('div'));
+    }
+    var l = EM.PN.inbox.list(0,20);
+    if (EM.Settings.GetValue('pageghack','pndropkeepbottom')) {
+      l.sort(function(a,b) {
+        if (a.unread && !b.unread) return -1;
+        if (!a.unread && b.unread) return 1;
+        return b.date-a.date;
+      });
+    }
+    l.slice(0,EM.Settings.GetValue('pagehack','privmenu')?4:5).reverse().forEach(function(pn) {
+      var d = new Date(1000*pn.date);
+      tbl.addMenuItem(
+        '/templates/subSilver/images/folder'+(pn.unread?'_new':'')+'.gif',
+        '/privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id,
+        pn.title,
+        '<span class="intbl">'+
+          '<span class="incell left"> von '+
+            (pn.senderID?'<a class="gensmall" href="profile.php?mode=viewprofile&amp;u='+pn.senderID+'">'+
+             pn.sender+'</a>':pn.sender)+
+            ' am '+d.format("d.m.y")+' um '+d.format("H:i")+'</span>'+
+          '<span class="incell right"><a href="javascript:EM.Notifier.MenuPNView('+pn.id+')"'+
+            ' id="pn_dd_'+pn.id+'">Schnellansicht...</a></span></span>');
+    },this);
+    w.ContentArea.removeChild(w.ContentArea.lastElementChild);
+  },
+  MenuPNView: function(id) {
+    var link= document.getElementById('pn_dd_'+id);
+    var bcr = link.parentNode.parentNode.getBoundingClientRect();
+    var coords = new Point(bcr.left, bcr.bottom);
+    coords.TranslateWindow();
+
+    var w = new OverlayWindow(coords.x,coords.y,442,196,'','em_pnview');
+    w.InitDropdown();
+    var msg = EM.PN.inbox.getMessage(id);
+    w.ContentArea.innerHTML =
+     msg?
+      '<div style="background-color: rgb(225, 230, 236); font-family: Verdana,Arial,Helvetica,sans-serif; margin: 5px;">'+
+      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 180px;" class="postbody">'+
+       '<div style="float: right; position: relative; bottom: 3px;">'+
+       '<a class="gensmall" href="privmsg.php?mode=reply&amp;p='+id+'">Auf Nachricht antworten</a>'+
+       '&nbsp;&nbsp;<a class="gensmall" href="privmsg.php?mode=quote&amp;p='+id+'">Nachricht zitieren</a>'+
+       '</div><hr style="clear:both">'+
+      msg.getContent()+
+      '</div></div>':
+      '<div style="background-color: rgb(225, 230, 236); font-family: Verdana,Arial,Helvetica,sans-serif; margin: 5px;">'+
+      '<div style="border: 1px solid rgb(190, 207, 220); padding: 2px; overflow: auto; margin-top: 4px; height: 180px;" class="postbody">'+
+      'Nachricht nicht gefunden!'+
+      '</div></div>';
   },
   AlertDropdown: function() {
     this.EMStuff.setHighlight(false);
@@ -2669,8 +3197,11 @@ function Pagehacks() {
   if(1*EM.Settings.GetValue('pageghack','pnautocheck')) {
     var min = EM.Settings.GetValue('pageghack','pnautocheck');
     if(1 > 1 * min) min = 1;
+    PNAPI.LIFETIME = min * 60 - 30; // 30s less => definitely expired on next regular check
     window.setInterval('EM.Pagehacks.checkPMAuto()', min * 60000);
   }
+  // do a first check, regardless of when regular checks will occur (if at all)
+  window.setTimeout('EM.Pagehacks.checkPMAuto()', 30*1000);
 }
 
 Pagehacks.prototype = {
@@ -2694,23 +3225,13 @@ Pagehacks.prototype = {
   },
 
   checkPMAuto: function() {
-    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,document.createElement('div'),
-      function(div) {
-        if (/Es sind keine neuen privaten Nachrichten vorhanden/.test(div.innerHTML)) {
-          // no PNs, but nobody would want to know that
-        } else {
-          var a=div.getElementsByTagName('a');
-          for(i=0;i<a.length;i++) {
-            if (a[i].href.match(/window\.close/)) {
-              a[i].parentNode.removeChild(a[i]);
-            } else a[i].removeAttribute('target');
-          }
-          div=queryXPathNode(div, './/table[@class=\'forumline\']');
-          div.className='';
-          EM.Notifier.notify('/graphics/Portal-PM.gif','PN eingetroffen',div,'pnarrived',true);
-          div.style.cssText='height:100%';
-        }
-      });
+    var l = EM.PN.getUnread('inbox',20);
+    if (l.length) {
+      var s=l.length==1?'Eine neue PN':l.length+' neue PNs';
+      EM.Notifier.PNs.setText(s);
+      EM.Notifier.PNs.setWidth('');
+      EM.Notifier.PNs.setHighlight(true);
+    }
   },
 
   fastSearch: function() {
@@ -3196,11 +3717,23 @@ Pagehacks.prototype = {
     var coords = new Point(bcr.left, bcr.bottom+10);
     coords.TranslateWindow();
 
-    var w = new OverlayWindow(coords.x,coords.y,328,148,'','em_QPM');
+    var w = new OverlayWindow(coords.x,coords.y,328,EM.Settings.GetValue('pagehack','privmenu')?148:187,'','em_QPM');
     w.InitDropdown();
 
     var tbl = w.CreateMenu();
 
+    if (!EM.Settings.GetValue('pagehack','privmenu')) {
+      tbl.addMenuItem(
+        "/graphics/Portal-PM.gif",
+        "/privmsg.php?folder=inbox",
+        "Private Nachrichten",
+        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
+        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
+        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
+        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
+        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
+        );
+    }
     tbl.addMenuItem(
         "/graphics/Drafts.gif",
         "/drafts.php",
@@ -3663,6 +4196,9 @@ function initEdgeApe() {
     }
     EM.Pagehacks = new Pagehacks();
     EM.Shouts = new ShoutboxControls();
+
+    EM.Cache = new CacheMonkey();
+    EM.PN = new PNAPI();
   }
 }
 
@@ -3684,6 +4220,7 @@ if (SOP_ok && !isEmpty(unsafeWindow.parent.EM)) {
   EM.User = new UserManager();
   unsafeWindow.EM = EM;
 }
+
 Ajax = new AJAXObject();
 Location = window.location.href;
 
