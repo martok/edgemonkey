@@ -416,6 +416,16 @@ if (!String.prototype.trim) String.prototype.trim = function() {
     }
 })();
 
+function EventQueue() {}
+EventQueue.prototype= new Array();
+EventQueue.prototype.fire=function(data){
+  for (var i=0; i<this.length; i++) {
+    if (!this[i](data))
+      return false;
+  }
+  return true;
+};
+
 function encodeLongShout(text)
 {
   var b = '';
@@ -1086,6 +1096,8 @@ function SettingsStore() {
       this.cookies[k] = Deserialize(unescape(res[2]));
     }
   }
+
+  this.onSettingChanged = new EventQueue();
 }
 
 var Settings_SaveToDisk = function () { // global deklarieren
@@ -1156,6 +1168,7 @@ SettingsStore.prototype = {
     this.Window.Body.appendChild(head);
     head=head.insertRow(-1);
     var firstTab = null;
+    var onChanges = [];
     this.Categories.forEach(function(c){
       if(head.children.length>=4) head=head.parentNode.insertRow(-1);
       var h=head.insertCell(-1);
@@ -1207,6 +1220,7 @@ SettingsStore.prototype = {
           var w = this.Window;
           if (s.events.onChange) {
             e.addEventListener('change',function(e) { s.events.onChange(e.target,w,e); },true);
+            onChanges.push(function() {s.events.onChange(e,w,null)});
           }
           if (s.events.onExit) {
             e.addEventListener('blur',function(e) { s.events.onExit(e.target,w,e); },true);
@@ -1235,9 +1249,12 @@ SettingsStore.prototype = {
     this.Window.ButtonBar.className = 'forumline';
     this.Window.ButtonBar.style.cssText = 'width:98%; margin:5px;';
     this.Window.Body.appendChild(this.Window.ButtonBar);
+
+    onChanges.forEach(function(f) {f()});
   },
 
   ev_SaveDialog: function(evt) {
+    var old=eval(uneval(EM.Settings.Values));
     with (EM.Settings.Window) {
       EM.Settings.Categories.forEach(function(c){
         c.settings.forEach(function(s) {
@@ -1253,6 +1270,14 @@ SettingsStore.prototype = {
         }, this);
       }, this);
     }
+    var diff={};
+    for (key in old) {
+      if (old[key]!=EM.Settings.Values[key]) {
+        diff[key]=EM.Settings.Values[key];
+      }
+    }
+
+    EM.Settings.onSettingChanged.fire({Old:old, Modified:diff});
     Settings_SaveToDisk();
     if (confirm('Änderungen gespeichert.\nSie werden aber erst beim nächsten Seitenaufruf wirksam. Jetzt neu laden?')){
       window.location.reload(false);
