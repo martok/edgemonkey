@@ -505,6 +505,80 @@ Date.prototype.format = function(format) {
   return returnStr;
 };
 
+//Some ISO 8601 magic from http://delete.me.uk/2005/03/iso8601.html
+Date.prototype.setISO8601 = function (string) {
+    var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
+        "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
+        "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
+    var d = string.match(new RegExp(regexp));
+
+    var offset = 0;
+    var date = new Date(d[1], 0, 1);
+
+    if (d[3]) { date.setMonth(d[3] - 1); }
+    if (d[5]) { date.setDate(d[5]); }
+    if (d[7]) { date.setHours(d[7]); }
+    if (d[8]) { date.setMinutes(d[8]); }
+    if (d[10]) { date.setSeconds(d[10]); }
+    if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+    if (d[14]) {
+        offset = (Number(d[16]) * 60) + Number(d[17]);
+        offset *= ((d[15] == '-') ? 1 : -1);
+    }
+
+    offset -= date.getTimezoneOffset();
+    time = (Number(date) + (offset * 60 * 1000));
+    this.setTime(Number(time));
+}
+
+Date.prototype.toISO8601String = function (format, offset) {
+    /* accepted values for the format [1-6]:
+     1 Year:
+       YYYY (eg 1997)
+     2 Year and month:
+       YYYY-MM (eg 1997-07)
+     3 Complete date:
+       YYYY-MM-DD (eg 1997-07-16)
+     4 Complete date plus hours and minutes:
+       YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+     5 Complete date plus hours, minutes and seconds:
+       YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+     6 Complete date plus hours, minutes, seconds and a decimal
+       fraction of a second
+       YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+    */
+    if (!format) { var format = 6; }
+    if (!offset) {
+        var offset = 'Z';
+        var date = this;
+    } else {
+        var d = offset.match(/([-+])([0-9]{2}):([0-9]{2})/);
+        var offsetnum = (Number(d[2]) * 60) + Number(d[3]);
+        offsetnum *= ((d[1] == '-') ? -1 : 1);
+        var date = new Date(Number(Number(this) + (offsetnum * 60000)));
+    }
+
+    var zeropad = function (num) { return ((num < 10) ? '0' : '') + num; }
+
+    var str = "";
+    str += date.getUTCFullYear();
+    if (format > 1) { str += "-" + zeropad(date.getUTCMonth() + 1); }
+    if (format > 2) { str += "-" + zeropad(date.getUTCDate()); }
+    if (format > 3) {
+        str += "T" + zeropad(date.getUTCHours()) +
+               ":" + zeropad(date.getUTCMinutes());
+    }
+    if (format > 5) {
+        var secs = Number(date.getUTCSeconds() + "." +
+                   ((date.getUTCMilliseconds() < 100) ? '0' : '') +
+                   zeropad(date.getUTCMilliseconds()));
+        str += ":" + zeropad(secs);
+    } else if (format > 4) { str += ":" + zeropad(date.getUTCSeconds()); }
+
+    if (format > 3) { str += offset; }
+    return str;
+}
+
 function EventQueue() {}
 EventQueue.prototype= new Array();
 EventQueue.prototype.fire=function(data){
@@ -1295,6 +1369,72 @@ function SettingsStore() {
     this.AddSetting( 'Shouts von Moderatoren/Admins hervorheben', 'sb.highlight_mod', 'color', 0),
     this.AddSetting( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_stalk', 'list', []),
     this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true)
+  ]);
+
+  this.AddCategory('UpdateMonkey', [
+    this.AddSetting( 'Automatisches Update aktivieren', 'update.enable', 'bool', false),
+    this.AddSetting( 'Art zu installierender Updates','update.update_type', [
+          ['Stable Releases (Release Tags)', 0],
+          ['Testing Releases (Master Branch)', 1],
+          ['Unstable Releases (Custom Branch)', 2]
+        ], 0, {
+        onChange: function (t,w,e) {
+            var src = w.getControl('update_source_repo');
+            var brn = w.getControl('update_source_branch');
+            src.disabled=w.getValue('update_update_type')==0;
+            brn.disabled=w.getValue('update_update_type')!=2;
+
+            if (!brn.disabled) {
+              //simulate change to get elected^W^W^W load branches
+              var ev = document.createEvent("HTMLEvents");
+              ev.initEvent("change", true, false);
+              src.dispatchEvent(ev);
+            }
+          }
+        }),
+    this.AddSetting( 'Quelle f&uuml;r Updates','update.source_repo', [
+          ['BenBE', 'BenBE#edgemonkey'],
+          ['Kha', 'Kha#edgemonkey'],
+          ['martok', 'martok#edgemonkey']
+        ], 'martok#edgemonkey', {
+        onChange: function (t,w,e) {
+            if (w.getValue('update_update_type')!=2)
+              return;
+            var repo = w.getValue('update_source_repo').split('#');
+            var brn = w.getControl('update_source_branch');
+            var b=brn.value;
+            if (isEmpty(e)) {
+              //initial change-> display current setting
+              b=EM.Settings.GetValue('update','source_branch');
+            }
+            for (var i=brn.options.length-1; i>=0; i--) {
+              brn.remove(i);
+            }
+            EM.Updater.updateBranches(repo[0],repo[1],function(upd,branches) {
+              var lst=[];
+              for (var branch in branches) {
+                lst.push(branch);
+              }
+              lst.sort().forEach(function(br) {
+                brn.options[brn.options.length]=new Option(br,br,br==b);
+              });
+            });
+          }
+        }),
+    this.AddSetting( 'Source Branch (Nur bei Unstable Releases)','update.source_branch', [
+          ['master', 'master']
+        ], 'master'),
+    this.AddSetting( 'Zeit zwischen Update-Checks','update.check_every', [
+          ['30 Minuten', 1800],
+          ['60 Minuten', 3600],
+          ['2 Stunden', 7200],
+          ['3 Stunden', 10800],
+          ['6 Stunden', 21600],
+          ['12 Stunden', 43200],
+          ['24 Stunden', 86400],
+          ['7 Tage', 86400*7],
+          ['14 Tage', 86400*14],
+        ], 86400)
   ]);
 
   this.RestoreDefaults();
@@ -4110,6 +4250,472 @@ Pagehacks.prototype = {
   }
 }
 
+function UpdateMonkey() {
+    this.state = 'init';
+    this.network = [];
+    this.branches = {};
+    this.tags = {};
+    this.commits = {};
+
+    this.stack = [];
+    this.running = false;
+
+    this.settings = {
+      enabled: EM.Settings.GetValue('update','enable'),
+      installed: EM.Settings.GetValue('update','installed'),
+      updateType: EM.Settings.GetValue('update','update_type'),
+      updateSource: EM.Settings.GetValue('update','source_repo'),
+      updateBranch: EM.Settings.GetValue('update','source_branch'),
+      updateTimeout: EM.Settings.GetValue('update','check_every')
+    };
+
+    this.ghapi = {
+        parent: this,
+        defaultUser : 'martok',
+        defaultRepo : 'edgemonkey',
+
+        request: function(method, url, headers, data, cb, cbdata) {
+            if(isEmpty(method)) method = 'GET';
+            if(isEmpty(headers))
+                headers = {
+                    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+                    'Accept': '*'
+                };
+            if(isEmpty(data)) data = '';
+            console.log('Asking for Bananas @ ' + url);
+
+            GM_xmlhttpRequest({
+                method: method,
+                url: url,
+                headers: headers,
+                data: data,
+                onload: function(rd) {
+                    cb(1,1,rd,cbdata);
+                },
+                onerror: function(rd) {
+                    cb(1,0,rd,cbdata);
+                },
+                onreadystatechange: function(rd) {
+                    cb(0,rd.readyState,rd,cbdata);
+                }
+            });
+        },
+        queryRepo: function (method,user,repo,cb,cbdata) {
+            if(isEmpty(method)) method = 'network';
+            if(isEmpty(user)) user = this.defaultUser;
+            if(isEmpty(repo)) repo = this.defaultRepo;
+            this.request('GET', 'http://github.com/api/v2/json/repos/show/'+user+'/'+repo+'/'+method,null,null,cb,cbdata);
+        },
+        queryCommit: function (commit,user,repo,cb,cbdata) {
+            if(isEmpty(commit)) commit = 'HEAD';
+            if(isEmpty(user)) user = this.defaultUser;
+            if(isEmpty(repo)) repo = this.defaultRepo;
+            this.request('GET', 'http://github.com/api/v2/json/commits/show/'+user+'/'+repo+'/'+commit,null,null,cb,cbdata);
+        }
+    };
+
+    EM.Settings.onSettingChanged.push(this.evSettingChanged);
+}
+UpdateMonkey.prototype.updateEngine = function(stage, success, response) {}; //Telling JS something it doesn't believe me without telling it directly
+UpdateMonkey.prototype = {
+    actionPush: function(actionProc,checkProc,doneProc,data) {
+        var action = {
+            perform:actionProc,
+            check:checkProc,
+            done:doneProc,
+            data:data
+            };
+        this.stack.push(action);
+        this.actionPerform();
+    },
+    actionPop: function() {
+        if(!this.stack.length){
+            return null;
+        }
+        return this.stack.shift();
+    },
+    actionPerform: function() {
+        if(this.running) {
+            return;
+        }
+        var action = this.actionPop();
+        if(isEmpty(action)) {
+            console.log('UpdateMonkey can haz cheezeburger?');
+            return;
+        }
+        if(!action.check(action)) {
+            console.log('UpdateMonkey rescheduling ... feed more or other bananas!');
+            this.actionPerform();
+            this.stack.push(action);
+            return;
+        }
+        this.running = true;
+        action.perform(action);
+    },
+    actionDone:function() {
+        this.running = false;
+        this.actionPerform();
+    },
+
+    checkNetwork: function() {
+        var skynet = EM.Cache.get('updatemonkey.networks', 'main');
+        return skynet.current;
+    },
+
+    failMonkeyMessage:function(msg) {
+        console.log('UpdateMonkey failed liek crazy: ' + msg);
+    },
+
+    updateCommit: function(user,repo,commit) {
+        console.log('commit:'+commit);
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var commitinfo = EM.Cache.get('updatemonkey.commits', a.data.commit);
+                if(!commitinfo.current) {
+                    obj.ghapi.queryCommit(a.data.commit,a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.commit)) {
+                                        obj.failMonkeyMessage('Commit request returned no commit information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.commits', a.data.commit, tmp.commit);
+                                    obj.commits[a.data.commit] = tmp.commit;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.commits[a.data.commit] = commitinfo.data;
+                a.done(a);
+            },
+            function(a) {
+                return true;
+            },
+            function(a) {
+                obj.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo,
+                commit:commit
+            }
+        );
+    },
+
+    updateBranches: function(user,repo,callback) {
+        console.log('branches:'+user+','+repo);
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var branches = EM.Cache.get('updatemonkey.branches', a.data.user+'#'+a.data.repo);
+                if(!branches.current) {
+                    obj.ghapi.queryRepo('branches',a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.branches)) {
+                                        obj.failMonkeyMessage('Branch List request returned no branch information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.branches', a.data.user+'#'+a.data.repo, tmp.branches, obj.settings.updateTimeout);
+                                    obj.branches[a.data.user+'#'+a.data.repo] = tmp.branches;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.branches[a.data.user+'#'+a.data.repo] = branches.data;
+                a.done(a);
+            },
+            function(a) {
+                return obj.checkNetwork();
+            },
+            function(a) {
+            	var branches = obj.branches[a.data.user+'#'+a.data.repo];
+                for(var branch in branches) {
+                    obj.updateCommit(a.data.user,a.data.repo,branches[branch]);
+                }
+                if (!isEmpty(callback))
+                  callback(obj, branches);
+                obj.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo
+            }
+        );
+    },
+
+    updateTags: function(user,repo) {
+        console.log('tags:'+user+','+repo);
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var tags = EM.Cache.get('updatemonkey.tags', a.data.user+'#'+a.data.repo);
+                if(!tags.current) {
+                    obj.ghapi.queryRepo('tags',a.data.user,a.data.repo,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.tags)) {
+                                        obj.failMonkeyMessage('Tag List request returned no tag information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.tags', a.data.user+'#'+a.data.repo, tmp.tags);
+                                    obj.tags[a.data.user+'#'+a.data.repo] = tmp.tags;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.tags[a.data.user+'#'+a.data.repo] = tags.data;
+                a.done(a);
+            },
+            function(a) {
+                return obj.checkNetwork();
+            },
+            function(a) {
+            	var tags = obj.tags[a.data.user+'#'+a.data.repo];
+                for(var tag in tags) {
+                    obj.updateCommit(a.data.user,a.data.repo,tags[tag]);
+                }
+                obj.actionDone(a);
+            },
+            {
+                user:user,
+                repo:repo
+            }
+        );
+    },
+
+    updateNetwork: function() {
+        console.log('networks');
+        var obj = this;
+        this.actionPush(
+            function(a) {
+                var skynet = EM.Cache.get('updatemonkey.networks', 'main');
+                if(!skynet.current) {
+                    obj.ghapi.queryRepo('network',null,null,
+                        function(stage,success,response) {
+                            //console.log('UpdateMonkey eating bananas in state: ' + this.state + ' at stage ' + stage + ' with as little success as ' + success + ' politicians');
+                            if(1 == stage) {
+                                console.log('Something happened to UpdateMonkey - IZ LIEK ' + (success ? '#SAXEZ' : '#FAIL'));
+                                if(success) {
+                                    var tmp = JSON.parse(response.responseText);
+                                    if (isEmpty(tmp.network)) {
+                                        obj.failMonkeyMessage('Network request returned no network information!');
+                                        return;
+                                    }
+                                    EM.Cache.put('updatemonkey.networks', 'main', tmp.network, obj.settings.updateTimeout);
+                                    obj.network = tmp.network;
+                                    a.done(a);
+                                }
+                            }
+                        }
+                    );
+                    return;
+                }
+                obj.network = skynet.data;
+                a.done(a);
+            },
+            function(a) {
+                return true;
+            },
+            function(a) {
+                obj.network.forEach(
+                    function(e) {
+                        obj.updateBranches(e.owner,e.name);
+                        obj.updateTags(e.owner,e.name);
+                    }
+                );
+                obj.actionDone(a);
+            },
+            null
+        );
+    },
+
+    checkUpdateAvail: function() {
+        console.log('update');
+        var obj = this;
+        this.actionPush(
+            function(a) {
+              //Check the cache for the various commits we need ...
+              var mode = 1*a.data.updateType;
+              var repo = a.data.updateSource;
+              var branch = a.data.updateBranch;
+
+              if(!mode) {
+                repo = 'martok#edgemonkey';
+              }
+              if(2 > mode) {
+                branch = 'master';
+              }
+
+              var commit = null;
+              var c = null;
+              switch(mode) {
+                case 0:    //Only use tags
+                  var mostcurrent = new Date(0);
+                          for(var tag in obj.tags[repo]) {
+                            c = obj.tags[repo][tag];
+                            var rev_date = new Date();
+                            rev_date.setISO8601(obj.commits[c].committed_date);
+                              if(rev_date > mostcurrent) {
+                                commit = c;
+                                mostcurrent = rev_date;
+                              }
+                          }
+                  break;
+                case 1:    //Use the master branch
+                case 2:    //Use a custom branch
+                  c = obj.branches[repo][branch];
+                            if(isEmpty(obj.commits[c])) {
+                              break;
+                            }
+                            commit = c;
+                  break;
+                default:
+                  obj.failMonkeyMessage('Unknown Update mode!');
+                  return;
+              }
+
+              if(!isEmpty(commit)) {
+                console.log('OLD: ' + a.data.installed);
+                console.log('NEW: ' + commit);
+                if(commit.trim() != (''+a.data.installed).trim()) {
+                  console.log('UpdateMonkey haz njuz!');
+                  ur = repo.match(/^([^#]+)#([^#]+)$/);
+                  EM.Cache.put('updatemonkey.networks', 'update',
+                    {user:ur[1], repo:ur[2], branch:branch, tag:tag, commit:commit, mode:mode}, obj.settings.updateTimeout);
+                  obj.notifyUpdate(ur[1], ur[2], branch, tag, commit, mode);
+                }
+              }
+
+              a.done(a);
+            },
+            function(a) {
+              //Check the cache for the various commits we need ...
+              var mode = 1*a.data.updateType;
+              var repo = a.data.updateSource;
+              var branch = a.data.updateBranch;
+
+              if(!mode) {
+                repo = 'martok#edgemonkey';
+              }
+              if(2 > mode) {
+                branch = 'master';
+              }
+
+              switch(mode) {
+                case 0:    //Only use tags
+                  if(isEmpty(obj.tags[repo])) {
+                    return false;
+                  }
+                          for(var tag in obj.tags[repo]) {
+                              if(isEmpty(obj.commits[obj.tags[repo][tag]])) {
+                                return false;
+                              }
+                          }
+                  break;
+                case 1:    //Use the master branch
+                case 2:    //Use a custom branch
+                  if(isEmpty(obj.branches[repo])) {
+                    return false;
+                  }
+                            if(isEmpty(obj.commits[obj.branches[repo][branch]])) {
+                              return false;
+                            }
+                  break;
+                default:
+                  obj.failMonkeyMessage('Unknown Update mode!');
+                  return true;
+              }
+              return true;
+            },
+            function(a) {
+                obj.actionDone(a);
+            },
+            obj.settings
+        );
+    },
+
+    checkUpdate: function() {
+      if(!this.settings.enabled) {
+        return true;
+      }
+      var update = EM.Cache.get('updatemonkey.networks', 'update');
+      if(update.current) {
+        var u = update.data;
+        this.notifyUpdate(u.user, u.repo,u.branch,u.tag,u.commit,u.mode);
+        return;
+      }
+
+      this.updateNetwork();
+      this.checkUpdateAvail();
+    },
+
+    notifyUpdate: function(user,repo,branch,tag,commit,mode) {
+      var e = document.createElement('div');
+      e.innerHTML =
+        '<div class="gensmall">Ein neues Update von EdgeMonkey wurde gefunden.</div>' +
+        '<table>'+
+        '<tr><td><span class="gensmall">Benutzer:</span></td><td><span class="gensmall">' + user + '</span></td></tr>' +
+        '<tr><td><span class="gensmall">Repository:</span></td><td><span class="gensmall">' + repo + '</span></td></tr>' +
+        '<tr><td><span class="gensmall">Branch:</span></td><td><span class="gensmall">' + branch + '</span></td></tr>' +
+        (isEmpty(tag)?'':'<tr><td><span class="gensmall">Tag:</span></td><td><span class="gensmall">' + tag + '</span></td></tr>' )+
+        '<tr><td><span class="gensmall">Commit:</span></td><td><span class="gensmall"><a href="http://github.com/'+user+'/'+repo+'/commit/'+commit+'/" target="_blank">' + commit.substr(0,16) + '</a></span></td></tr>' +
+        '</table><br/>' +
+        '<div class="dfnav"><a href="http://github.com/'+user+'/'+repo+'/raw/'+commit+'/edgemonkey.user.js" onClick="return EM.Updater.installUpdate(\''+commit+'\');">Installation der neuen Version</a></div>'+
+        '<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
+
+      EM.Notifier.addAlert(
+        '/graphics/Profil-Sidebar.gif',
+        'Neues EM-Update',
+        'http://github.com/'+user+'/'+repo+'/commit/'+commit+'/',
+        e
+      );
+    },
+
+    installUpdate: function(commit) {
+      console.log('install:'+commit);
+      EM.Settings.SetValue('update','installed',commit);
+      Settings_SaveToDisk();
+      EM.Cache.touch('updatemonkey.networks', 'update', -1);
+      return true;
+    },
+
+    evSettingChanged: function(data) {
+      if (!(isUndef(data.Modified['update.update_type']) &&
+          isUndef(data.Modified['update.source_repo']) &&
+          isUndef(data.Modified['update.source_branch']))) {
+        EM.Cache.touch('updatemonkey.networks', 'update', -1);
+      }
+    }
+}
+
+function checkUpdate(){
+    EM.Updater = new UpdateMonkey();
+    EM.Updater.checkUpdate();
+}
+
 function upgradeSettings(){
   var upgraded = false;
 
@@ -4179,6 +4785,7 @@ function initEdgeApe() {
   if(isEmpty(window.opener) && (window.parent==window) )
   {
     upgradeSettings();
+    setTimeout(function() {checkUpdate()}, 100);
   }
 
   if (Location.match(/shoutbox_view.php/)) {
