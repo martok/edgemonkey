@@ -2077,7 +2077,7 @@ ShoutboxReplacer.prototype = {
 						}
 						return $0;
 					  });
-					  
+
 		str = str.replace(/@@/g, '@');
 		return str;
 	},
@@ -2384,7 +2384,7 @@ ShoutboxControls.prototype = {
 
     return true;
   },
-  
+
   ev_shoutchange: function(evt) {
 	var shout = this.form_text.value;
 	shout=this.replacer.do_replace(shout);
@@ -2968,7 +2968,7 @@ Pagehacks.prototype = {
   },
 
   TLColourize: function (tltable, isForum) {
-	if(!tltable) return;
+    if(!tltable) return;
     var entries = queryXPathNodeSet(tltable,"./tbody/tr");
     var col_ofs = (isForum)?1:0;
     var singlePostMode=false;;
@@ -2977,15 +2977,15 @@ Pagehacks.prototype = {
       var row = entries[i];
       var cols = queryXPathNodeSet(row, './td');
       if(!cols.length) continue;
-      
+
       if (cols.length<2){
         if(i==1 && cols[0].className=='catHead'){ // looks like single post mode
           singlePostMode=true;
-		}
+        }
         continue;
-     }else if(singlePostMode){
+      }else if(singlePostMode){
         var tuser_l = queryXPathNode(row,"./td[1]/span[1]/b[1]/a[1]");
-	 }else{
+      }else{
         var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span[1]/a[1]");
         if (isForum) {
           var puser_l = queryXPathNode(row,"./td[5]/a[2]");
@@ -3000,14 +3000,14 @@ Pagehacks.prototype = {
       }else{
         var t_cssClassAdd = "";
         tuser_l = queryXPathNode(row,"./td[2]/span[2]/span[1]");
-		if(!tuser_l){
-			console.log('No user link');
-			continue;
-		}
+        if(!tuser_l){
+          console.log('No user link');
+          continue;
+        }
       }
       if(!singlePostMode){
         var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
-  
+
         var c_cssClassAdd = '';
         if (pcount.textContent == 0) {
             c_cssClassAdd += ' emctpl' + 1; //Red
@@ -3059,61 +3059,61 @@ Pagehacks.prototype = {
 
       var std = document.createElement('span');
       std.className = 'gensmall incell right';
-	  
-	  var strUser=queryXPathNode(tuser_l, './span').textContent;
+
+      var strUser=queryXPathNode(tuser_l, './span').textContent;
 
       var isSelf = tuser_l && (strUser == EM.User.loggedOnUser);
 
       if(singlePostMode){
-		i++;
-		var it_span_user = document.createElement('span');
-		it_span_user.className = 'incell left';
-		it_span_user.innerHTML=cols[0].innerHTML;
-		cols[0].innerHTML='';
-		div.appendChild(it_span_user);
-		if(!isSelf){
-			if(EM.Settings.GetValue('topic','button_stalk')) {
-			  var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk_t, 'topic', 'stalk');
-			  std.appendChild(l_stalk);
-			}
-			if(EM.Settings.GetValue('topic','button_killfile')) {
-			  var l_kill = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_kill, 'topic', 'killfile');
-			  std.appendChild(l_kill);
-			}
-		}
-	  }else{
-		  var img = queryXPathNode(cols[0], './/img');
-		  
-		  var cnt = document.createElement('span');
-		  cnt.className = 'incell left';
-		  cnt.innerHTML = cols[0].innerHTML;
-		  cols[0].innerHTML = '';
+        i++;
+        var it_span_user = document.createElement('span');
+        it_span_user.className = 'incell left';
+        it_span_user.innerHTML=cols[0].innerHTML;
+        cols[0].innerHTML='';
+        div.appendChild(it_span_user);
+        if(!isSelf){
+          if(EM.Settings.GetValue('topic','button_stalk')) {
+            var l_stalk = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_stalk_t, 'topic', 'stalk');
+            std.appendChild(l_stalk);
+          }
+          if(EM.Settings.GetValue('topic','button_killfile')) {
+            var l_kill = EM.User.userlinkButtonFromLink(document, strUser, EM.User.ev_kill, 'topic', 'killfile');
+            std.appendChild(l_kill);
+          }
+        }
+      }else{
+        var img = queryXPathNode(cols[0], './/img');
 
-		  //Fix for a bug in TUFKAPL source
-		  cnt.id = cols[0].id;
-		  cols[0].id = '';
+        var cnt = document.createElement('span');
+        cnt.className = 'incell left';
+        cnt.innerHTML = cols[0].innerHTML;
+        cols[0].innerHTML = '';
 
-		  div.appendChild(cnt);
+        //Fix for a bug in TUFKAPL source
+        cnt.id = cols[0].id;
+        cols[0].id = '';
 
-		  if(img && isSelf && !img.src.match(/answered/) && !img.src.match(/lock/)) {
-			var topicid = img.id.match(/^folderFor(\d+)$/);
-			var std_a = document.createElement('a');
-			std_a.innerHTML = '&#x2714;';
-			std_a.id = 'answerLink'+topicid[1];
-			std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
-			std_a.style.cssText+=' cursor:pointer;';
-			std.appendChild(std_a);
-		  }
-		  var std_br = document.createElement('br');
-		  std.appendChild(std_br);
-		  std.appendChild(std_own);
+        div.appendChild(cnt);
 
-		  std.style.cssText+=' vertical-align:top;';
-		  std.style.cssText+=' min-width:1.1em;';
-		  std.style.cssText+=' min-height:23px;';
+        if(img && isSelf && !img.src.match(/answered/) && !img.src.match(/lock/)) {
+          var topicid = img.id.match(/^folderFor(\d+)$/);
+          var std_a = document.createElement('a');
+          std_a.innerHTML = '&#x2714;';
+          std_a.id = 'answerLink'+topicid[1];
+          std_a.setAttribute("onclick",'EM.Pagehacks.SetAnswered("'+topicid[1]+'"); return false;');
+          std_a.style.cssText+=' cursor:pointer;';
+          std.appendChild(std_a);
+        }
+        var std_br = document.createElement('br');
+        std.appendChild(std_br);
+        std.appendChild(std_own);
 
-	  }
-	  div.appendChild(std);
+        std.style.cssText+=' vertical-align:top;';
+        std.style.cssText+=' min-width:1.1em;';
+        std.style.cssText+=' min-height:23px;';
+
+      }
+      div.appendChild(std);
 
       cols[0].appendChild(div);
     }
@@ -3203,7 +3203,7 @@ Pagehacks.prototype = {
           "  background-color:#fff;"+
           "  border-color: #000;"+
           "  border-style: solid;"+
-          "  margin:0.5px;"+
+    F      "  margin:0.5px;"+
           "}";
         style.innerHTML+=
           "input:focus, textarea:focus, select:focus {"+
@@ -3622,15 +3622,15 @@ Pagehacks.prototype = {
       if(!linkUser){
         linkUser=tdProfile;
         var spanUser = queryXPathNode(linkUser, "span[1]/b");
-		if(!spanUser) spanUser = queryXPathNode(linkUser, "b[1]/span[1]");
+        if(!spanUser) spanUser = queryXPathNode(linkUser, "b[1]/span[1]");
       }else{
         var spanUser = queryXPathNode(linkUser, "span[1]");
       }
-	  if(!spanUser){
-		console.log("Error on higlighter");
-		continue;
-	  }
-  	  var idPost = queryXPathNode(tdProfile, "a[1]");
+      if(!spanUser){
+        console.log("Error on higlighter");
+        continue;
+      }
+      var idPost = queryXPathNode(tdProfile, "a[1]");
       if(idPost) idPost = idPost.name;
       else{
         idPost=i;
@@ -3638,11 +3638,11 @@ Pagehacks.prototype = {
         newA.name=idPost;
         tdProfile.insertBefore(newA,tdProfile.firstChild);
       }
-      
+
       var strUser = spanUser.textContent;
       var isSelf=strUser==EM.User.loggedOnUser
-	    var cssClassAdd = EM.User.helper_getHLStyleByUserLink(linkUser);
- 
+      var cssClassAdd = EM.User.helper_getHLStyleByUserLink(linkUser);
+
 
       if (!isSelf && kftype && user_killfile.some(
           function (e){
@@ -3680,7 +3680,7 @@ Pagehacks.prototype = {
       tdProfile.className = tdProfile.className.replace(/Highlight/, '');
       tdPost.className = tdPost.className.replace(/Highlight/, '');
       tdBottom.className = tdBottom.className.replace(/Highlight/, '');
- 
+
       var user_b = queryXPathNode(tdProfile, "b");
       if(!user_b) user_b = queryXPathNode(tdProfile, "span");
       var post_idlink = queryXPathNode(tdProfile, "a");
