@@ -1307,9 +1307,30 @@ function SettingsStore() {
               ev.initEvent("change", true, false);
               src.dispatchEvent(ev);
             }
+
+            if (!src.disabled || isEmpty(e)) {
+              if (isEmpty(e)) {
+                //initial change-> display current setting
+                r=EM.Settings.GetValue('update','source_repo');
+              }
+              for (var i=src.options.length-1; i>=0; i--) {
+                src.remove(i);
+              }
+              EM.Updater.updateNetwork(function(upd,network) {
+                [].concat(network).sort(function (l,r) {
+                  return (new Date(l.created_at))-(new Date(r.created_at));
+                }).forEach(function(rep) {
+                  var n=rep.owner+'#'+rep.name;
+                  src.options[src.options.length]=new Option(rep.owner,n,n==r);
+                });
+                return false;
+              });
+            }
           }
         }),
-    this.AddSetting( 'Quelle f&uuml;r Updates','update.source_repo', [
+    this.AddSetting( 'Quelle f&uuml;r Updates<br><a href="http://github.com/martok/edgemonkey/network">GitHub network</a>',
+        'update.source_repo', [
+          ['Flamefire', 'Flamefire#edgemonkey'],
           ['BenBE', 'BenBE#edgemonkey'],
           ['Kha', 'Kha#edgemonkey'],
           ['martok', 'martok#edgemonkey']
@@ -3978,7 +3999,7 @@ UpdateMonkey.prototype = {
         );
     },
 
-    updateNetwork: function() {
+    updateNetwork: function(callback) {
         console.log('networks');
         var obj = this;
         this.actionPush(
@@ -4012,12 +4033,16 @@ UpdateMonkey.prototype = {
                 return true;
             },
             function(a) {
-                obj.network.forEach(
-                    function(e) {
-                        obj.updateBranches(e.owner,e.name);
-                        obj.updateTags(e.owner,e.name);
-                    }
-                );
+                var nodef = false;
+                if (!isEmpty(callback))
+                  nodef = callback(obj, obj.network)===false; // require false, undef would be falsy too
+                if (!nodef)
+                  obj.network.forEach(
+                      function(e) {
+                          obj.updateBranches(e.owner,e.name);
+                          obj.updateTags(e.owner,e.name);
+                      }
+                  );
                 obj.actionDone(a);
             },
             null
