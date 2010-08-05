@@ -1091,30 +1091,25 @@ document.overlayWindows = {
         return this._list[i];
     }
     return null;
+  },
+  getTopmost: function() {
+    var agg=null;
+    this._list.forEach(function (curr) {
+      if (!agg || (curr.Outer.style.zIndex*1>agg.Outer.style.zIndex*1)) {
+        agg = curr;
+      }
+    });
+    return agg;
   }
 }
 
 function bringToFront(obj)
 {
-    var divs = document.getElementsByClassName('overlayWin','div');
+    var top = null;
     var max_index = 0;
-    var cur_index;
-
-    // Compute the maximal z-index of
-    // other absolute-positioned divs
-    for (i = 0; i < divs.length; i++)
-    {
-      var item = divs[i];
-      if (item == obj || item.style.zIndex == '') {
-        continue;
-      }
-
-      cur_index = parseInt(item.style.zIndex);
-      if (max_index < cur_index)
-      {
-        max_index = cur_index;
-      }
-    }
+    top = document.overlayWindows.getTopmost();
+    if (top)
+      max_index = top.Outer.style.zIndex;
 
     obj.style.zIndex = max_index + 1;
     return max_index;
@@ -1221,7 +1216,7 @@ OverlayWindow.prototype = {
   },
 
   InitDropdown: function() {
-    this.Outer.style.zIndex=1000;
+    this.BringToFront();
 
     this.evgmousedown = addGlobalEvent(this.Frame,'mousedown',function(dv,event) {
       var clicked = event.target;
@@ -1232,9 +1227,10 @@ OverlayWindow.prototype = {
         clicked = clicked.offsetParent;
       }
       //if we get here, someone clicked outside
-
-      dv.Window.Close();
-      event.preventDefault();
+      if (document.overlayWindows.getTopmost()==dv.Window) {
+        dv.Window.Close();
+        event.preventDefault();
+      }
     },true);
   },
 
