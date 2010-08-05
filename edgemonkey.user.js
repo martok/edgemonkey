@@ -3543,6 +3543,7 @@ Pagehacks.prototype = {
 
   AddBetaLinks: function() {
     var table = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr/td[4]/table");
+    if (!table) return;
     table.style.cssText = '';
     RegExp.prototype.replace = function(str,rep) {
       return str.replace(this,rep);
