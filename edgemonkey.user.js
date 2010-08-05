@@ -1365,7 +1365,8 @@ function SettingsStore() {
     this.AddSetting( 'Shouts von ausgew&auml;hlten Nutzern hervorheben', 'sb.highlight_stalk', 'color', 0),
     this.AddSetting( 'Shouts von Moderatoren/Admins hervorheben', 'sb.highlight_mod', 'color', 0),
     this.AddSetting( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_stalk', 'list', []),
-    this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true)
+    this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true),
+    this.AddSetting( 'Auszublendende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_killfile', 'list', [])
   ]);
 
   this.AddCategory('UpdateMonkey', [
@@ -2178,6 +2179,22 @@ UserManager.prototype = {
     }
 
     EM.Settings.SetValue('sb','user_stalk',user_list);
+    Settings_SaveToDisk();
+    window.location.reload();
+  },
+  ev_sbkill: function(user) {
+// don't really know why it gets double-escaped...
+//    user = unescape(user);
+
+    var user_list = EM.Settings.GetValue('sb','user_killfile');
+
+    if (user_list.some(function (item) { return item.equals(user); })) {
+      user_list = user_list.filter(function(el) { return !el.equals(user); });
+    } else {
+      user_list.push(user);
+    }
+
+    EM.Settings.SetValue('sb','user_killfile',user_list);
     Settings_SaveToDisk();
     window.location.reload();
   },
@@ -3105,6 +3122,20 @@ function ShoutboxWindow() {
     shout.insertBefore(cnt, shout.firstChild);
     shout.insertBefore(div, shout.firstChild);
 
+    var user_list = EM.Settings.GetValue('sb','user_killfile');
+
+    if (user_list.some(function (item) { return item.equals(shout_user); })) {
+      cnt.style.cssText="display:none";
+      a.style.cssText="padding-left:1em;color:#777777";
+      (function(cnt,a) {
+        addEvent(a,'click',function(d,e) {
+          cnt.style.cssText="";
+          a.style.cssText="";
+          e.preventDefault();
+        });
+      })(cnt,a);
+    }
+
     var tools = null;
     var tool_html = '';
     if(anek_active) {
@@ -3120,11 +3151,13 @@ function ShoutboxWindow() {
     if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
       var l_stalk = EM.User.userlinkButtonFromLink(document, shout_user, EM.User.ev_stalk, 'sb', 'stalk');
     }
+    var l_kill = EM.User.userlinkButtonFromLink(document, shout_user, EM.User.ev_sbkill, 'sb', 'killfile');
     if(tool_html!='') {
       tools = document.createElement('span');
       tools.className+=' incell right';
       tools.innerHTML = tool_html;
       if(l_stalk) tools.appendChild(l_stalk);
+      tools.appendChild(l_kill);
       div.appendChild(tools);
     }
   };
