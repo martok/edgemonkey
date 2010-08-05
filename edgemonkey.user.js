@@ -2016,8 +2016,8 @@ function ButtonBar() {
   }
 
   if(isUndef(this.mainTable) || null == this.mainTable) {
-	this.container = {appendChild:function(a){},innerHTML:''};
-	return;
+    this.container = {appendChild:function(a){},innerHTML:''};
+    return;
   }
 
   this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
@@ -3380,10 +3380,10 @@ function Pagehacks() {
     this.AddAnsweredLinks();
   }
   if(/\bforum_(\S+_)?\d+\.html|viewforum\.php/.test(Location)) {
-	if(EM.Buttons.mainTable){
-		var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
-		this.TLColourize(resTable, "forum");
-	}
+    if(EM.Buttons.mainTable){
+      var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
+      this.TLColourize(resTable, "forum");
+    }
   }
   if(EM.Settings.GetValue('ui','addsid')) {
     this.AddLinkSIDs();
@@ -3766,7 +3766,7 @@ Pagehacks.prototype = {
           "  background-color:#fff;"+
           "  border-color: #000;"+
           "  border-style: solid;"+
-    F      "  margin:0.5px;"+
+          "  margin:0.5px;"+
           "}";
         style.innerHTML+=
           "input:focus, textarea:focus, select:focus {"+
@@ -3941,7 +3941,7 @@ Pagehacks.prototype = {
   AddQuickProfileMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
     var linkText = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[3]/a[1]");
-	if(link==null) return;
+    if(link==null) return;
     if('Meine Ecke' == linkText.textContent) {
       link.setAttribute('onclick','return EM.Pagehacks.QuickProfileMenu()');
     }
@@ -3949,7 +3949,7 @@ Pagehacks.prototype = {
 
   AddQuickLoginMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
-	if(link==null) return;
+    if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
   },
 
@@ -4197,6 +4197,7 @@ Pagehacks.prototype = {
 
   AddBetaLinks: function() {
     var table = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr/td[4]/table");
+    if (!table) return;
     table.style.cssText = '';
     RegExp.prototype.replace = function(str,rep) {
       return str.replace(this,rep);
@@ -4262,7 +4263,7 @@ Pagehacks.prototype = {
         break;
       }
     }
-	  if(tbl==null) return;
+    if(tbl==null) return;
     var tr = queryXPathNodeSet(tbl, "tbody/tr");
 
     var user_killfile = EM.Settings.GetValue('topic','user_killfile');
