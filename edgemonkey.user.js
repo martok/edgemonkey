@@ -1722,6 +1722,15 @@ SettingsStore.prototype = {
       addEvent(i[0], 'click', this.ev_ClearAll);
       addEvent(i[1], 'click', this.ev_ClearUIDCache);
     }
+    var contr = ['Martok','BenBE','Kha','Flamefire'].map(function(a) {return '<a href="/user_'+a+'.html">'+a+'</a>';});
+    var ver = document.createElement('p');
+    ver.className="copyright";
+    ver.style.textAlign="center";
+    ver.innerHTML="Edgemonkey Version "+ScriptVersion+(isUndef(EM.Updater.installed)?'':' Git Revision '+EM.Updater.installed)+
+      '<br>Contributors: '+contr.join(', ')+' &amp; more'+
+      '<br>Developed with git on <a href="http://github.com/martok/edgemonkey">GitHub</a>'+
+      '<br><br>Der Edgemonkey distanziert sich ausdr&uuml;cklich von Fremdbananen jeglicher Art!';
+    this.Window.Body.appendChild(ver);
   },
 
   getControl: function (name) {
