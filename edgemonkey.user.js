@@ -12,10 +12,26 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.23;
+const ScriptVersion = 0.2499999999999999;
 
 // @changelog
 /*
+0.25-1E-16        10-08-06
+  -SB: AnekdoteAll (Kha)
+  -SB: more shorttags, replacer rewrite (Flamefire, BenBE, Martok)
+  -add: more controls next to userlinks in thread views & search (BenBE, Flamefire)
+  -add: extend links to stay in same forum/subdomain (Martok)
+  -add: login dropdown (BenBE)
+  -add: settings dialog autogenerate (Martok)
+  -add: settings dialog with tabs (Martok)
+  -add: set answered from search=myopen (BenBE, Flamefire)
+  -add: PN API (Martok)
+  -add: flexible caching utility (BenBE)
+  -add: PN notifier (Martok)
+  -add: auto updater (BenBE)
+  -add: sitemap dropdown (BenBE)
+  -SB: ignorelist (Martok)
+
 0.23           10-02-01
   -SB: anekdoter w/Linkification (Martok)
   -SB: moved Topic+Post+Forum+Search Autotags to new syntax (Martok)
