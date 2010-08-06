@@ -1214,7 +1214,7 @@ function SettingsStore() {
   ]);
   this.AddCategory('Ergonomie', [
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', 'pagehack.quickProfMenu', 'bool', true),
-    this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', true),
+    this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', false),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
     this.AddSetting( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', 'pagehack.extPostSubmission', 'bool', true),
