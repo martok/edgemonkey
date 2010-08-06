@@ -1297,7 +1297,7 @@ function SettingsStore() {
   ]);
   this.AddCategory('Ergonomie', [
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', 'pagehack.quickProfMenu', 'bool', true),
-    this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', true),
+    this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', false),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Sitemap', 'pagehack.quickSitemapMenu', 'bool', true),
@@ -3138,7 +3138,10 @@ function ShoutboxWindow() {
       (function(cnt,a) {
         addEvent(a,'click',function(d,e) {
           cnt.style.cssText="";
-          a.style.cssText="";
+          a.style.paddingLeft="";
+          if(EM.Settings.GetValue('sb','boldUser')) {
+            a.style.fontWeight="bold";
+          }
           e.preventDefault();
         });
       })(cnt,a);
