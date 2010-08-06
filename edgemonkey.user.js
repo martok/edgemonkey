@@ -3130,7 +3130,10 @@ function ShoutboxWindow() {
       (function(cnt,a) {
         addEvent(a,'click',function(d,e) {
           cnt.style.cssText="";
-          a.style.cssText="";
+          a.style.paddingLeft="";
+          if(EM.Settings.GetValue('sb','boldUser')) {
+            a.style.fontWeight="bold";
+          }
           e.preventDefault();
         });
       })(cnt,a);
