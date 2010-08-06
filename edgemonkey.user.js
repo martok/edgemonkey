@@ -1543,6 +1543,7 @@ function ShoutboxReplacer(){
     /RFC\s?0*((?!0)\d+)/, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]",true,false,
     //Implement /me-Tags ;-)
     /^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false,
+    /^me\{(.+?)\}/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false,
     //User-Tag-Verlinkung
     "@GTA", "[user=\"GTA-Place\"]GTA-Place[/user]",true,false,
     "@TUFKAPL", "[user=\"Christian S.\"]TUFKAPL[/user]",true,false,
