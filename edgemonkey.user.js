@@ -2813,7 +2813,7 @@ function ShoutboxControls() {
     this.btnUpdate.value='Aktuellste zeigen';
     this.btnUpdate.setAttribute('onclick', 'EM.Shouts.ev_sb_update()');
 
-    this.contButtons = document.createElement('<div>');
+    this.contButtons = document.createElement('div');
     this.btnUpdate.parentNode.appendChild(this.contButtons);
 
     this.btnNewer = this.btnUpdate.cloneNode(false);
@@ -5064,10 +5064,14 @@ function initEdgeApe() {
     setTimeout(function() {checkUpdate()}, 100);
   }
 
-  if (Location.match(/shoutbox_view.php/)) {
+  if (Location.match(/shoutbox_view\.php/)) {
     if (EM.User.loggedOnUser) {
       EM.ShoutWin = new ShoutboxWindow();
     }
+  }
+  else
+  if (Location.match(/posting\.php\?mode=topicreview/)) {
+    EM.Pagehacks = new Pagehacks();
   }
   else
   {
