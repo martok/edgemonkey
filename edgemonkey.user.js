@@ -2559,8 +2559,6 @@ function ShoutboxReplacer(){
     ":+mrgreen:+", ":mrgreen:",false,false,
     "FIF", "Fragen in's Forum :mahn:",true,false,
     "SIWO", "Suche ist weiter oben :mahn:",true,false,
-    //Wall-Hack
-    ":wall:", ":autsch:",true,false,
     //Wikipedia Link support
     /\[\[(\w\w):(\w+)\|(.*?)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]",true,false,
     /\[\[(\w+)\|(.*?)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]",true,false,
