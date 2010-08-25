@@ -3625,11 +3625,13 @@ Pagehacks.prototype = {
         var rowfix = col_ofs?' row'+(2-i%2):'';
 
         //Now lets check against the blacklist :P
-        cols[0].className += t_cssClassAdd;
+        if (singlePostMode)
+          cols[0].className += t_cssClassAdd;
         cols[1].className += t_cssClassAdd;
 
         //Remove the DF Highlighting to ensure proper colors :P
-        cols[0].className = cols[0].className.replace(/Highlight/, '');
+        if (singlePostMode)
+          cols[0].className = cols[0].className.replace(/Highlight/, '');
         cols[1].className = cols[1].className.replace(/Highlight/, '');
 
         if(singlePostMode){
