@@ -1791,7 +1791,7 @@ UserManager.prototype = {
     var kftype = EM.Settings.GetValue('topic','killFileType');
 
     var user_span = queryXPathNode(user_link,"./span");
-	//usernames are escaped in killfile and stalklists
+    //usernames are escaped in killfile and stalklists
     var user_name = escape(user_span.textContent);
 
     var isSelf = user_name == EM.User.loggedOnUser;
