@@ -2570,19 +2570,22 @@ function ShoutboxWindow() {
     shout.insertBefore(div, shout.firstChild);
 
     var tools = null;
+    var l_stalk = null;
     var tool_html = '';
     if(anek_active) {
       tool_html+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')">A</a>';
     }
-    if(pn_link) {
-      var uid = EM.User.getUID(shout_user);
-      if (uid>=0)
-        tool_html+='<a href="privmsg.php?mode=post&u=' + uid + '" target="_parent">P</a>';
-      else
-        tool_html+='P';
-    }
-    if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
-      var l_stalk = EM.User.userlinkButtonFromLink(document, shout_user, EM.User.ev_stalk, 'sb', 'stalk');
+    if (!shout_user.equals(EM.User.loggedOnUser)) {
+      if(pn_link) {
+        var uid = EM.User.getUID(shout_user);
+        if (uid>=0)
+          tool_html+='<a href="privmsg.php?mode=post&u=' + uid + '" target="_parent">P</a>';
+        else
+          tool_html+='P';
+      }
+      if(EM.Settings.GetValue('sb','highlight_stalk')>0) {
+        l_stalk = EM.User.userlinkButtonFromLink(document, shout_user, EM.User.ev_stalk, 'sb', 'stalk');
+      }
     }
     if(tool_html!='') {
       tools = document.createElement('span');
