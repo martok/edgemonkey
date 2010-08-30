@@ -2257,7 +2257,7 @@ UserManager.prototype = {
   usernameFromProfile: function(href) {
     var m = href.match(/user_(.*)\.html/);
     if (m)
-      return unescape(m[1]);
+      return unescape(unescape(m[1]));
     else
       return '';
   },
@@ -2280,7 +2280,7 @@ UserManager.prototype = {
     var kftype = EM.Settings.GetValue('topic','killFileType');
 
     var user_span = queryXPathNode(user_link,"./span");
-    var user_name = user_span.textContent;
+    var user_name = EM.User.usernameFromProfile(user_link.href);
 
     var isSelf = user_name == EM.User.loggedOnUser;
     var isMod = /color\:/.test(user_link.style.cssText);
