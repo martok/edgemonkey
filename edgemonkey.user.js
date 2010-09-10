@@ -271,6 +271,25 @@ var data = {
     'FuIHNvZGlwb2RpOnJvbGU9ImxpbmUiIHg9IjM4NC4wIiB5PSI2ODQuOTI1NzIiPiA8L3RzcGFuPgogICAgPC90ZXh0Pg0KICA8L2c%2BDQo8L3N2Zz4%3D'
 }
 
+//Chrome compat (Regan)
+function eval_c(a) {
+  if (navigator.appVersion.indexOf('Chrome') > -1) {
+    return JSON.parse(a);
+  }
+  else {
+    return eval(a);
+  }
+}
+
+function uneval_c(a) {
+  if (navigator.appVersion.indexOf('Chrome') > -1) {
+    return JSON.stringify(a);
+  }
+  else {
+    return uneval(a);
+  }  
+}
+
 function queryXPath(node,xpath){
     //I hate having to always type this crap ...
     var docref = (node.body)?node:node.ownerDocument;
