@@ -2807,7 +2807,7 @@ function ShoutboxControls() {
   var h=EM.Settings.GetValue('sb','displayHeight');
   if (!isEmpty(h)) ifr.style.height = h+'px';
 
-  if (this.shout_obj) {
+  if (!isEmpty(this.shout_obj)) {
     this.btnUpdate = document.getElementsByName('shoutrefresh')[0];
     this.btnUpdate.style.cssText+='width: 152px !important';
     this.btnUpdate.value='Aktuellste zeigen';
