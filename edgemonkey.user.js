@@ -1352,7 +1352,8 @@ function SettingsStore() {
 
   this.AddCategory('Such-Ansicht', [
     this.AddSetting( 'Zus&auml;tzliche Navigationslinks bei leeren Suchergebnissen', 'pagehack.extSearchPage', 'bool', false),
-    this.AddSetting( 'Zus&auml;tzliche Hervorhebungen bei Suchergebnissen', 'search.moremarkup', 'bool', true)
+    this.AddSetting( 'Zus&auml;tzliche Hervorhebungen bei Suchergebnissen', 'search.moremarkup', 'bool', true),
+    this.AddSetting( 'Erste Tabellenspalte auch hervorheben', 'search.highlightfirst', 'bool', true)
   ]);
 
   this.AddCategory('Thread-Ansicht', [
@@ -3625,12 +3626,12 @@ Pagehacks.prototype = {
         var rowfix = col_ofs?' row'+(2-i%2):'';
 
         //Now lets check against the blacklist :P
-        if (singlePostMode)
+        if (singlePostMode || EM.Settings.GetValue('search','highlightfirst'))
           cols[0].className += t_cssClassAdd;
         cols[1].className += t_cssClassAdd;
 
         //Remove the DF Highlighting to ensure proper colors :P
-        if (singlePostMode)
+        if (singlePostMode || EM.Settings.GetValue('search','highlightfirst'))
           cols[0].className = cols[0].className.replace(/Highlight/, '');
         cols[1].className = cols[1].className.replace(/Highlight/, '');
 
