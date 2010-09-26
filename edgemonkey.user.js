@@ -5005,8 +5005,10 @@ function initEdgeApe() {
     // find out what we regard as parent using elaborate DNA tests...
     //  ...well, actually, only check hair color
     if (Env.isPopup) {
+      Env.parentName = 'window.opener';
       Env.parent = unsafeWindow.opener;
     } else {
+      Env.parentName = 'window.parent';
       Env.parent = unsafeWindow.parent;
     }
     //if we were toplevel, we don't have to care about SOP, so it will remain false
@@ -5019,59 +5021,64 @@ function initEdgeApe() {
   }
   console.log('Loader',Env.url,Env);
   if (Env.isSOPPass) {
-    // parent accessible, so it IS part of the EE & should have .EM
-    // if not, wait for it
-    continueUsing(Env.parent);
+    injectInitCode(Env.parentName);
+    waitForObject(false);
   } else {
-    // either not accessible or we are top level
-    // so it's our duty to build the EM wrapper
-    newEM = {
-      Ajax: new AJAXObject(),
-      Settings: new SettingsStore(),
-      User: null,
-      Cache: null,
-      Updater: null
-    };
-    console.log('Loader','Create new EM');
-    publish('EM',makeInst({},newEM));
-    newEM.User = new UserManager();
-    newEM.Cache = new CacheMonkey();
-    newEM.Updater = new UpdateMonkey();
+    injectInitCode();
+    waitForObject(true);
+  }
 
-    // toplevel && !popup check no longer needed, because all other cases wouldn't come here
-    upgradeSettings(EM);
-    setTimeout(function() {
-        EM.Updater.checkUpdate();
+  function injectInitCode(p) {
+    var code='';
+    code+='(function(par){';
+    code+=' var newEM = {};';
+    code+=' if (par) {';
+    code+='  var wait=setTimeout(function() {';
+    code+='   if (typeof par.EM!=="undefined") {';
+    code+='    clearInterval(wait);';
+    code+='    newEM.__proto__ = par.EM.__proto__;';
+    code+='    window.EM = newEM;';
+    code+='   }';
+    code+='  }, 10);';
+    code+=' } else {';
+    code+='  newEM.__proto__ = {};';
+    code+='  window.EM = newEM;';
+    code+=' } ';
+    code+='})('+p+')';
+
+    var script=document.createElement('script');
+    script.setAttribute('type','text/javascript');
+    script.innerHTML = code;
+    document.documentElement.appendChild(script);
+    //document.documentElement.removeChild(script);
+  }
+
+  function waitForObject(buildglobals) {
+    var wait=setInterval(function() {
+      if (typeof unsafeWindow.EM!== "undefined") {
+        clearInterval(wait);
+        window.EM = unsafeWindow.EM;
+        if (buildglobals) {
+          shared(EM).Ajax = new AJAXObject();
+          shared(EM).Settings = new SettingsStore();
+          shared(EM).User = new UserManager();
+          shared(EM).Cache = new CacheMonkey();
+          shared(EM).Updater = new UpdateMonkey();
+          console.log('Loader','EM constructed',EM);
+          // toplevel && !popup check no longer needed, because all other cases wouldn't come here
+          upgradeSettings(EM);
+          setTimeout(function() {
+              EM.Updater.checkUpdate();
+          }, 100);
+        }
+        //awesome, we're done
+        startup(EM);
+      }
     }, 100);
-
-    startup(EM);
-  }
-
-  function publish(name, data) {
-    window[name]=data;
-    unsafeWindow[name]=data;
-  }
-
-  function makeInst(obj,prototype) {
-    obj.__proto__ = prototype;
-    return obj;
   }
 
   function shared(em) {
     return em.__proto__;
-  }
-
-  function continueUsing(ref) {
-    var proto;
-    if (!ref.EM) {
-      setTimeout(function() {continueUsing(ref)}, 100);
-    } else {
-      proto=shared(ref.EM);
-      console.log('Loader','Reusing ',proto,'from',ref.EM);
-      publish('EM',makeInst({a:1},proto));
-      console.log('Loader','Reused in ',EM);
-      startup(EM);
-    }
   }
 
   function startup(EM) {
