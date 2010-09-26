@@ -5052,7 +5052,7 @@ function initEdgeApe() {
     script.setAttribute('type','text/javascript');
     script.innerHTML = code;
     document.documentElement.appendChild(script);
-    //document.documentElement.removeChild(script);
+    document.documentElement.removeChild(script);
   }
 
   function waitForObject(buildglobals) {
@@ -5071,12 +5071,12 @@ function initEdgeApe() {
           upgradeSettings(EM);
           setTimeout(function() {
               EM.Updater.checkUpdate();
-          }, 100);
+          }, 200);
         }
         //awesome, we're done
         startup(EM);
       }
-    }, 100);
+    }, 20);
   }
 
   function shared(em) {
