@@ -3368,8 +3368,10 @@ SmileyWindow.prototype = {
 function Pagehacks() {
   if (EM.Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
-  EM.Buttons.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
-  EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
+  if (EM.Env.isTopLevel) {
+    EM.Buttons.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
+    EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
+  }
   this.AddCustomStyles();
   if(EM.Settings.GetValue('pagehack','extSearchPage') &&
     /\bsearch\.php(\?(?:mode=results|search_id=.*|search_author=.*)|$)/.test(Env.url))
