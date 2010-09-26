@@ -4988,6 +4988,7 @@ UpdateMonkey.prototype = {
 }
 
 function initEdgeApe() {
+  var newEM;
   window.Env={}; // this is sandbox-local
   try {
     //Work around Firefox Security by Obscurity
@@ -5024,17 +5025,18 @@ function initEdgeApe() {
   } else {
     // either not accessible or we are top level
     // so it's our duty to build the EM wrapper
-    console.log('Loader','Create new EM');
-    publish('EM', {
+    newEM = {
       Ajax: new AJAXObject(),
       Settings: new SettingsStore(),
       User: null,
       Cache: null,
       Updater: null
-    });
-    EM.User = new UserManager();
-    EM.Cache = new CacheMonkey();
-    EM.Updater = new UpdateMonkey();
+    };
+    console.log('Loader','Create new EM');
+    publish('EM',makeInst({},newEM));
+    newEM.User = new UserManager();
+    newEM.Cache = new CacheMonkey();
+    newEM.Updater = new UpdateMonkey();
 
     // toplevel && !popup check no longer needed, because all other cases wouldn't come here
     upgradeSettings(EM);
@@ -5050,37 +5052,57 @@ function initEdgeApe() {
     unsafeWindow[name]=data;
   }
 
+  function makeInst(obj,prototype) {
+    obj.__proto__ = prototype;
+    return obj;
+  }
+
+  function shared(em) {
+    return em.__proto__;
+  }
+
   function continueUsing(ref) {
+    var proto;
     if (!ref.EM) {
       setTimeout(function() {continueUsing(ref)}, 100);
     } else {
-      publish('EM', ref.EM);
-      startup(ref.EM);
+      proto=shared(ref.EM);
+      console.log('Loader','Reusing ',proto,'from',ref.EM);
+      publish('EM',makeInst({a:1},proto));
+      console.log('Loader','Reused in ',EM);
+      startup(EM);
     }
   }
 
   function startup(EM) {
+    EM.Env = Env;
     if (Env.url.match(/shoutbox_view\.php/)) {
+      console.log("Loader",Env.url," is shoutbox");
       if (EM.User.loggedOnUser) {
-        EM.ShoutWin = new ShoutboxWindow();
+        shared(EM).ShoutWin = new ShoutboxWindow();
       }
     }
     else
     if (Env.url.match(/posting\.php\?mode=topicreview/)) {
+      console.log("Loader",Env.url," is topicreview");
       EM.Pagehacks = new Pagehacks();
     }
     else
     {
-      EM.Buttons = new ButtonBar();
-      EM.Notifier = new Notifier();
+      console.log("Loader",Env.url," is main");
+      if (!Env.isPopup) {
+        shared(EM).Buttons = new ButtonBar();
+        shared(EM).Notifier = new Notifier();
 
-      with(EM.Buttons) {
-        addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
-      }
-      EM.Pagehacks = new Pagehacks();
-      EM.Shouts = new ShoutboxControls();
+        with(EM.Buttons) {
+          addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
+        }
+        EM.Pagehacks = new Pagehacks();
+        shared(EM).Shouts = new ShoutboxControls();
 
-      EM.PN = new PNAPI();
+        shared(EM).PN = new PNAPI();
+      } else
+        console.log("Loader",Env.url," discarded (popup)");
     }
   }
 
@@ -5143,5 +5165,6 @@ function initEdgeApe() {
     }
   }
 }
+
 
 initEdgeApe(); //Should go as soon as possible ...
