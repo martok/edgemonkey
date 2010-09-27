@@ -4991,7 +4991,7 @@ UpdateMonkey.prototype = {
 
 function initEdgeApe() {
   var newEM;
-  window.Env={}; // this is sandbox-local
+  window.Env=Env={}; // this is sandbox-local
   try {
     //Work around Firefox Security by Obscurity
     isEmpty(unsafeWindow.opener);
@@ -5062,6 +5062,7 @@ function initEdgeApe() {
       if (typeof unsafeWindow.EM!== "undefined") {
         clearInterval(wait);
         window.EM = unsafeWindow.EM;
+        EM = window.EM;
         if (buildglobals) {
           shared(EM).Ajax = new AJAXObject();
           shared(EM).Settings = new SettingsStore();
