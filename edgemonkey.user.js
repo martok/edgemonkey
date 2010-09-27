@@ -1791,7 +1791,7 @@ UserManager.prototype = {
     var kftype = EM.Settings.GetValue('topic','killFileType');
 
     var user_span = queryXPathNode(user_link,"./span");
-    var user_name = EM.User.usernameFromProfile(user_link.href);
+    var user_name = (user_link&&user_link.href)?EM.User.usernameFromProfile(user_link.href) : user_span.firstChild.textContent;
 
     var isSelf = user_name == EM.User.loggedOnUser;
     var isMod = /color\:/.test(user_link.style.cssText);
