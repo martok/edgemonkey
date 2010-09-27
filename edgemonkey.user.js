@@ -1382,6 +1382,7 @@ function SettingsStore() {
     this.AddSetting( 'Shouts von Moderatoren/Admins hervorheben', 'sb.highlight_mod', 'color', 0),
     this.AddSetting( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_stalk', 'list', []),
     this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true),
+    this.AddSetting( 'Links f&uuml;r angemeldeten Benutzer immer komplett anzeigen', 'sb.linksForSelf', 'bool', true),
     this.AddSetting( 'Auszublendende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_killfile', 'list', [])
   ]);
 
@@ -2281,7 +2282,7 @@ UserManager.prototype = {
     var kftype = EM.Settings.GetValue('topic','killFileType');
 
     var user_span = queryXPathNode(user_link,"./span");
-    var user_name = EM.User.usernameFromProfile(user_link.href);
+    var user_name = (user_link&&user_link.href)?EM.User.usernameFromProfile(user_link.href) : user_span.firstChild.textContent;
 
     var isSelf = user_name == EM.User.loggedOnUser;
     var isMod = /color\:/.test(user_link.style.cssText);
@@ -3168,7 +3169,7 @@ function ShoutboxWindow() {
     if(anek_active) {
       tool_html+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')">A</a>';
     }
-    if (!shout_user.equals(EM.User.loggedOnUser)) {
+    if (!shout_user.equals(EM.User.loggedOnUser) || EM.Settings.GetValue('sb','linksForSelf')) {
       if(pn_link) {
         var uid = EM.User.getUID(shout_user);
         if (uid>=0)
