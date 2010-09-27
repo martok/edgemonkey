@@ -1266,7 +1266,8 @@ function SettingsStore() {
     this.AddSetting( 'Shouts von ausgew&auml;hlten Nutzern hervorheben', 'sb.highlight_stalk', 'color', 0),
     this.AddSetting( 'Shouts von Moderatoren/Admins hervorheben', 'sb.highlight_mod', 'color', 0),
     this.AddSetting( 'Hervorzuhebende Benutzer<br />(Ein Benutzer je Zeile)', 'sb.user_stalk', 'list', []),
-    this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true)
+    this.AddSetting( 'Zeige Link zum Schreiben einer PN an Benutzer', 'sb.pnlink_active', 'bool', true),
+    this.AddSetting( 'Links f&uuml;r angemeldeten Benutzer immer komplett anzeigen', 'sb.linksForSelf', 'bool', true)
   ]);
 
   this.AddCategory('UpdateMonkey', [
@@ -2575,7 +2576,7 @@ function ShoutboxWindow() {
     if(anek_active) {
       tool_html+='<a href="javascript:EM.ShoutWin.ev_anekdote('+i+')">A</a>';
     }
-    if (!shout_user.equals(EM.User.loggedOnUser)) {
+    if (!shout_user.equals(EM.User.loggedOnUser) || EM.Settings.GetValue('sb','linksForSelf')) {
       if(pn_link) {
         var uid = EM.User.getUID(shout_user);
         if (uid>=0)
