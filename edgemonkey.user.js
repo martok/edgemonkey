@@ -4999,6 +4999,8 @@ function initEdgeApe() {
     unsafeWindow.opener = null;
   }
   Env.isPopup = !isEmpty(unsafeWindow.opener);
+  if (Env.isPopup)
+    Env.isEMPopup = unsafeWindow.name.substr(0,'em_wnd'.length)==='em_wnd';
   Env.isTopLevel = !Env.isPopup && (unsafeWindow.parent==unsafeWindow); // popup is not the kind of toplevel we mean
   Env.url = window.location.href;
 
@@ -5087,7 +5089,7 @@ function initEdgeApe() {
     EM.Env = Env;
     if (Env.url.match(/shoutbox_view\.php/)) {
       console.log("Loader",Env.url," is shoutbox");
-      if (EM.User.loggedOnUser) {
+      if (EM.User.loggedOnUser && !Env.isEMPopup) {
         shared(EM).ShoutWin = new ShoutboxWindow();
       }
     }
