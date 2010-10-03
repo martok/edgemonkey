@@ -3371,19 +3371,21 @@ SmileyWindow.prototype = {
 function Pagehacks() {
   if (EM.Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
-  EM.Buttons.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
-  EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
+  if (EM.Env.isTopLevel) {
+    EM.Buttons.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
+    EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
+  }
   this.AddCustomStyles();
   if(EM.Settings.GetValue('pagehack','extSearchPage') &&
-    /\bsearch\.php(\?(?:mode=results|search_id=.*|search_author=.*)|$)/.test(Location))
+    /\bsearch\.php(\?(?:mode=results|search_id=.*|search_author=.*)|$)/.test(Env.url))
   {
     this.FixEmptyResults();
   }
-  if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Location)) {
+  if(/\bsites\.php\?id=|\b(?:help(?:_.*?)?|promotion)\.html.*?,19.*$/i.test(Env.url)) {
     this.HelpAJAXified();
   }
   if(EM.Settings.GetValue('pagehack','extPostSubmission') &&
-    /\bposting\.php/i.test(Location)) {
+    /\bposting\.php/i.test(Env.url)) {
     this.FixPostingDialog();
   }
   if(EM.Settings.GetValue('pagehack','quickProfMenu')) {
@@ -3404,14 +3406,14 @@ function Pagehacks() {
   if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
   }
-  if(/\bviewtopic\.php|\btopic_|posting\.php\?mode=topicreview/.test(Location)) {
+  if(/\bviewtopic\.php|\btopic_|posting\.php\?mode=topicreview/.test(Env.url)) {
     this.HighlightPosts();
   }
   if(EM.Settings.GetValue('pagehack','answeredLinks') &&
-     /\bsearch\.php\?search_id=myopen/.test(Location)) {
+     /\bsearch\.php\?search_id=myopen/.test(Env.url)) {
     this.AddAnsweredLinks();
   }
-  if(/\bforum_(\S+_)?\d+\.html|viewforum\.php/.test(Location)) {
+  if(/\bforum_(\S+_)?\d+\.html|viewforum\.php/.test(Env.url)) {
     if(EM.Buttons.mainTable){
       var resTable = queryXPathNode(EM.Buttons.mainTable, "tbody/tr[2]/td[1]/div/form/table");
       this.TLColourize(resTable, "forum");
@@ -3437,7 +3439,7 @@ Pagehacks.prototype = {
     coords.TranslateWindow();
     var w = new OverlayWindow(coords.x,coords.y,400,225-30,'','em_pmcheck');
     w.InitDropdown();
-    var s = Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,w.ContentArea,
+    var s = EM.Ajax.AsyncRequest('privmsg.php?mode=newpm',undefined,w.ContentArea,
       function(div) {
         var a=div.getElementsByTagName('a');
         for(i=0;i<a.length;i++) {
@@ -3531,7 +3533,7 @@ Pagehacks.prototype = {
         '<tr><td style="vertical-align:center; text-align:center"><img src="'+data.searchAnim+'" /></td></tr>'+
         '<tr><td>&nbsp;</td></tr></table>';
     w.Frame.style.height = w.Frame.style.minHeight;
-    var s = Ajax.AsyncRequest(inp.form.action,post,w.ContentArea,
+    var s = EM.Ajax.AsyncRequest(inp.form.action,post,w.ContentArea,
       /search_keywords=(\x45\x61\x73\x74\x65\x72\x65\x67\x67|\x4F\x73\x74\x65\x72\x65\x69(?:er)?)\&/i.test(post) ?
       function(div,target) {
         target.style.height=(parseInt(w.Frame.style.height)-30)+'px';
@@ -3850,11 +3852,11 @@ Pagehacks.prototype = {
     }
     template=template[1];
     img.src=template+'folder.gif';
-    Ajax.AsyncRequest('viewtopic.php?&t='+topic,undefined,null,
+    EM.Ajax.AsyncRequest('viewtopic.php?&t='+topic,undefined,null,
       function(content) {
         var p=content.match(/markanswered.{1,6}t.(\d+).{1,6}p.(\d+)[^0-9]/);
         if(!p || !p[2]) return;
-        Ajax.AsyncRequest('posting.php?mode=markanswered&t='+topic+'&p='+p[2],undefined,null,
+        EM.Ajax.AsyncRequest('posting.php?mode=markanswered&t='+topic+'&p='+p[2],undefined,null,
       	  function(content) {
             img.src=template+'folder_answered.gif';
     	    var link=document.getElementById('answerLink'+topic);
@@ -4238,12 +4240,12 @@ Pagehacks.prototype = {
     }
     var Lks = [];
     with (/http\:\/\/(branch|trunk)\./i) {
-      if (test(Location))
-        Lks.push(['Echt-Forum',replace(Location, 'http://www.')]);
+      if (test(Env.url))
+        Lks.push(['Echt-Forum',replace(Env.url, 'http://www.')]);
     }
     with (/http\:\/\/(www|trunk)\./i) {
-      if (test(Location)) {
-        var loc = replace(Location, 'http://branch.');
+      if (test(Env.url)) {
+        var loc = replace(Env.url, 'http://branch.');
         if (! /[\?\&]sid=/.test(loc)) {
           var p=loc.indexOf('?');
           if (p<0) loc+='?sid='+EM.User.loggedOnSessionId;
@@ -4254,7 +4256,7 @@ Pagehacks.prototype = {
       }
     }
     with (/http\:\/\/(www|branch)\./i) {
-      if (test(Location))
+      if (test(Env.url))
         Lks.push(['Trunk', 'http://'+window.location.host.replace(/(www|branch)/i,'trunk')+'/my.php']);
     }
     with (table.insertRow(-1)) {
@@ -4992,128 +4994,194 @@ UpdateMonkey.prototype = {
     }
 }
 
-function checkUpdate(){
-    EM.Updater = new UpdateMonkey();
-    EM.Updater.checkUpdate();
-}
-
-function upgradeSettings(){
-  var upgraded = false;
-
-  //0.18: Upgrade of boolean to number for Shout Highlighting related settings
-  var chk = EM.Settings.GetValue('sb','highlight_me');
-//  console.log('sb.me:'+typeof chk);
-  if(parseInt(chk, 10) == NaN) {
-    upgraded = true;
-    EM.Settings.SetValue('sb','highlight_me', chk?2:0);
-  }
-
-  chk = EM.Settings.GetValue('sb','highlight_mod');
-//  console.log('sb.mod:'+typeof chk);
-  if(parseInt(chk, 10) == NaN) {
-    upgraded = true;
-    EM.Settings.SetValue('sb','highlight_mod', chk?3:0);
-  }
-
-  //0.19: Upgrade of boolean to number for
-  var chk = EM.Settings.GetValue('pagehack','smileyOverlay');
-  if(parseInt(chk, 10) == NaN) {
-    upgraded = true;
-    EM.Settings.SetValue('pagehack','smileyOverlay', chk?1:0);
-  }
-
-  //0.19: remove that typo quickSearhMenu
-  if (EM.Settings.GetValue('pagehack','quickSearhMenu')!=null) {
-    upgraded = true;
-    EM.Settings.Values['pagehack.quickSearhMenu'] = undefined;
-    delete EM.Settings.Values['pagehack.quickSearhMenu'];
-  }
-
-  //0.19: Upgrade of string stalk list to array
-  var chk = EM.Settings.GetValue('sb','user_stalk');
-  if(typeof chk == 'string') {
-    upgraded = true;
-    var a = chk.trim().split(/\s*,\s*/);
-    EM.Settings.SetValue('sb','user_stalk', a);
-  }
-
-  //0.19: remove that typo quickSearhMenu
-  if (EM.Settings.GetValue('ui','disableShouting')==null) {
-    upgraded = true;
-    EM.Settings.Values['ui.disableShouting'] = false;
-  }
-
-  if (upgraded) {
-    Settings_SaveToDisk();
-    window.setTimeout(function() {
-      window.alert(
-        'Die Einstellungen wurden auf ein aktualisiertes Datenformat konvertiert.\n' +
-        'Ein Downgrade von EdgeMonkey kann daher zu Fehlfunktionen oder Datenverlust führen.'
-      );
-      window.location.reload(false);
-      }, 50);
-  }
-}
-
 function initEdgeApe() {
-  //No upgrade from inside any popup
+  var newEM;
+  window.Env=Env={}; // this is sandbox-local
   try {
     //Work around Firefox Security by Obscurity
-    isEmpty(window.opener);
+    isEmpty(unsafeWindow.opener);
   } catch(foo) {
-    window.opener = null;
+    unsafeWindow.opener = null;
   }
-  if(isEmpty(window.opener) && (window.parent==window) )
-  {
-    upgradeSettings();
-    setTimeout(function() {checkUpdate()}, 100);
-  }
+  Env.isPopup = !isEmpty(unsafeWindow.opener);
+  if (Env.isPopup)
+    Env.isEMPopup = unsafeWindow.name.substr(0,'em_wnd'.length)==='em_wnd';
+  Env.isTopLevel = !Env.isPopup && (unsafeWindow.parent==unsafeWindow); // popup is not the kind of toplevel we mean
+  Env.url = window.location.href;
 
-  if (Location.match(/shoutbox_view\.php/)) {
-    if (EM.User.loggedOnUser) {
-      EM.ShoutWin = new ShoutboxWindow();
+  Env.isSOPPass = false;
+  if (!Env.isTopLevel) {
+    // find out what we regard as parent using elaborate DNA tests...
+    //  ...well, actually, only check hair color
+    if (Env.isPopup) {
+      Env.parentName = 'window.opener';
+      Env.parent = unsafeWindow.opener;
+    } else {
+      Env.parentName = 'window.parent';
+      Env.parent = unsafeWindow.parent;
+    }
+    //if we were toplevel, we don't have to care about SOP, so it will remain false
+    try {
+      Env.isSOPPass = !!Env.parent.document;
+    }
+    catch(v) {
+      Env.isSOPPass = false;
     }
   }
-  else
-  if (Location.match(/posting\.php\?mode=topicreview/)) {
-    EM.Pagehacks = new Pagehacks();
+  console.log('Loader',Env.url,Env);
+  if (Env.isSOPPass) {
+    injectInitCode(Env.parentName);
+    waitForObject(false);
+  } else {
+    injectInitCode();
+    waitForObject(true);
   }
-  else
-  {
-    EM.Buttons = new ButtonBar();
-    EM.Notifier = new Notifier();
 
-    with(EM.Buttons) {
-      addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
+  function injectInitCode(p) {
+    var code='';
+    code+='(function(par){';
+    code+=' var newEM = {};';
+    code+=' if (par) {';
+    code+='  var wait=setTimeout(function() {';
+    code+='   if (typeof par.EM!=="undefined") {';
+    code+='    clearInterval(wait);';
+    code+='    newEM.__proto__ = par.EM.__proto__;';
+    code+='    window.EM = newEM;';
+    code+='   }';
+    code+='  }, 10);';
+    code+=' } else {';
+    code+='  newEM.__proto__ = {};';
+    code+='  window.EM = newEM;';
+    code+=' } ';
+    code+='})('+p+')';
+
+    var script=document.createElement('script');
+    script.setAttribute('type','text/javascript');
+    script.innerHTML = code;
+    document.documentElement.appendChild(script);
+    document.documentElement.removeChild(script);
+  }
+
+  function waitForObject(buildglobals) {
+    var wait=setInterval(function() {
+      if (typeof unsafeWindow.EM!== "undefined") {
+        clearInterval(wait);
+        window.EM = unsafeWindow.EM;
+        EM = window.EM;
+        if (buildglobals) {
+          shared(EM).Ajax = new AJAXObject();
+          shared(EM).Settings = new SettingsStore();
+          shared(EM).User = new UserManager();
+          shared(EM).Cache = new CacheMonkey();
+          shared(EM).Updater = new UpdateMonkey();
+          console.log('Loader','EM constructed',EM);
+          // toplevel && !popup check no longer needed, because all other cases wouldn't come here
+          upgradeSettings(EM);
+          setTimeout(function() {
+              EM.Updater.checkUpdate();
+          }, 200);
+        }
+        //awesome, we're done
+        startup(EM);
+      }
+    }, 20);
+  }
+
+  function shared(em) {
+    return em.__proto__;
+  }
+
+  function startup(EM) {
+    EM.Env = Env;
+    if (Env.url.match(/shoutbox_view\.php/)) {
+      console.log("Loader",Env.url," is shoutbox");
+      if (EM.User.loggedOnUser && !Env.isEMPopup) {
+        shared(EM).ShoutWin = new ShoutboxWindow();
+      }
     }
-    EM.Pagehacks = new Pagehacks();
-    EM.Shouts = new ShoutboxControls();
+    else
+    if (Env.url.match(/posting\.php\?mode=topicreview/)) {
+      console.log("Loader",Env.url," is topicreview");
+      EM.Pagehacks = new Pagehacks();
+    }
+    else
+    {
+      console.log("Loader",Env.url," is main");
+      if (!Env.isPopup) {
+        shared(EM).Buttons = new ButtonBar();
+        shared(EM).Notifier = new Notifier();
 
-    EM.Cache = new CacheMonkey();
-    EM.PN = new PNAPI();
+        with(EM.Buttons) {
+          addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
+        }
+        EM.Pagehacks = new Pagehacks();
+        shared(EM).Shouts = new ShoutboxControls();
+
+        shared(EM).PN = new PNAPI();
+      } else
+        console.log("Loader",Env.url," discarded (popup)");
+    }
+  }
+
+
+  function upgradeSettings(EM) {
+    var upgraded = false;
+
+    //0.18: Upgrade of boolean to number for Shout Highlighting related settings
+    var chk = EM.Settings.GetValue('sb','highlight_me');
+    //  console.log('sb.me:'+typeof chk);
+    if(parseInt(chk, 10) == NaN) {
+      upgraded = true;
+      EM.Settings.SetValue('sb','highlight_me', chk?2:0);
+    }
+
+    chk = EM.Settings.GetValue('sb','highlight_mod');
+    //  console.log('sb.mod:'+typeof chk);
+    if(parseInt(chk, 10) == NaN) {
+      upgraded = true;
+      EM.Settings.SetValue('sb','highlight_mod', chk?3:0);
+    }
+
+    //0.19: Upgrade of boolean to number for
+    var chk = EM.Settings.GetValue('pagehack','smileyOverlay');
+    if(parseInt(chk, 10) == NaN) {
+      upgraded = true;
+      EM.Settings.SetValue('pagehack','smileyOverlay', chk?1:0);
+    }
+
+    //0.19: remove that typo quickSearhMenu
+    if (EM.Settings.GetValue('pagehack','quickSearhMenu')!=null) {
+      upgraded = true;
+      EM.Settings.Values['pagehack.quickSearhMenu'] = undefined;
+      delete EM.Settings.Values['pagehack.quickSearhMenu'];
+    }
+
+    //0.19: Upgrade of string stalk list to array
+    var chk = EM.Settings.GetValue('sb','user_stalk');
+    if(typeof chk == 'string') {
+      upgraded = true;
+      var a = chk.trim().split(/\s*,\s*/);
+      EM.Settings.SetValue('sb','user_stalk', a);
+    }
+
+    //0.19: fix writing problem
+    if (EM.Settings.GetValue('ui','disableShouting')==null) {
+      upgraded = true;
+      EM.Settings.Values['ui.disableShouting'] = false;
+    }
+
+    if (upgraded) {
+      Settings_SaveToDisk();
+      window.setTimeout(function() {
+        window.alert(
+          'Die Einstellungen wurden auf ein aktualisiertes Datenformat konvertiert.\n' +
+          'Ein Downgrade von EdgeMonkey kann daher zu Fehlfunktionen oder Datenverlust führen.'
+        );
+        window.location.reload(false);
+      }, 50);
+    }
   }
 }
 
-//check if we can access the parent or if its against SOP.
-var SOP_ok = false;
-try {
-  SOP_ok = unsafeWindow.parent.document?true:false;
-}
-catch(v) {
-  SOP_ok = false;
-}
-
-if (SOP_ok && !isEmpty(unsafeWindow.parent.EM)) {
-  window.EM = unsafeWindow.parent.EM;
-  unsafeWindow.EM = EM;
-} else {
-  window.EM = {};
-  EM.Settings = new SettingsStore();
-  EM.User = new UserManager();
-  unsafeWindow.EM = EM;
-}
-
-Ajax = new AJAXObject();
-Location = window.location.href;
 
 initEdgeApe(); //Should go as soon as possible ...
