@@ -2127,6 +2127,7 @@ function UserManager() {
       break;
     }
   }
+  this.isModerator = !!document.getElementById('sidebar_modpanel');
 }
 
 UserManager.prototype = {
@@ -2803,8 +2804,12 @@ function ShoutboxControls() {
                   '<img border="0" style="border-left: 1px solid rgb(46, 95, 134); width: 7px; height: 9px;" alt="Smaller" src="./graphics/categorie_up.gif"/></a>'+
                '<a href="#" title="Gr&ouml;&szlig;er" onclick="EM.Shouts.ev_resize(+50); return false;">'+
                   '<img border="0" alt="Move category down" src="./graphics/categorie_down.gif"/></a>';
-  if (EM.Settings.GetValue('sb', 'anek_active'))
-    sp.innerHTML += '<a href="#" onclick="EM.ShoutWin.ev_anekdoteAll(); return false;" style="font-size: 10px; margin: 0 5px;">A</a>';
+  if (EM.Settings.GetValue('sb', 'anek_active')) {
+    sp.innerHTML += '<a href="#" title="Alles anekdotieren" onclick="EM.ShoutWin.ev_anekdoteAll(); return false;" style="font-size: 10px; margin: 0 5px;">A</a>';
+    if (EM.User.isModerator) {
+      sp.innerHTML += '<a href="#" title="Aus User-Sicht anekdotieren" onclick="EM.ShoutWin.ev_anekdoteAll(true); return false;" style="font-size: 10px; margin: 0 5px;">AU</a>';
+    }
+  }
   ifr.parentNode.appendChild(sp);
   var h=EM.Settings.GetValue('sb','displayHeight');
   if (!isEmpty(h)) ifr.style.height = h+'px';
@@ -3242,9 +3247,11 @@ ShoutboxWindow.prototype = {
     EM.Anekdoter.Anekdote(this.shouts[idx]);
     EM.Anekdoter.focus();
   },
-  ev_anekdoteAll: function() {
+  ev_anekdoteAll: function(onlyPublic) {
     this.EnsureWindow();
-    var rev = this.shouts.slice(0);
+    var rev = this.shouts.slice(0).filter(function(item) {
+      return item.className.indexOf("Del")<0 && item.className.indexOf("Intern")<0;
+    });
     rev.reverse();
     EM.Anekdoter.AnekdoteAll(rev);
     EM.Anekdoter.focus();
