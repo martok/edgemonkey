@@ -455,6 +455,16 @@ RegExp.prototype.execAll=function(data) {
     return null;
 }
 
+Object.duplicate = function(src) {
+  var o={},n;
+  o.__proto__ = src.__proto__;
+  for (n in src) {
+    if (src.hasOwnProperty(n))
+      o[n] = src[n]
+  }
+  return o;
+}
+
 //http://jacwright.com/projects/javascript/date_format
 // Simulates PHP's date function
 Date.prototype.format = function(format) {
@@ -1643,7 +1653,7 @@ SettingsStore.prototype = {
   },
 
   ev_SaveDialog: function(evt) {
-    var old=eval(uneval(EM.Settings.Values));
+    var old=Object.duplicate(EM.Settings.Values);
     with (EM.Settings.Window) {
       EM.Settings.Categories.forEach(function(c){
         c.settings.forEach(function(s) {
