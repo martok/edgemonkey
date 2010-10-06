@@ -3046,7 +3046,7 @@ ShoutboxAnekdoter.prototype = {
       sh.reverse();
     }
     cont.innerHTML='[quote="Shoutbox-Anekdote, erstellt '+new Date().toLocaleString()+':"]\n'+sh.map(function(item) {
-      var s = '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n'
+      var s = '[user]'+item.user+'[/user] [color=#777777]'+item.time+'[/color]\n';
       if (item.color != null)
         return s+"[color="+item.color+"]"+item.shout.escapeHTML()+"[/color]";
       else
