@@ -465,6 +465,50 @@ Object.duplicate = function(src) {
   return o;
 }
 
+JSON.convertFromUneval = function(u) {
+  function protect(s) {
+    return s.replace(/./g, function(m) {
+      return '#'+m.charCodeAt(0).toString(16);
+    })
+  }
+  function unprotect(s) {
+    return s.replace(/#([a-f0-9]+)/g, function(m,c) {
+      return String.fromCharCode(parseInt(c,16))
+    })
+  }
+
+  return u.
+    // remove outer braces
+    match(/^\((.*)\)$/)[1].
+    // protect strings
+    replace(/(?:\:"")|(?:\:"(.*?)([^\\]"))/g,function(m,g1,g2) {
+      return ':"'+(isUndef(g2)?'':protect(g1+g2.charAt(0)))+'"';
+    }).
+    // prepare unquoted param names using single ticks
+    replace(/([{,])\s*([^:'{,]+?):/g,function(g,g1,g2) {
+      return g1+"'"+g2+"':";
+    }).
+    // remove undefined, JSON has no notation of that data type
+    replace(/([,{])\s?'tag':\(void 0\)([,}])?/g,function(g,g1,g2) {
+      return ((g1!=='{')?g1='':g1) + ((g1 && g2!=='}')?'':g2);
+    }).
+    // turn single into double tics
+    replace(/'(.+?)':/g,function(g,g1) {
+      return '"'+g1.replace(/\\'/g,"'").replace(/"/g,'\\"')+'":';
+    }).
+    // unprotect strings (unwind \x sequences: JSON as a Unicode standard doesn't have ASCII escapes)
+    // and do that w/o lookbehinds, which would be waaaay to easy
+    replace(/:"((#[a-f0-9]+)+)"/g,function(m,t) {
+      return ':"'+unprotect(t).replace(/(?:(?:\\\\)*\\)*(\\x([0-9A-F]{2}))/g, function(m,g1,g2) {
+        return (m.length%2)?m:m.replace(g1,String.fromCharCode(parseInt(g2,16)));
+      })+'"';
+    })
+}
+
+JSON.parseUneval = function(u) {
+  return JSON.parse(JSON.convertFromUneval(u));
+}
+
 //http://jacwright.com/projects/javascript/date_format
 // Simulates PHP's date function
 Date.prototype.format = function(format) {
@@ -1506,11 +1550,18 @@ var Settings_SaveToDisk = function () { // global deklarieren
 SettingsStore.prototype = {
   store_field: function (key, data) {
     window.setTimeout(function() {
-      GM_setValue(key, uneval(data));
+      GM_setValue(key, JSON.stringify(data));
     }, 0);
   },
   load_field: function (key, data) {
-    return eval(GM_getValue(key, (uneval(data) || '({})')));
+    var dat,str=GM_getValue(key, (JSON.stringify(data) || '{}'));
+    if (str.charAt(0)==='(') {
+      // convert uneval to JSON
+      dat=JSON.parseUneval(str);
+      this.store_field(key,dat);
+      return dat;
+    }
+    return JSON.parse(str);
   },
 
   LoadFromDisk: function () {
