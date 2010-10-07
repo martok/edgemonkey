@@ -489,7 +489,7 @@ JSON.convertFromUneval = function(u) {
       return g1+"'"+g2+"':";
     }).
     // remove undefined, JSON has no notation of that data type
-    replace(/([,{])\s?'tag':\(void 0\)([,}])?/g,function(g,g1,g2) {
+    replace(/([,{])\s?'(?:[^']|(?:(?:\\\\)*\\'))*':\(void 0\)([,}])?/g,function(g,g1,g2) {
       return ((g1!=='{')?g1='':g1) + ((g1 && g2!=='}')?'':g2);
     }).
     // turn single into double tics
