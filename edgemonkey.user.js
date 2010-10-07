@@ -4741,6 +4741,9 @@ UpdateMonkey.prototype = {
                                         obj.failMonkeyMessage('Commit request returned no commit information!');
                                         return;
                                     }
+                                    if (tmp.commit.modified) {
+                                      delete tmp.commit.modified;
+                                    }
                                     EM.Cache.put('updatemonkey.commits', a.data.commit, tmp.commit);
                                     obj.commits[a.data.commit] = tmp.commit;
                                     a.done(a);
