@@ -465,48 +465,158 @@ Object.duplicate = function(src) {
   return o;
 }
 
-JSON.convertFromUneval = function(u) {
-  function protect(s) {
-    return s.replace(/./g, function(m) {
-      return '#'+m.charCodeAt(0).toString(16);
-    })
+JSON.parseUneval = function(src) {
+  var pos=0;
+
+  function eof() {
+    return !(pos<src.length);
   }
-  function unprotect(s) {
-    return s.replace(/#([a-f0-9]+)/g, function(m,c) {
-      return String.fromCharCode(parseInt(c,16))
-    })
+  function skipSpace() {
+    while (!eof() && src[pos]===' ') {
+      pos++;
+    }
+  }
+  function next() {
+    pos++;
+    skipSpace();
+  }
+  function ParserException(msg) {
+    var e = Error(msg);
+    e.name='ParserException';
+    e.pos=pos;
+    e.src=src;
+    e.source=src.substr(pos);
+    return e;
+  }
+  function pBrace() {
+    var res;
+    skipSpace();
+    if (src[pos]!=='(') throw ParserException('Expected (');
+    next();
+    if(src.substr(pos,7).toLowerCase()==='void 0)') {
+      pos+=6;
+      return undefined;
+    }
+    res=pParam();
+    next();
+    if (src[pos]!==')') throw ParserException('Expected )');
+    return res;
+  }
+  function pAttrName() {
+    var n='';
+    if (src[pos]==="'") {
+      return pString("'");
+    } else {
+      do {
+        n+=src[pos];
+        next();
+      } while(src[pos]!==':');
+      pos--;
+      return n;
+    }
+  }
+  function pObject() {
+    var res={},pn,pv;
+    if (src[pos]!=='{') throw ParserException('Expected {');
+    next();
+    while (!eof() && src[pos]!=='}') {
+      pn=pAttrName();
+      next();
+      if (src[pos]!==':') throw ParserException('Expected :');
+      next();
+      pv=pParam();
+      res[pn]=pv;
+      next();
+      switch (src[pos]) {
+        case ',': next(); break; //go on
+        case '}': break;
+        default: throw ParserException('Expected next param or end');
+      }
+    }
+    return res;
+  }
+  function pArray() {
+    var res=[],pv;
+    if (src[pos]!=='[') throw ParserException('Expected [');
+    next();
+    while (!eof() && src[pos]!==']') {
+      pv=pParam();
+      res.push(pv);
+      next();
+      switch (src[pos]) {
+        case ',': next(); break; //go on
+        case ']': break;
+        default: throw ParserException('Expected next element or end');
+      }
+    }
+    return res;
+  }
+  function pString(Q) {
+    var i,
+        esc=0,
+        ret='';
+    if (src[pos]!==Q) throw ParserException('Expected '+Q);
+    next();
+    while (!eof()) {
+      if (!esc) {
+        if (src[pos]===Q) {
+          break;
+        } else
+        if (src[pos]!=='\\') {
+          ret+=src[pos];
+        } else {
+          esc=1;
+        }
+      } else {
+        switch(src[pos]) {
+          case 'n': ret+='\n'; break;
+          case 'f': ret+='\f'; break;
+          case 't': ret+='\t'; break;
+          case 'x': ret+=String.fromCharCode(parseInt(src.substr(pos+1,2),16)); i+=2; break;
+          case 'u': ret+=String.fromCharCode(parseInt(src.substr(pos+1,4),16)); i+=4; break;
+          default: ret+=src[pos];
+        }
+        esc=0;
+      }
+      pos++;
+    }
+    return ret;
+  }
+  function pUnquoted() {
+    // as a value, it can only be numeric, bool or null. either way: } or , ends it.
+    var v='';
+    while (!eof() && src[pos]!=='}' && src[pos]!==',' && src[pos]!==']') {
+      v+=src[pos];
+      next();
+    }
+    pos--;
+    if (v.toLowerCase()=='true') v = true; else
+    if (v.toLowerCase()=='false') v = false; else
+    if (v.toLowerCase()=='null') v = null; else
+    if (/^-?[0-9]+(\.[0-9]+(\e\+[0-9]+)?)?$/.test(v)) v = parseInt(v); else
+    throw ParserException('invalid data format: '+v);
+    return v;
+  }
+  function pParam() {
+    skipSpace();
+    switch(src[pos]) {
+      case '{': return pObject();
+      case '[': return pArray();
+      case '"': return pString('"');
+      case '(': return pBrace();
+      default: return pUnquoted();
+    }
   }
 
-  return u.
-    // remove outer braces
-    match(/^\((.*)\)$/)[1].
-    // protect strings
-    replace(/(?:\:"")|(?:\:"(.*?)([^\\]"))/g,function(m,g1,g2) {
-      return ':"'+(isUndef(g2)?'':protect(g1+g2.charAt(0)))+'"';
-    }).
-    // prepare unquoted param names using single ticks
-    replace(/([{,])\s*([^:'{,]+?):/g,function(g,g1,g2) {
-      return g1+"'"+g2+"':";
-    }).
-    // remove undefined, JSON has no notation of that data type
-    replace(/([,{])\s?'(?:[^']|(?:(?:\\\\)*\\'))*':\(void 0\)([,}])?/g,function(g,g1,g2) {
-      return ((g1!=='{')?g1='':g1) + ((g1 && g2!=='}')?'':g2);
-    }).
-    // turn single into double tics
-    replace(/'(.+?)':/g,function(g,g1) {
-      return '"'+g1.replace(/\\'/g,"'").replace(/"/g,'\\"')+'":';
-    }).
-    // unprotect strings (unwind \x sequences: JSON as a Unicode standard doesn't have ASCII escapes)
-    // and do that w/o lookbehinds, which would be waaaay to easy
-    replace(/:"((#[a-f0-9]+)+)"/g,function(m,t) {
-      return ':"'+unprotect(t).replace(/(?:(?:\\\\)*\\)*(\\x([0-9A-F]{2}))/g, function(m,g1,g2) {
-        return (m.length%2)?m:m.replace(g1,String.fromCharCode(parseInt(g2,16)));
-      })+'"';
-    })
-}
-
-JSON.parseUneval = function(u) {
-  return JSON.parse(JSON.convertFromUneval(u));
+  skipSpace();
+  if (eof()) {
+    return undefined;
+  }
+  if (src[pos]==='(') {
+    return pBrace();
+  } else {
+    throw ParserException('Start not found');
+  }
 }
 
 //http://jacwright.com/projects/javascript/date_format
