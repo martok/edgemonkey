@@ -5095,7 +5095,8 @@ function initEdgeApe() {
       }
     }
     else
-    if (Env.url.match(/posting\.php\?mode=topicreview/)) {
+    if (Env.url.match(/posting\.php\?mode=topicreview/) ||
+        Env.url.match(/vc\.php\?mode=review/)) {
       console.log("Loader",Env.url," is topicreview");
       EM.Pagehacks = new Pagehacks();
     }
