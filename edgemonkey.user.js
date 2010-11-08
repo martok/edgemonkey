@@ -456,13 +456,35 @@ RegExp.prototype.execAll=function(data) {
 }
 
 Object.duplicate = function(src) {
-  var o={},n;
-  o.__proto__ = src.__proto__;
-  for (n in src) {
-    if (src.hasOwnProperty(n))
-      o[n] = src[n]
+  var o,n,v;
+  switch (typeof src) {
+    case "undefined":
+      return undefined;
+    case "string":
+      return ''+src;
+    case "number":
+      return 1*src;
+    case "function":
+      return src;
+    case "object":
+      if (src===null) {
+        return null;
+      }
+      if (src.__proto__==Array.prototype) {
+        return src.map(function(e,i) { return Object.duplicate(e) });
+      }
+      if (src.__proto__==Date.prototype) {
+        return new Date(src.getTime());
+      }
+      o={};
+      o.__proto__ = src.__proto__;
+      for (n in src) {
+        if (src.hasOwnProperty(n)) {
+          o[n] = Object.duplicate(src[n]);
+        }
+      }
+      return o;
   }
-  return o;
 }
 
 JSON.parseUneval = function(src) {
