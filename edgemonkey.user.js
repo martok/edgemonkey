@@ -2961,9 +2961,9 @@ ShoutboxControls.prototype = {
   },
 
   ev_shoutchange: function(evt) {
-	var shout = this.form_text.value;
-	shout=this.replacer.do_replace(shout);
-	unsafeWindow.setShoutChars(shout, this.form_chars);
+    var shout = this.form_text.value;
+    shout=this.replacer.do_replace(shout);
+    unsafeWindow.setShoutChars(shout, this.form_chars);
   },
 
   ev_shoutkeys: function(evt) {
@@ -3005,7 +3005,7 @@ ShoutboxControls.prototype = {
       } else {
         EM.Shouts._ACIndex = null;
         EM.Shouts._ACList = null;
-		this.ev_shoutchange(evt);
+        this.ev_shoutchange(evt);
       }
       if (evt.keyCode== 13) {
         evt.preventDefault();
