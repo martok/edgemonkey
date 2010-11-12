@@ -2573,6 +2573,7 @@ function ShoutboxReplacer(){
     ["@TUFKAPL", "[user=\"Christian S.\"]TUFKAPL[/user]",true,false],
     ["@Wolle", "[user=\"Wolle92\"]Wolle92[/user]",true,false]
   ];
+  this.exprCache = [];
   this.fixedReplacements=this.replacements.length;
   this.allowedTextChars="\\w\\-=@\\(\\)\\[\\]\\{\\}äöüÄÖÜß";
   this.load();
@@ -2588,28 +2589,28 @@ ShoutboxReplacer.prototype = {
   },
 
   do_replace: function (str){
-    var regExp,s,replacement,sRepl;
+    var s,replacement,sRepl;
     var reg=/(^|[^\\])(\\*)\$(\d+)(?=$|\D)/g; //RegExp to increase references
     for(var i=0;i<this.replacements.length; i++){
       replacement=this.get(i);
       if(replacement.length<4) continue;
-      s=this.regexp_toString(replacement[0]);
       sRepl=replacement[1];
       if(replacement[2]){
         sRepl="$1"+sRepl.replace(reg,function (str, start, bs, digit, offset, s){
           if(bs.length % 2==1) return str;//odd count of backslashes -->escape $
           return start+bs+"$"+(digit*1+1);
         });
-        var noText='[^'+this.allowedTextChars+']';
-        s="(^|"+noText+")"+s+"(?=$|"+noText+")";
       }
-      if(replacement[3]) {
-        regExp=new RegExp(s,"g");
-      } else {
-        regExp=new RegExp(s,"gi");
+      if (typeof this.exprCache[i]=="undefined") {
+        s=this.regexp_toString(replacement[0]);
+        if(replacement[2]){
+          var noText='[^'+this.allowedTextChars+']';
+          s="(^|"+noText+")"+s+"(?=$|"+noText+")";
+        }
+        this.exprCache[i]=new RegExp(s,"g"+(replacement[3]?"":"i"));
       }
       for(var j=0;j<2;j++){
-        str=str.replace(regExp,sRepl);
+        str=str.replace(this.exprCache[i],sRepl);
       }
     }
     //AutoTagging
@@ -2690,6 +2691,8 @@ ShoutboxReplacer.prototype = {
                                 sReplace,
                                 (useWordbounds!=false), //standart is true
                                 (caseSensitive==true)]; //standart is false
+    if (typeof this.exprCache[index]!=="undefined")
+      delete this.exprCache[index];
     if(doSave!=false) this.save();
   },
 
@@ -2697,6 +2700,7 @@ ShoutboxReplacer.prototype = {
     var index=this.findSearchString(sSearch);
     if(index>=0){
       this.replacements.splice(index,1);
+      this.exprCache.splice(index,1);
       this.save();
     }
   },
