@@ -2550,30 +2550,30 @@ Notifier.Field.prototype = {
 
 function ShoutboxReplacer(){
   //suchString, Replacement, WortGrenzen, CaseSensitive
-  this.replacements = new Array(
-    "benbe", "BenBE",true,false,
-    "cih", "ich",true,false,
-    "mrg", ":mrgreen:",true,false,
-    /(?=:\w{6,7}:):m?r?g?r?e?e?n?:/, ":mrgreen:",true,false,
-    "mrgreen", ":mrgreen:",true,false,
-    ":+mrgreen:+", ":mrgreen:",false,false,
-    "FIF", "Fragen in's Forum :mahn:",true,false,
-    "SIWO", "Suche ist weiter oben :mahn:",true,false,
+  this.replacements = [
+    ["benbe", "BenBE",true,false],
+    ["cih", "ich",true,false],
+    ["mrg", ":mrgreen:",true,false],
+    [/(?=:\w{6,7}:):m?r?g?r?e?e?n?:/, ":mrgreen:",true,false],
+    ["mrgreen", ":mrgreen:",true,false],
+    [":+mrgreen:+", ":mrgreen:",false,false],
+    ["FIF", "Fragen in's Forum :mahn:",true,false],
+    ["SIWO", "Suche ist weiter oben :mahn:",true,false],
     //Wikipedia Link support
-    /\[\[(\w\w):(\w+)\|(.*?)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]",true,false,
-    /\[\[(\w+)\|(.*?)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]",true,false,
-    /\[\[(\w\w):(\w+)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]",true,false,
-    /\[\[(\w+)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]",true,false,
-    /RFC\s?0*((?!0)\d+)/, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]",true,false,
+    [/\[\[(\w\w):(\w+)\|(.*?)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$3[/url]",true,false],
+    [/\[\[(\w+)\|(.*?)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$2[/url]",true,false],
+    [/\[\[(\w\w):(\w+)\]\]/, "[url=http://$1.wikipedia.org/wiki/$2]$2[/url]",true,false],
+    [/\[\[(\w+)\]\]/, "[url=http://de.wikipedia.org/wiki/$1]$1[/url]",true,false],
+    [/RFC\s?0*((?!0)\d+)/, "[url=http://www.rfc-editor.org/rfc/rfc$1.txt]RFC $1[/url]",true,false],
     //Implement /me-Tags ;-)
-    /^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false,
-    /^me\{(.+?)\}/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false,
+    [/^\/me\s(.*)$/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false],
+    [/^me\{(.+?)\}/, "[i][user]" + EM.User.loggedOnUser + "[/user] $1[/i]",false,false],
     //User-Tag-Verlinkung
-    "@GTA", "[user=\"GTA-Place\"]GTA-Place[/user]",true,false,
-    "@TUFKAPL", "[user=\"Christian S.\"]TUFKAPL[/user]",true,false,
-    "@Wolle", "[user=\"Wolle92\"]Wolle92[/user]",true,false
-    );
-  this.fixedReplacements=this.length();
+    ["@GTA", "[user=\"GTA-Place\"]GTA-Place[/user]",true,false],
+    ["@TUFKAPL", "[user=\"Christian S.\"]TUFKAPL[/user]",true,false],
+    ["@Wolle", "[user=\"Wolle92\"]Wolle92[/user]",true,false]
+  ];
+  this.fixedReplacements=this.replacements.length;
   this.allowedTextChars="\\w\\-=@\\(\\)\\[\\]\\{\\}äöüÄÖÜß";
   this.load();
 }
@@ -2582,15 +2582,15 @@ ShoutboxReplacer.prototype = {
   regexp_toString: function (regE){
     if(regE instanceof RegExp){
       var s=regE.toString();
-      s=s.substr(1,s.lastIndexOf('/')-1);
-      return s;
-    }else return regE;
+      return s.substr(1,s.lastIndexOf('/')-1);
+    }
+    return regE;
   },
 
   do_replace: function (str){
     var regExp,s,replacement,sRepl;
     var reg=/(^|[^\\])(\\*)\$(\d+)(?=$|\D)/g; //RegExp to increase references
-    for(var i=0;i<this.length();i++){
+    for(var i=0;i<this.replacements.length; i++){
       replacement=this.get(i);
       if(replacement.length<4) continue;
       s=this.regexp_toString(replacement[0]);
@@ -2600,12 +2600,14 @@ ShoutboxReplacer.prototype = {
           if(bs.length % 2==1) return str;//odd count of backslashes -->escape $
           return start+bs+"$"+(digit*1+1);
         });
-        var noText=this.allowedTextChars;
-        noText='[^'+noText+']';
+        var noText='[^'+this.allowedTextChars+']';
         s="(^|"+noText+")"+s+"(?=$|"+noText+")";
       }
-      if(replacement[3]) regExp=new RegExp(s,"g");
-      else regExp=new RegExp(s,"gi");
+      if(replacement[3]) {
+        regExp=new RegExp(s,"g");
+      } else {
+        regExp=new RegExp(s,"gi");
+      }
       for(var j=0;j<2;j++){
         str=str.replace(regExp,sRepl);
       }
@@ -2658,26 +2660,21 @@ ShoutboxReplacer.prototype = {
   },
 
   getSearchString: function (index){
-    if(index<0 || index>=this.length()) return "";
-    return this.regexp_toString(this.replacements[index*4]);
+    if(index<0 || index>=this.replacements.length) return "";
+    return this.regexp_toString(this.replacements[index][0]);
   },
 
   findSearchString: function (sSearch){
     sSearch=this.regexp_toString(sSearch);
-    for(var i=0; i<this.length(); i++){
+    for(var i=0; i<this.replacements.length; i++){
       if(this.getSearchString(i)==sSearch) return i;
     }
     return -1;
   },
 
-  length: function (){
-    return Math.floor(this.replacements.length/4);
-  },
-
   get: function (index){
-    if(index<0 || index>=this.length()) return new Array();
-    index*=4;
-    return this.replacements.slice(index,index+4);
+    if(index<0 || index>=this.replacements.length) return [];
+    return this.replacements[index];
   },
 
   add: function (sSearch,sReplace,useWordbounds,caseSensitive,doSave){
@@ -2685,20 +2682,21 @@ ShoutboxReplacer.prototype = {
     var index=this.findSearchString(sSearch);
     if(index<0){
       //add new
-      index=this.length();
-    }else if(index<this.fixedReplacements) return; //Don't overwrite standart
-    index*=4;
-    this.replacements[index]=sSearch;
-    this.replacements[index+1]=sReplace;
-    this.replacements[index+2]=(useWordbounds!=false); //standart is true
-    this.replacements[index+3]=(caseSensitive==true); //standart is false
+      index=this.replacements.length;
+    } else {
+      if(index<this.fixedReplacements) return; //Don't overwrite standart
+    }
+    this.replacements[index] = [sSearch,
+                                sReplace,
+                                (useWordbounds!=false), //standart is true
+                                (caseSensitive==true)]; //standart is false
     if(doSave!=false) this.save();
   },
 
   remove: function (sSearch){
     var index=this.findSearchString(sSearch);
     if(index>=0){
-      this.replacements.splice(index*4,4);
+      this.replacements.splice(index,1);
       this.save();
     }
   },
@@ -2706,8 +2704,8 @@ ShoutboxReplacer.prototype = {
   load: function (){
     var newEntries=EM.Settings.load_field('sb-replacements');
     if(isUndef(newEntries)) return;
-    for(var i=0; i<newEntries.length-3; i+=4){
-      this.add(newEntries[i],newEntries[i+1],newEntries[i+2],newEntries[i+3],false);
+    for(var i=0; i<newEntries.length; i++){
+      this.add(newEntries[i][0],newEntries[i][1],newEntries[i][2],newEntries[i][3],false);
     }
   },
 
