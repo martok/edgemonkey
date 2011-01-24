@@ -2797,7 +2797,7 @@ function ShoutboxControls() {
     }
   }
   this.form_text = document.getElementById('shoutmessage');
-  this.form_chars = document.getElementById('shoutchars');
+  this.form_chars = unsafeWindow.document.getElementById('shoutchars');
   this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
   var ifr=this.get_iframe();
@@ -2972,9 +2972,9 @@ ShoutboxControls.prototype = {
   },
 
   ev_shoutchange: function(evt) {
-    var shout = this.form_text.value;
-    shout=this.replacer.do_replace(shout);
-    unsafeWindow.setShoutChars(shout, this.form_chars);
+    var shout = this.replacer.do_replace(this.form_text.value),
+        disp = this.form_chars;
+    unsafeWindow.setShoutChars(shout, disp);
   },
 
   ev_shoutkeys: function(evt) {
