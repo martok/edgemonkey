@@ -971,7 +971,7 @@ function AJAXObject() {
 
 AJAXObject.prototype = {
   prepareRequest: function(url,postData,async) {
-    request = new XMLHttpRequest();
+    var request = new XMLHttpRequest();
 
     if (isUndef(postData))
     {
@@ -1001,6 +1001,7 @@ AJAXObject.prototype = {
     function readyEvent(aEvt) {
       var req = aEvt.target;
       if (req.readyState == 4) {
+        req.removeEventListener('load',readyEvent,false);
         if(req.status == 200) {
           if (!isUndef(callback) && typeof callback=='function'){
             if (callback.length==1) {
@@ -1857,7 +1858,8 @@ PNAPI.PNBox.prototype = {
       //something may not be okay, refresh required part
       console.log('PNAPI', 'Need to refresh ',this.box,' range ',first,',',count);
       this.forceUpdate(first,count);
-    }
+    } else
+      console.log('PNAPI', 'Answering from cache ',this.box,' range ',first,',',count);
     //ok, now we definitely have it in cache
 
     //answer from there
