@@ -1157,7 +1157,7 @@ function AJAXObject() {
 
 AJAXObject.prototype = {
   prepareRequest: function(url,postData,async) {
-    request = new XMLHttpRequest();
+    var request = new XMLHttpRequest();
 
     if (isUndef(postData))
     {
@@ -1187,6 +1187,7 @@ AJAXObject.prototype = {
     function readyEvent(aEvt) {
       var req = aEvt.target;
       if (req.readyState == 4) {
+        req.removeEventListener('load',readyEvent,false);
         if(req.status == 200) {
           if (!isUndef(callback) && typeof callback=='function'){
             if (callback.length==1) {
@@ -2050,7 +2051,8 @@ PNAPI.PNBox.prototype = {
       //something may not be okay, refresh required part
       console.log('PNAPI', 'Need to refresh ',this.box,' range ',first,',',count);
       this.forceUpdate(first,count);
-    }
+    } else
+      console.log('PNAPI', 'Answering from cache ',this.box,' range ',first,',',count);
     //ok, now we definitely have it in cache
 
     //answer from there
@@ -2990,7 +2992,7 @@ function ShoutboxControls() {
     }
   }
   this.form_text = document.getElementById('shoutmessage');
-  this.form_chars = document.getElementById('shoutchars');
+  this.form_chars = unsafeWindow.document.getElementById('shoutchars');
   this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
   var ifr=this.get_iframe();
@@ -3165,9 +3167,12 @@ ShoutboxControls.prototype = {
   },
 
   ev_shoutchange: function(evt) {
-    var shout = this.form_text.value;
-    shout=this.replacer.do_replace(shout);
-    unsafeWindow.setShoutChars(shout, this.form_chars);
+    var shout = this.replacer.do_replace(this.form_text.value),
+        disp = this.form_chars;
+    if (unsafeWindow.setShoutChars)
+      unsafeWindow.setShoutChars(shout, disp);
+    else
+      unsafeWindow.Sidebar.shoutboxAssumeText(shout, disp);
   },
 
   ev_shoutkeys: function(evt) {
