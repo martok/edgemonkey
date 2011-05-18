@@ -357,8 +357,10 @@ function isEmpty(what)
 
 function isHTMLElement(what)
 {
+  // good job bugfox: inside GM, every string is an instanceof HTMLElement.
+  //   in normal code, it is not. Just hope every node has its constants defined.
   return !isEmpty(what) &&
-   ((what instanceof HTMLElement) || (what.nodeType));
+   ((what.ELEMENT_NODE) || (what.nodeType));
 }
 
 //http://www.infocamp.de/javascript_htmlspecialchars.php
@@ -2992,7 +2994,7 @@ function ShoutboxControls() {
     }
   }
   this.form_text = document.getElementById('shoutmessage');
-  this.form_chars = unsafeWindow.document.getElementById('shoutchars');
+  this.form_chars = document.getElementById('shoutchars');
   this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
   var ifr=this.get_iframe();
@@ -5226,7 +5228,7 @@ function initEdgeApe() {
   Env.isPopup = !isEmpty(unsafeWindow.opener);
   if (Env.isPopup)
     Env.isEMPopup = unsafeWindow.name.substr(0,'em_wnd'.length)==='em_wnd';
-  Env.isTopLevel = !Env.isPopup && (unsafeWindow.parent==unsafeWindow); // popup is not the kind of toplevel we mean
+  Env.isTopLevel = !Env.isPopup && (window.parent==window); // popup is not the kind of toplevel we mean
   Env.url = window.location.href;
 
   Env.isSOPPass = false;
@@ -5262,7 +5264,7 @@ function initEdgeApe() {
     code+='(function(par){';
     code+=' var newEM = {};';
     code+=' if (par) {';
-    code+='  var wait=setTimeout(function() {';
+    code+='  var wait=setInterval(function() {';
     code+='   if (typeof par.EM!=="undefined") {';
     code+='    clearInterval(wait);';
     code+='    newEM.__proto__ = par.EM.__proto__;';
