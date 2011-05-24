@@ -12,10 +12,27 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.2499999999999999;
+const ScriptVersion = 0.26;
 
 // @changelog
 /*
+0.26              11-05-25
+  -rewritten loader
+  -compatibility: fx 4 + chrome (theoretically)
+  -username escaping bugs
+  -new sb-replacer
+  -topic list highlighting can be switched off for 1st row
+  -anekdoter: user/mod-mode
+  -more robust shout-send-function
+  -eval is evil (and uneval as well)
+  -recognize topic review iframe
+  -optimized memory usage
+  -make me{} usable anywhere in a shout
+  -store settings as JSON (should be better for XBrowser)
+  -compat with jQueryfied EE
+  -fixes for Firefox4-final
+
+
 0.25-1E-16        10-08-06
   -SB: AnekdoteAll (Kha)
   -SB: more shorttags, replacer rewrite (Flamefire, BenBE, Martok)
