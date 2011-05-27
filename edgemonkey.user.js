@@ -2261,49 +2261,21 @@ function ButtonBar() {
     return;
   }
 
-  this.navTable = last_child(this.mainTable.getElementsByTagName('td')[0],'table');
-  //man könnte auch XPath nehmen... :P
+  this.navTable = queryXPathNode(this.mainTable, '//div[@class=\'navbar nav\']');
   this.navTable.style.cssText += "z-index: 1; position:relative;";
 
-  var cont = this.navTable.getElementsByTagName('tbody')[0];
+  var dummy = document.createElement('div');
+  dummy.style.cssText='clear: both; margin-top: 2px;';
+  this.navTable.appendChild(dummy);
 
-  var sep = document.createElement('tr');
-  var dummy = document.createElement('td');
-  dummy.className='navbarleft';
-  sep.appendChild(dummy);
-  dummy = document.createElement('td');
-  dummy.colSpan='2';
-  dummy.style.cssText = "margin: 0px; padding: 0px; height: 2px; background-image: url(./graphics/navBar.gif);";
-  sep.appendChild(dummy);
-
-  dummy = document.createElement('td');
-  dummy.className='navbarright';
-  sep.appendChild(dummy);
-  cont.insertBefore(sep, last_child(cont,'tr'));
-
-  this.row = document.createElement('tr');
-  dummy = document.createElement('td');
-  dummy.className='navbarleft';
-  this.row.appendChild(dummy);
-
-  dummy = document.createElement('td');
-  dummy.colSpan='2';
-  dummy.className='navbarfunctions';
   this.container=document.createElement('span');
   this.container.className='nav';
+  dummy.appendChild(this.container);
 
   var sp=document.createElement('span');
   sp.style.cssText="color: rgb(0, 0, 0);";
   sp.innerHTML='EdgeMonkey:&nbsp;';
   this.container.appendChild(sp);
-
-  //buttons
-  dummy.appendChild(this.container);
-  this.row.appendChild(dummy);
-  dummy = document.createElement('td');
-  dummy.className='navbarright';
-  this.row.appendChild(dummy);
-  cont.insertBefore(this.row, last_child(cont,'tr'));
 }
 
 ButtonBar.prototype = {
