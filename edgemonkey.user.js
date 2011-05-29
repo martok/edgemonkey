@@ -2507,27 +2507,23 @@ UserManager.prototype = {
 }
 
 function Notifier() {
-  var c=queryXPathNode(document,'/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[6]');
+  var c=queryXPathNode(document,'/html/body/div[3]/table/tbody/tr');
   if (isEmpty(c))
     return;
-  previousNode(c).style.paddingRight='12px';
-  c.className="overall_menu";
 
-  this.container = document.createElement('div');
-  this.container.className="intbl";
-  c.appendChild(this.container);
+  this.container = c;
 
   this.PNs = new Notifier.Field(this,'notmen_PN',
-     '<img src="/graphics/PN.gif" border="0"/>',
+     '<img src="/graphics/PN.gif" border="0" style="height: 38px; margin-top: -3px;"/>',
      'PNs');
   this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
   this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
   if (!EM.Settings.GetValue('pagehack','privmenu')) {
-    this.PNs.setWidth('0px');
+    this.PNs.setVisible(false);
   }
 
   this.EMStuff = new Notifier.Field(this,'notmen_EM',
-     '<img src="/graphics/Group.gif" border="0"/>',
+     '<img src="/graphics/Group.gif" border="0" style="height: 38px; margin-top: -3px;"/>',
      'EM');
   this.EMStuff.setImageAction('javascript:EM.Notifier.AlertDropdown()');
   this.EMStuff.setTextAction('javascript:EM.Notifier.AlertDropdown()');
@@ -2540,9 +2536,9 @@ function Notifier() {
 Notifier.prototype = {
   MenuPNDropdown: function() {
     this.PNs.setHighlight(false);
-    var link = this.PNs.field;
+    var link = this.PNs.image;
     var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom-5);
+    var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
 
     var w = new OverlayWindow(coords.x,coords.y,400,EM.Settings.GetValue('pagehack','privmenu')?187:167,'','em_QPN');
@@ -2623,9 +2619,9 @@ Notifier.prototype = {
     this.EMStuff.setHighlight(false);
     if (!this._alerts.length)
       return;
-    var link = this.EMStuff.field;
+    var link = this.EMStuff.image;
     var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom-5);
+    var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
 
     var w = new OverlayWindow(coords.x,coords.y,328,187,'','em_Alerts');
@@ -2658,10 +2654,10 @@ Notifier.prototype = {
   _updateText: function() {
     if (this._alerts.length) {
       this.EMStuff.setText(this._alerts.length+' Meldung'+((this._alerts.length>1)?'en':''));
-      this.EMStuff.setWidth('');
+      this.EMStuff.setVisible(true);
     } else {
       this.EMStuff.setText('EM');
-      this.EMStuff.setWidth('0px');
+      this.EMStuff.setVisible(false);
     }
   },
   addAlert: function(icon, title, href, html) {
@@ -2685,52 +2681,47 @@ Notifier.prototype = {
 Notifier.BLINKTIME=700;
 
 Notifier.Field = function(parent,id,img,text) {
-  var cnt2 = document.createElement('div');
-  cnt2.id=id;
-  cnt2.className="incell";
-  cnt2.style.cssText='vertical-align:middle';
-  parent.container.appendChild(cnt2);
+  var cImg = parent.container.insertCell(-1);
+  var cText = parent.container.insertCell(-1);
+  cImg.className='mainmenuItemLeft';
+  cText.className='mainmenuItemRight';
 
-  var cnt = document.createElement('div');
-  cnt2.appendChild(cnt);
-  cnt.style.cssText='overflow:hidden;';
+  cImg.innerHTML='<a href="" class="dfnav" style="float:left; height:30px">'+img+'</a>';
 
-  this.field = document.createElement('div');
-  cnt.appendChild(this.field);
-  this.field.style.cssText='display:table;padding-right:12px';
+  var link = document.createElement('a');
+  link.style.cssText='vertical-align:middle';
+  link.className='dfnav';
+  cText.appendChild(link);
+  link.innerHTML = text;
 
-  this.field.innerHTML='<a href="" class="dfnav">'+img+'</a>';
-
-  this.text = document.createElement('a');
-  this.text.style.cssText='display:table-cell;vertical-align:middle';
-  this.text.className='dfnav';
-  this.field.appendChild(this.text);
-  this.text.innerHTML=text;
+  this.image=cImg;
+  this.text=cText;
 
   this._hilight=null;
 }
 
 Notifier.Field.prototype = {
   setImageAction: function(act) {
-    this.field.firstChild.href=act;
+    this.image.firstChild.href=act;
   },
   setTextAction: function(act) {
-    this.text.href=act;
+    this.text.firstChild.href=act;
   },
   setText: function(text) {
-    this.text.innerHTML=text;
+    this.text.firstChild.innerHTML=text;
   },
-  setWidth: function(w) {
-    this.field.parentNode.style.width=w;
+  setVisible: function(visible) {
+    this.text.style.display=visible?'':'none';
+    this.image.style.display=visible?'':'none';
   },
   setHighlight: function(hl) {
     window.clearTimeout(this._hilight);
-    this.field.firstChild.style.visibility='';
+    this.image.style.visibility='';
     this._hilight=null;
     if (hl) {
       var t = this;
       this._hilight = window.setTimeout(function() {
-        t.field.firstChild.style.visibility=t.field.firstChild.style.visibility?'':'hidden';
+        t.image.style.visibility=t.image.style.visibility?'':'hidden';
         t._hilight = window.setTimeout(arguments.callee,Notifier.BLINKTIME);
       },Notifier.BLINKTIME);
     }
@@ -3665,7 +3656,7 @@ Pagehacks.prototype = {
     if (l.length) {
       var s=l.length==1?'Eine neue PN':l.length+' neue PNs';
       EM.Notifier.PNs.setText(s);
-      EM.Notifier.PNs.setWidth('');
+      EM.Notifier.PNs.setVisible(true);
       EM.Notifier.PNs.setHighlight(true);
     }
   },
@@ -4183,8 +4174,8 @@ Pagehacks.prototype = {
   },
 
   AddQuickProfileMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
-    var linkText = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[3]/a[1]");
+    var link = queryXPathNode(unsafeWindow.document,     "/html/body/div[3]/table/tbody/tr/td/a");
+    var linkText = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td[2]/a");
     if(link==null) return;
     if('Meine Ecke' == linkText.textContent) {
       link.setAttribute('onclick','return EM.Pagehacks.QuickProfileMenu()');
@@ -4192,28 +4183,28 @@ Pagehacks.prototype = {
   },
 
   AddQuickLoginMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td[3]/a");
     if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
   },
 
   AddQuickSearchMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td/a");
 	if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
   },
 
   AddQuickSitemapMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[12]/a[img]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td[5]/a");
 	if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickSitemapMenu()');
   },
 
   QuickProfileMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td/a[img][1]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td/a");
 	if(link==null) return;
     var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom+10);
+    var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
 
     var w = new OverlayWindow(coords.x,coords.y,328,EM.Settings.GetValue('pagehack','privmenu')?148:187,'','em_QPM');
@@ -4265,9 +4256,9 @@ Pagehacks.prototype = {
   },
 
   QuickLoginMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[4]/a[img][1]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td[3]/a");
     var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom+10);
+    var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
 
     var w = new OverlayWindow(coords.x,coords.y,320,108,'','em_QLM');
@@ -4309,9 +4300,9 @@ Pagehacks.prototype = {
   },
 
   QuickSearchMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[7]/a[img]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td/a");
     var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom+10);
+    var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
 
     var w = new OverlayWindow(coords.x,coords.y,275,241,'','em_QSM');
@@ -4357,9 +4348,9 @@ Pagehacks.prototype = {
   },
 
   QuickSitemapMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr/td[12]/a[img]");
+    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td[5]/a");
     var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom+10);
+    var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
 
     var w = new OverlayWindow(coords.x,coords.y,275,576,'','em_QSM');
@@ -4440,9 +4431,8 @@ Pagehacks.prototype = {
   },
 
   AddBetaLinks: function() {
-    var table = queryXPathNode(unsafeWindow.document, "/html/body/table/tbody/tr/td[4]/table");
+    var table = queryXPathNode(unsafeWindow.document, "/html/body/div[@class='mainlogo']/table");
     if (!table) return;
-    table.style.cssText = '';
     RegExp.prototype.replace = function(str,rep) {
       return str.replace(this,rep);
     }
@@ -4468,7 +4458,6 @@ Pagehacks.prototype = {
         Lks.push(['Trunk', 'http://'+window.location.host.replace(/(www|branch)/i,'trunk')+'/my.php']);
     }
     with (table.insertRow(-1)) {
-      insertCell(-1).style.cssText='width: 100%;';
       with (insertCell(-1)) {
         innerHTML='<a href="'+Lks[0][1]+'" class="gensmall" title="Zum '+Lks[0][0]+' wechseln"><b>'+
                    Lks[0][0]+'</b><img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
