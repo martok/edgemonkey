@@ -3775,17 +3775,17 @@ Pagehacks.prototype = {
       if(!cols.length) continue;
 
       if (cols.length<2){
-        if(i==1 && cols[0].className=='catHead'){ // looks like single post mode
+        if(i==1 && !isEmpty(queryXPathNode(cols[0], './span[@class="topictitle"]'))){ // looks like single post mode
           singlePostMode=true;
         }
         continue;
       }else if(singlePostMode){
-        var tuser_l = queryXPathNode(row,"./td[1]/span[1]/b[1]/a[1]");
+        var tuser_l = queryXPathNode(row,"./td[1]/span[1]/b/a");
       }else{
-        var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span[1]/a[1]");
+        var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
         if (isForum) {
-          var puser_l = queryXPathNode(row,"./td[5]/a[2]");
-          var pcount = queryXPathNode(row,"./td[4]/div");
+          var puser_l = queryXPathNode(row,"./td[4]/a[2]");
+          var pcount = queryXPathNode(row,"./td[3]/span");
         } else {
           var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
           var pcount = queryXPathNode(row,"./td[3]/div/span");
@@ -3805,17 +3805,18 @@ Pagehacks.prototype = {
         var p_cssClassAdd = EM.User.helper_getHLStyleByUserLink(puser_l);
 
         var c_cssClassAdd = '';
-        if (pcount.textContent == 0) {
+        var count = parseInt(pcount.textContent);
+        if (count == 0) {
             c_cssClassAdd += ' emctpl' + 1; //Red
-        } else if (pcount.textContent < 3) {
+        } else if (count < 3) {
             c_cssClassAdd += ' emctpl' + 2; //Orange
-        } else if (pcount.textContent < 10) {
+        } else if (count < 10) {
             c_cssClassAdd += ' emctpl' + 3; //Yellow
-        } else if (pcount.textContent < 40) {
+        } else if (count < 40) {
             c_cssClassAdd += ' emctpl' + 4; //Green
-        } else if (pcount.textContent < 100) {
+        } else if (count < 100) {
             c_cssClassAdd += ' emctpl' + 5; //Blue
-        } else if (pcount.textContent < 500) {
+        } else if (count < 500) {
             c_cssClassAdd += ' emctpl' + 6; //Magenta
         } else {
             c_cssClassAdd += ' emctpl' + 7; //Lila
@@ -3845,10 +3846,8 @@ Pagehacks.prototype = {
         }else{
           if (col_ofs) cols[2].className += rowfix + t_cssClassAdd;
           cols[2+col_ofs].className += rowfix + c_cssClassAdd;
-          cols[3+col_ofs].className += rowfix + p_cssClassAdd;
           if (col_ofs) cols[2].className = cols[2].className.replace(/Highlight/, '');
           cols[2+col_ofs].className = cols[2+col_ofs].className.replace(/Highlight/, '');
-          cols[3+col_ofs].className = cols[3+col_ofs].className.replace(/Highlight/, '');
         }
       }
 
