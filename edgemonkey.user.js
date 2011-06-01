@@ -4504,7 +4504,6 @@ Pagehacks.prototype = {
       if(tr[i].getElementsByTagName("td").length<=1) continue;
       var tdProfile = queryXPathNode(tr[i], "td[1]");
       var tdPost = queryXPathNode(tr[i], "td[2]");
-      var tdBottom = queryXPathNode(tr[i+1], "td[1]");
       var linkUser = queryXPathNode(tdProfile, "b/a[1]");
       if(!linkUser){
         linkUser=tdProfile;
@@ -4561,12 +4560,10 @@ Pagehacks.prototype = {
       //Now lets check against the blacklist :P
       tdProfile.className += cssClassAdd;
       tdPost.className += cssClassAdd;
-      tdBottom.className += cssClassAdd;
 
       //Remove the DF Highlighting to ensure proper colors :P
       tdProfile.className = tdProfile.className.replace(/Highlight/, '');
       tdPost.className = tdPost.className.replace(/Highlight/, '');
-      tdBottom.className = tdBottom.className.replace(/Highlight/, '');
 
       var user_b = queryXPathNode(tdProfile, "b");
       if(!user_b) user_b = queryXPathNode(tdProfile, "span");
