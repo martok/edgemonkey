@@ -4501,9 +4501,14 @@ Pagehacks.prototype = {
     var user_killfile = EM.Settings.GetValue('topic','user_killfile');
     var kftype = EM.Settings.GetValue('topic','killFileType');
     for(var i = 1; i < tr.length - 1; i ++) {
-      if(tr[i].getElementsByTagName("td").length<=1) continue;
+      if(tr[i].getElementsByTagName("td").length<=1)
+        continue;
       var tdProfile = queryXPathNode(tr[i], "td[1]");
+      if (!tdProfile.children.length)
+        continue;
       var tdPost = queryXPathNode(tr[i], "td[2]");
+      var tdBottomLeft = queryXPathNode(tr[i+1], "td[1]");
+      var tdBottom = queryXPathNode(tr[i+1], "td[2]");
       var linkUser = queryXPathNode(tdProfile, "b/a[1]");
       if(!linkUser){
         linkUser=tdProfile;
@@ -4516,6 +4521,7 @@ Pagehacks.prototype = {
         console.log("Error on higlighter");
         continue;
       }
+
       var idPost = queryXPathNode(tdProfile, "a[1]");
       if(idPost) idPost = idPost.name;
       else{
@@ -4560,10 +4566,14 @@ Pagehacks.prototype = {
       //Now lets check against the blacklist :P
       tdProfile.className += cssClassAdd;
       tdPost.className += cssClassAdd;
+      tdBottomLeft.className += cssClassAdd;
+      if (tdBottom) tdBottom.className += cssClassAdd;
 
       //Remove the DF Highlighting to ensure proper colors :P
       tdProfile.className = tdProfile.className.replace(/Highlight/, '');
       tdPost.className = tdPost.className.replace(/Highlight/, '');
+      tdBottomLeft.className = tdBottomLeft.className.replace(/Highlight/, '');
+      if (tdBottom) tdBottom.className = tdBottom.className.replace(/Highlight/, '');
 
       var user_b = queryXPathNode(tdProfile, "b");
       if(!user_b) user_b = queryXPathNode(tdProfile, "span");
