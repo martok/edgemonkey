@@ -3766,10 +3766,9 @@ Pagehacks.prototype = {
   TLColourize: function (tltable, isForum) {
     if(!tltable) return;
     var entries = queryXPathNodeSet(tltable,"./tbody/tr");
-    var col_ofs = (isForum)?1:0;
     var singlePostMode=false;;
 
-    for(var i = 1; i < entries.length - col_ofs; i++) { //Skip entry 0 (table header)
+    for(var i = 1; i < entries.length; i++) { //Skip entry 0 (table header)
       var row = entries[i];
       var cols = queryXPathNodeSet(row, './td');
       if(!cols.length) continue;
@@ -3784,11 +3783,11 @@ Pagehacks.prototype = {
       }else{
         var tuser_l = queryXPathNode(row,"./td[2]/span[2]/span/a");
         if (isForum) {
-          var puser_l = queryXPathNode(row,"./td[4]/a[2]");
-          var pcount = queryXPathNode(row,"./td[3]/span");
+          var puser_l = queryXPathNode(row,"./td[3]/a[2]");
+          var pcount = queryXPathNode(row,"./td[2]/div[1]/span[1]");
         } else {
-          var puser_l = queryXPathNode(row,"./td[4]/span/a[2]");
-          var pcount = queryXPathNode(row,"./td[3]/div/span");
+          var puser_l = queryXPathNode(row,"./td[3]/span/a[2]");
+          var pcount = queryXPathNode(row,"./td[2]/div[1]/span[1]");
         }
       }
       if(tuser_l){
@@ -3827,8 +3826,6 @@ Pagehacks.prototype = {
       std_own.innerHTML = /Highlight/.test(cols[0].className) ? 'B' : '-';
 
       if(EM.Settings.GetValue('search','moremarkup')) {
-        var rowfix = col_ofs?' row'+(2-i%2):'';
-
         //Now lets check against the blacklist :P
         if (singlePostMode || EM.Settings.GetValue('search','highlightfirst'))
           cols[0].className += t_cssClassAdd;
@@ -3844,10 +3841,8 @@ Pagehacks.prototype = {
           cols2[0].className += t_cssClassAdd;
           cols2[0].className = cols2[0].className.replace(/Highlight/, '');
         }else{
-          if (col_ofs) cols[2].className += rowfix + t_cssClassAdd;
-          cols[2+col_ofs].className += rowfix + c_cssClassAdd;
-          if (col_ofs) cols[2].className = cols[2].className.replace(/Highlight/, '');
-          cols[2+col_ofs].className = cols[2+col_ofs].className.replace(/Highlight/, '');
+          cols[2].className += c_cssClassAdd;
+          cols[2].className = cols[2].className.replace(/Highlight/, '');
         }
       }
 
