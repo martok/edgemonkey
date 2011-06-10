@@ -12,10 +12,14 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.26;
+const ScriptVersion = 0.261;
 
 // @changelog
 /*
+0.26.1            11-06-11
+  -Happy Birthday, Liebe Ecke ;)
+  -adjusted to facelifted structures
+s
 0.26              11-05-25
   -rewritten loader
   -compatibility: fx 4 + chrome (theoretically)
