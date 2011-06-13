@@ -1374,7 +1374,7 @@ function OverlayWindow(x,y,w,h,content,id)
     }
   }
 
-  this.Frame.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);'+
+  this.Frame.style.cssText = 'overflow:visible;position:relative;background:#d9e7f1;'+
                                    'border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
 
   this.ContentArea=this.createElement('div');
@@ -2518,7 +2518,7 @@ function Notifier() {
   this.container = c;
 
   this.PNs = new Notifier.Field(this,'notmen_PN',
-     '<img src="/graphics/PN.gif" border="0" style="height: 38px; margin-top: -3px;"/>',
+     '<img src="/graphics/my/Portal-PM.gif" border="0" style="position: absolute; clip: rect(10px, 22px, 26px, 0px);"/>',
      'PNs');
   this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
   this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
@@ -2527,7 +2527,7 @@ function Notifier() {
   }
 
   this.EMStuff = new Notifier.Field(this,'notmen_EM',
-     '<img src="/graphics/Group.gif" border="0" style="height: 38px; margin-top: -3px;"/>',
+     '<img src="/graphics/sitemap/group.gif" border="0" style="height: 38px; margin-top: -3px;"/>',
      'EM');
   this.EMStuff.setImageAction('javascript:EM.Notifier.AlertDropdown()');
   this.EMStuff.setTextAction('javascript:EM.Notifier.AlertDropdown()');
@@ -2561,8 +2561,8 @@ Notifier.prototype = {
     }
     if (EM.Settings.GetValue('pagehack','privmenu')) {
       tbl.addMenuItem(
-        "/graphics/Portal-PM.gif",
-        "/privmsg.php?folder=inbox",
+        "/graphics/my/pms/inbox.gif",
+        "/privmsg.php",
         "Private Nachrichten",
         "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
         "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
@@ -2582,7 +2582,7 @@ Notifier.prototype = {
     l.slice(0,EM.Settings.GetValue('pagehack','privmenu')?4:5).reverse().forEach(function(pn) {
       var d = new Date(1000*pn.date);
       tbl.addMenuItem(
-        '/templates/subSilver/images/folder'+(pn.unread?'_new':'')+'.gif',
+        '/graphics/viewforum/topic'+(pn.unread?'_unread':'')+'.gif',
         '/privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id,
         pn.title,
         '<span class="intbl">'+
@@ -2690,7 +2690,7 @@ Notifier.Field = function(parent,id,img,text) {
   cImg.className='mainmenuItemLeft';
   cText.className='mainmenuItemRight';
 
-  cImg.innerHTML='<a href="" class="dfnav" style="float:left; height:30px">'+img+'</a>';
+  cImg.innerHTML='<a href="" class="dfnav" style="float:left; height:30px; width: 30px">'+img+'</a>';
 
   var link = document.createElement('a');
   link.style.cssText='vertical-align:middle';
@@ -2984,9 +2984,9 @@ function ShoutboxControls() {
   var ifr=this.get_iframe();
   var sp = document.createElement('span');
   sp.innerHTML='<a href="#" title="Kleiner" onclick="EM.Shouts.ev_resize(-50); return false;">'+
-                  '<img border="0" style="border-left: 1px solid rgb(46, 95, 134); width: 7px; height: 9px;" alt="Smaller" src="./graphics/categorie_up.gif"/></a>'+
+                  '<img border="0" style="border-left: 1px solid rgb(46, 95, 134); width: 7px; height: 9px;" alt="Smaller" src="/graphics/index/categorie_up.gif"/></a>'+
                '<a href="#" title="Gr&ouml;&szlig;er" onclick="EM.Shouts.ev_resize(+50); return false;">'+
-                  '<img border="0" alt="Move category down" src="./graphics/categorie_down.gif"/></a>';
+                  '<img border="0" alt="Move category down" src="/graphics/index/categorie_down.gif"/></a>';
   if (EM.Settings.GetValue('sb', 'anek_active')) {
     sp.innerHTML += '<a href="#" title="Alles anekdotieren" onclick="EM.ShoutWin.ev_anekdoteAll(); return false;" style="font-size: 10px; margin: 0 5px;">A</a>';
     if (EM.User.isModerator) {
@@ -3575,7 +3575,7 @@ function Pagehacks() {
   if (EM.Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
   if (EM.Env.isTopLevel) {
-    EM.Buttons.addButton('/templates/subSilver/images/folder_new_open.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
+    EM.Buttons.addButton('/graphics/viewforum/topic_hot_open_unread.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
     EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
   }
   this.AddCustomStyles();
@@ -4212,7 +4212,7 @@ Pagehacks.prototype = {
 
     if (!EM.Settings.GetValue('pagehack','privmenu')) {
       tbl.addMenuItem(
-        "/graphics/Portal-PM.gif",
+        "/graphics/my/pms/inbox.gif",
         "/privmsg.php?folder=inbox",
         "Private Nachrichten",
         "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
@@ -4223,22 +4223,22 @@ Pagehacks.prototype = {
         );
     }
     tbl.addMenuItem(
-        "/graphics/Drafts.gif",
+        "/graphics/my/Drafts.gif",
         "/drafts.php",
         "Entw&uuml;rfe",
         "");
     tbl.addMenuItem(
-        "/graphics/basket_light.gif",
+        "/graphics/my/basket_light.gif",
         "/pdfbasket.php",
         "PDF-Korb",
         "");//"PDF erstellen");
     tbl.addMenuItem(
-        "/graphics/Attachment.gif",
+        "/graphics/my/Attachment.gif",
         "/uacp.php?u="+escape(EM.User.loggedOnUserId)+"&amp;sid="+escape(EM.User.loggedOnSessionId),
         "Dateianh&auml;nge",
         "");
     tbl.addMenuItem(
-        "/graphics/Portal-Profil.gif",
+        "/graphics/my/Portal-Profil.gif",
         "/profile.php?mode=editprofile&page=portal",
         "Einstellungen",
         "<a href=\"/profile.php?mode=editprofile&page=1\">Standard</a>, "+
@@ -4308,37 +4308,37 @@ Pagehacks.prototype = {
     var tbl = w.CreateMenu();
 
     tbl.addMenuItem(
-        "/templates/subSilver/images/folder_new_big.gif",
+        "/graphics/index/forum_unread.gif",
         "/search.php?search_id=newposts",
         "Beitr&auml;ge seit letztem Besuch");
     tbl.addMenuItem(
-        "/graphics/Portal-PM.gif",
+        "/graphics/my/Portal-PM.gif",
         "/search.php?search_id=unread",
         "Ungelesene Themen");
     tbl.addMenuItem(
-        "/templates/subSilver/images/folder_new.gif",
+        "/graphics/viewforum/topic_unread.gif",
         "/search.php?search_id=unanswered",
         "Unbeantwortete Themen");
 
     tbl.addMenuItem(
-        "/graphics/Postings.gif",
+        "graphics/my/Postings.gif",
         "/search.php?search_id=egosearch",
         "Eigene Beitr&auml;ge");
     tbl.addMenuItem(
-        "/graphics/Topics.gif",
+        "/graphics/my/Topics.gif",
         "/search.php?search_id=startedtopics",
         "Eigene Themen");
     tbl.addMenuItem(
-        "/graphics/Watched.gif",
+        "/graphics/my/Watched.gif",
         "/watched_topics.php",
         "Beobachtete Themen");
 
     tbl.addMenuItem(
-        "/templates/subSilver/images/folder_open.gif",
+        "/graphics/viewforum/topic_open.gif",
         "/search.php?search_id=open",
         "Offene Fragen");
     tbl.addMenuItem(
-        "/graphics/Open.gif",
+        "/graphics/my/Open.gif",
         "/search.php?search_id=myopen",
         "Meine offenen Fragen");
 
@@ -4458,13 +4458,12 @@ Pagehacks.prototype = {
     with (table.insertRow(-1)) {
       with (insertCell(-1)) {
         innerHTML='<a href="'+Lks[0][1]+'" class="gensmall" title="Zum '+Lks[0][0]+' wechseln"><b>'+
-                   Lks[0][0]+'</b><img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
+                   Lks[0][0]+'</b><img border="0" alt="no new" src="/graphics/mainmenu/website.gif"'+
                    ' style="margin-left: 1px; width: 12px; height: 9px;"/></a>';
         style.cssText='text-align: right; white-space: nowrap;';
       }
-      insertCell(-1).style.cssText='text-align: center; padding-left: 7px; padding-right: 7px;';
       insertCell(-1).innerHTML='<a href="'+Lks[1][1]+'" class="gensmall" title="Zum '+Lks[1][0]+' wechseln">'+
-                               '<img border="0" alt="no new" src="templates/subSilver/images/icon_minipost.gif"'+
+                               '<img border="0" alt="no new" src="/graphics/mainmenu/website.gif"'+
                                ' style="margin-left: 1px; width: 12px; height: 9px;"/><b>'+Lks[1][0]+'</b></a>';
       insertCell(-1);
     }
@@ -4674,7 +4673,7 @@ Pagehacks.prototype = {
             var ax = document.createElement('a');
             ax.className='gensmall';
             ax.target=link.target;
-            ax.innerHTML='<img border="0" style="margin-left:2px" src="/templates/subSilver/images/icon_latest_reply.gif" />';
+            ax.innerHTML='<img border="0" style="margin-left:2px" src="/graphics/viewforum/last_post.gif" />';
             link.parentNode.insertBefore(ax,before?link:link.nextSibling);
             ax.href = href;
             return ax;
@@ -5175,7 +5174,7 @@ UpdateMonkey.prototype = {
         '<div class="gensmall">(Bitte die Sicherheitsmeldung von GreaseMonkey mit OK best&auml;tigen)</div>';
 
       EM.Notifier.addAlert(
-        '/graphics/Profil-Sidebar.gif',
+        '/graphics/my/settings/Profil-Sidebar.gif',
         'Neues EM-Update',
         'http://github.com/'+user+'/'+repo+'/commit/'+commit+'/',
         e
@@ -5318,7 +5317,7 @@ function initEdgeApe() {
         shared(EM).Notifier = new Notifier();
 
         with(EM.Buttons) {
-          addButton('/graphics/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
+          addButton('/graphics/my/settings/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
         }
         EM.Pagehacks = new Pagehacks();
         shared(EM).Shouts = new ShoutboxControls();
