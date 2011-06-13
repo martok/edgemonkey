@@ -1353,30 +1353,12 @@ function OverlayWindow(x,y,w,h,content,id)
   this.id = id;
 
   this.Frame = this.createElement('div');
-
-  this.Shadows = [];
-  var pwn = this.Outer;
-  var swtop = 0;
-  if(EM.Settings.GetValue('ui', 'showDropShadow')) {
-    for(i=10; i>=0; i--) {
-      var filterCSS = 'position:relative; overflow:visible; display:block;';
-      filterCSS += 'left:'+i+'px; top:'+(-(swtop-i))+'px;';
-      filterCSS += 'min-width:'+(w+i)+';min-height:'+(h+i)+';';
-      swtop += h+i;
-      filterCSS += 'z-index:-'+(100+i)+';';
-      filterCSS += 'background-color: #000;';
-      filterCSS += 'opacity: '+(0.5-i/20)+';';
-      var shadow = document.createElement('div');
-      //shadow.className='overlay';
-      shadow.style.cssText = filterCSS;
-      this.Outer.appendChild(shadow);
-      this.Shadows.push(shadow);
-    }
-  }
-
   this.Frame.style.cssText = 'overflow:visible;position:relative;background:url(./graphics/navBar.gif);'+
-                                   'border:2px solid #197BB5;left:0;top:-'+swtop+';min-width:'+w+';min-height:'+h;
+                                   'border:2px solid #197BB5;left:0;min-width:'+w+';min-height:'+h;
 
+  if(EM.Settings.GetValue('ui', 'showDropShadow')) {
+    this.Frame.style.cssText+=' -moz-box-shadow: 8px 8px 6px rgb(9, 52, 92)'
+  }
   this.ContentArea=this.createElement('div');
   this.Frame.appendChild(this.ContentArea);
   this.ContentArea.innerHTML=content;
