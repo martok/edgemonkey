@@ -2960,7 +2960,7 @@ function ShoutboxControls() {
     }
   }
   this.form_text = document.getElementById('shoutmessage');
-  this.form_chars = document.getElementById('shoutchars');
+  this.form_chars = unsafeWindow.document.getElementById('shoutchars');
   this.form.setAttribute('onsubmit', 'return EM.Shouts.ev_sb_post()');
 
   var ifr=this.get_iframe();
