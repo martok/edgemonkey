@@ -3838,7 +3838,8 @@ Pagehacks.prototype = {
       var std = document.createElement('span');
       std.className = 'gensmall incell right';
 
-      var strUser=queryXPathNode(tuser_l, './span').textContent;
+      var eleUser=queryXPathNode(tuser_l, './span');
+      var strUser=eleUser ? eleUser.textContent : "";
 
       var isSelf = tuser_l && (strUser == EM.User.loggedOnUser);
 
