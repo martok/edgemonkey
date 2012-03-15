@@ -3936,7 +3936,7 @@ Pagehacks.prototype = {
       if (theURL=='' || theURL==null) return false;
       theSelection=prompt('Bitte den Link-Text eingeben:',theURL);
       if (theSelection=='' || theSelection==null) theSelection=theURL;
-      theURL = theURL.replace('[','\%5B').replace(']','\%5B');
+      theURL = theURL.replace('[','\%5B').replace(']','\%5D');
       if (theSelection==theURL) {
         edit.value =
           edit.value.substring(0, oldStart) +
