@@ -12,14 +12,20 @@
 // @exclude
 // ==/UserScript==
 
-const ScriptVersion = 0.261;
+const ScriptVersion = 0.27;
 
 // @changelog
 /*
+0.27              12-**-**
+  -dropshadows using CSS3
+  -TLColourize for "guest" postings
+  -escaping error in shoutbox url insert feature
+
+
 0.26.1            11-06-11
   -Happy Birthday, Liebe Ecke ;)
   -adjusted to facelifted structures
-s
+
 0.26              11-05-25
   -rewritten loader
   -compatibility: fx 4 + chrome (theoretically)
@@ -4238,6 +4244,7 @@ Pagehacks.prototype = {
 
   QuickLoginMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td[3]/a");
+	if(link==null) return;
     var bcr = link.getBoundingClientRect();
     var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
@@ -4282,6 +4289,7 @@ Pagehacks.prototype = {
 
   QuickSearchMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td/a");
+	if(link==null) return;
     var bcr = link.getBoundingClientRect();
     var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
@@ -4330,6 +4338,7 @@ Pagehacks.prototype = {
 
   QuickSitemapMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td[5]/a");
+	if(link==null) return;
     var bcr = link.getBoundingClientRect();
     var coords = new Point(bcr.left, bcr.bottom+2);
     coords.TranslateWindow();
