@@ -1679,7 +1679,7 @@ function SettingsStore() {
   for (var i=0; i<co.length; i++) {
     c = co[i];
     if (res=re.exec(c)) {
-      var k=res[1].replace(/(df|dl|csf|csl)/,'ee');
+      var k=res[1].replace(/(df|dl|csf|csl)/,'entwicklerecke');
       this.cookies[k] = Deserialize(unescape(res[2]));
     }
   }
@@ -2289,7 +2289,7 @@ ButtonBar.prototype = {
 function UserManager() {
   this.AjaxAvail = true;
   this.knownUIDs = EM.Settings.load_field('uidcache',this.knownUIDs);
-  this.loggedOnUserId = EM.Settings.cookies['ee_data']['userid'];
+  this.loggedOnUserId = EM.Settings.cookies['entwicklerecke_data']['userid'];
   this.loggedOnSessionId = "";
   this.loggedOnUser = this.knownUIDs[-1];
   var a=document.getElementsByTagName('a');
