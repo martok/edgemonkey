@@ -16,10 +16,11 @@ const ScriptVersion = 0.27;
 
 // @changelog
 /*
-0.27              12-**-**
+0.27              12-06-11
   -dropshadows using CSS3
   -TLColourize for "guest" postings
   -escaping error in shoutbox url insert feature
+  -changes for new header and single domain stuff
 
 
 0.26.1            11-06-11
