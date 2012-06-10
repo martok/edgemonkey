@@ -2295,16 +2295,17 @@ function UserManager() {
   var a=document.getElementsByTagName('a');
   for (var i=0;i<a.length;i++) {
     if (a[i].href.match(/login\.php\?logout=true/) && a[i].innerHTML.match(/Logout/)) {
-      this.loggedOnUser = a[i].innerHTML.match(/\((.*)\)/)[1];
-      this.knownUIDs[-1] = this.loggedOnUser;
-      EM.Settings.store_field('uidcache', this.knownUIDs);
-
       //Get the Session ID
       var sid = a[i].href.match(/sid=([a-f0-9]{32})/i);
       this.loggedOnSessionId = sid[1];
       break;
     }
   }
+  var usercell = queryXPathNode(document, "//div[contains(@class,'dropdown-left')]/table//tr[@class='nohover']/td");
+  this.loggedOnUser = usercell.innerHTML.match(/^Eingeloggt als:\s*(.*)\s*$/)[1];
+  this.knownUIDs[-1] = this.loggedOnUser;
+  EM.Settings.store_field('uidcache', this.knownUIDs);
+
   this.isModerator = !!document.getElementById('sidebar_modpanel');
 }
 
