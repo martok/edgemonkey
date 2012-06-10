@@ -1510,11 +1510,9 @@ function SettingsStore() {
     this.AddSetting( 'Maximalbreite von Bildern erzwingen', 'pagehack.imgMaxWidth', 'bool', false),
   ]);
   this.AddCategory('Ergonomie', [
-    this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Meine Ecke', 'pagehack.quickProfMenu', 'bool', true),
     this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', false),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
-    this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Sitemap', 'pagehack.quickSitemapMenu', 'bool', true),
     this.AddSetting( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', 'pagehack.extPostSubmission', 'bool', true),
     this.AddSetting( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen', 'pagehack.smileyOverlay',[
           ['Nein', 0],
@@ -3580,17 +3578,11 @@ function Pagehacks() {
     /\bposting\.php/i.test(Env.url)) {
     this.FixPostingDialog();
   }
-  if(EM.Settings.GetValue('pagehack','quickProfMenu')) {
-    this.AddQuickProfileMenu();
-  }
   if(EM.Settings.GetValue('pagehack','quickLoginMenu')) {
     this.AddQuickLoginMenu();
   }
   if(EM.Settings.GetValue('pagehack','quickSearchMenu')) {
     this.AddQuickSearchMenu();
-  }
-  if(EM.Settings.GetValue('pagehack','quickSitemapMenu')) {
-    this.AddQuickSitemapMenu();
   }
   if(EM.Settings.GetValue('ui','betaFeatures')) {
     this.AddBetaLinks();
@@ -4161,15 +4153,6 @@ Pagehacks.prototype = {
         '</p>';
   },
 
-  AddQuickProfileMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document,     "/html/body/div[3]/table/tbody/tr/td/a");
-    var linkText = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td[2]/a");
-    if(link==null) return;
-    if('Meine Ecke' == linkText.textContent) {
-      link.setAttribute('onclick','return EM.Pagehacks.QuickProfileMenu()');
-    }
-  },
-
   AddQuickLoginMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td[3]/a");
     if(link==null) return;
@@ -4180,67 +4163,6 @@ Pagehacks.prototype = {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td/a");
 	if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
-  },
-
-  AddQuickSitemapMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td[5]/a");
-	if(link==null) return;
-    link.setAttribute('onclick','return EM.Pagehacks.QuickSitemapMenu()');
-  },
-
-  QuickProfileMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td/a");
-	if(link==null) return;
-    var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom+2);
-    coords.TranslateWindow();
-
-    var w = new OverlayWindow(coords.x,coords.y,328,EM.Settings.GetValue('pagehack','privmenu')?148:187,'','em_QPM');
-    w.InitDropdown();
-
-    var tbl = w.CreateMenu();
-
-    if (!EM.Settings.GetValue('pagehack','privmenu')) {
-      tbl.addMenuItem(
-        "/graphics/my/pms/inbox.gif",
-        "/privmsg.php?folder=inbox",
-        "Private Nachrichten",
-        "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
-        "<a href=\"/privmsg.php?mode=post\">PN schreiben</a>, "+
-        "<a href=\"/privmsg.php?folder=outbox\">Ausgang</a></a>, "+
-        "<a href=\"/privmsg.php?folder=sentbox\">Gesendete</a>, "+
-        "<a href=\"/privmsg.php?folder=savebox\">Archiv</a>"
-        );
-    }
-    tbl.addMenuItem(
-        "/graphics/my/Drafts.gif",
-        "/drafts.php",
-        "Entw&uuml;rfe",
-        "");
-    tbl.addMenuItem(
-        "/graphics/my/basket_light.gif",
-        "/pdfbasket.php",
-        "PDF-Korb",
-        "");//"PDF erstellen");
-    tbl.addMenuItem(
-        "/graphics/my/Attachment.gif",
-        "/uacp.php?u="+escape(EM.User.loggedOnUserId)+"&amp;sid="+escape(EM.User.loggedOnSessionId),
-        "Dateianh&auml;nge",
-        "");
-    tbl.addMenuItem(
-        "/graphics/my/Portal-Profil.gif",
-        "/profile.php?mode=editprofile&page=portal",
-        "Einstellungen",
-        "<a href=\"/profile.php?mode=editprofile&page=1\">Standard</a>, "+
-        "<a href=\"/profile.php?mode=editprofile&page=2\">Erweitert</a>, "+
-        "<a href=\"/profile.php?mode=editprofile&page=3\">Sidebar</a></a>, "+
-        "<a href=\"/profile.php?mode=editprofile&page=4\">Newsfeeds</a>, "+
-        "<a href=\"/profile.php?mode=editprofile&page=5\">Websites</a>"
-        );
-
-    w.ContentArea.appendChild(tbl);
-
-    return false;
   },
 
   QuickLoginMenu: function() {
@@ -4333,90 +4255,6 @@ Pagehacks.prototype = {
         "/graphics/my/Open.gif",
         "/search.php?search_id=myopen",
         "Meine offenen Fragen");
-
-    return false;
-  },
-
-  QuickSitemapMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td[5]/a");
-	if(link==null) return;
-    var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom+2);
-    coords.TranslateWindow();
-
-    var w = new OverlayWindow(coords.x,coords.y,275,576,'','em_QSM');
-    w.InitDropdown();
-    var tbl = w.CreateMenu();
-
-    tbl.addMenuItem(
-        "/graphics/sitemap/home.gif",
-        "/index.php",
-        "Index");
-
-    tbl.addMenuItem(
-        "/graphics/sitemap/users.gif",
-        "/memberlist.php",
-        "Benutzer");
-    tbl.addMenuItem(
-        "/graphics/sitemap/group.gif",
-        "/groupcp.php",
-        "Gruppen");
-
-    tbl.addMenuItem(
-        "/graphics/sitemap/my.gif",
-        "/my.php",
-        "Meine Ecke");
-    tbl.addMenuItem(
-        "/graphics/sitemap/synonyms.gif",
-        "/viewsynonyms.php",
-        "Synonyme");
-
-    tbl.addMenuItem(
-        "/graphics/sitemap/staff.gif",
-        "/staff.php",
-        "Das Team");
-    tbl.addMenuItem(
-        "/graphics/sitemap/blog.gif",
-        "/blogs.php?blog_id=1",
-        "Team-Blog"); //Should be blag ...
-    tbl.addMenuItem(
-        "/graphics/sitemap/rssfeed.gif",
-        "/sites.php?id=13",
-        "Foren-Newsfeeds");
-    tbl.addMenuItem(
-        "/graphics/sitemap/newsfeeds.gif",
-        "/newsfeeds.php",
-        "Weitere Newsfeeds");
-    tbl.addMenuItem(
-        "/graphics/sitemap/museum.gif",
-        "/museum.html",
-        "Museum");
-
-    tbl.addMenuItem(
-        "/graphics/sitemap/help.gif",
-        "/sites.php?id=19",
-        "Hilfe");
-    tbl.addMenuItem(
-        "/graphics/sitemap/guidelines.gif",
-        "/sites.php?id=9",
-        "Richtlinien");
-    tbl.addMenuItem(
-        "/graphics/sitemap/legend.gif",
-        "/sites.php?id=6",
-        "Legende");
-    tbl.addMenuItem(
-        "/graphics/sitemap/df_banner.gif",
-        "/sites.php?id=16",
-        "Banner &amp; Grafiken");
-
-    tbl.addMenuItem(
-        "/graphics/sitemap/copyright.gif",
-        "/sites.php?id=3",
-        "Copyright");
-    tbl.addMenuItem(
-        "/graphics/sitemap/imprint.gif",
-        "/sites.php?id=2",
-        "Impressum");
 
     return false;
   },
@@ -5310,7 +5148,7 @@ function initEdgeApe() {
         shared(EM).Notifier = new Notifier();
 
         with(EM.Buttons) {
-          addButton('/graphics/my/settings/Profil-Sidebar.gif','Einstellungen','EM.Settings.ev_EditSettings()');
+          addButton('','Einstellungen','EM.Settings.ev_EditSettings()','em_setting');
         }
         EM.Pagehacks = new Pagehacks();
         shared(EM).Shouts = new ShoutboxControls();
