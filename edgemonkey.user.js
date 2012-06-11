@@ -319,7 +319,19 @@ var data = {
     'A%98%01%DE%7F%80%9AJ%A3%1E%0C%83%BAC%D9%8A%02%D9%BD%3F%E7%8A%C9B%E2Yvn%88%CD%C8%26k%84%D6%D5ft%87%EC%BC%05%F6%F2%24%CC%01%99%2Cd%8F%0F%959%B3Z%9E%9Ea%FD%A7p%1A%16%93%5C%5E%0DY%B2%E3%F6%01%0E7%20%A6Q%99%9D%D7JF%81%FD%7F%BF%07%209%3D%EDQ%014%0D%D8%9C%C0%8A%1'+
     'D%D8I%92o%0B%0A%13S%FCB%80%E4ps%C9%E5%81%12%8E%00I%91%84)%20Fv(%40y%D5%8E%B2%DE%88%EFc%E3%FC%5C%40%CD%EE%E2%92%D3%0D%25%B4%0E%D0%18%25%87%0B%14%96Z%9C2h\'%8B%CB%40d%03%B5%17%CB(%3C%7C%8C%C3%A1a%DE%05%A0%CD%E2%D4%1DJ%F0%15uM%40%A2O%A7%B0%D4%E2%A4%81%15%9EL%B'+
     '0%A3%F1Gj%D5d%06%82!%9CX%AC8%1A%19%C5%C1%ADA%DE%01%D0f%095%9B%03J%20%04i%D5%01%0AK-%3E%D3w%02%FB62%C6%BE%0E%DFW%7F%1A%05H%D6%05%FC%18%7D%80%FD%1B%3A%A1%CB%02m%96P%5DXB%C90%ADQX%3Di%1F%DE%1Db_%06%EF%A8g%C5%3D!%96%F4F%A1%F0t%92%F5%FB%99%0Et%B7%D9%FE%F5%9B%C2'+
-    '%85c%BCl%FD%06r%BB%A4%C7%DB%ED%BE%14%00%00%00%00IEND%AEB%60%82'
+    '%85c%BCl%FD%06r%BB%A4%C7%DB%ED%BE%14%00%00%00%00IEND%AEB%60%82',
+  menu:
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABRCAMAAABfYf6AAAAAAXNSR0IArs4c6QAAAv1QTFRFAAIFAAEABwAAAAQHCgMBDAUDEQcAEwoAFAsCGAoDGwsAIAwAIg4AJg4AKw8DKBECMBMCNxQAPBcAPxoDRhoASR0DTxwARR8DSx4AUh8DUyAAUCMEVyMBXiMAXCcAYSYBZyUAXSgHZSgAZCgDaigAbSkBaSwBbysAdCoAci4'+
+    'AcS4GeC0BdTABezAAfTAAgi8AfDEFhDECfzMAgjUCiTUAjDcAhzkAkjYCgzsAlDcAjjkAlzoAjj4CnjoBmTwAmz0AnT8Coz4ApkAAqEIAn0YFsUIArEUCs0QAtEUAtkYAsEgApkwBoU4AvUYCuEgAp00CvkcEtUwAwUkAu0sAu0sDuE4CslAAxEsAwE4Av04Hu1EAzEwDu1EFx04At1QAylADv1QA0E8AxlMCzFIAt1kA0lEA1FIAz1QAsF4A1lQAwVsC3'+
+    'lMA11UC2VYD1FgBz1oA4FUA2lcA4lYA11oAzF4A3VkA5FgA010CvmQAxGMA5VoB4FwA12EA6FwE414B8FsA6l0A32EA2WMA8VwA8l0Ay2kD52EA12YA7WAA9F8A3WYA%2FF4A9mED32gD8WMA7GUA52cA%2BGIA5mcI3GsB%2BWMA82UC%2F2IA72cA%2BmQA5GsA6moA%2FWUA92cA8WoD7WwA%2FmcA524A82sA%2F2gA6W8A%2BmoA%2F2kA%2F2oC9'+
+    'm0A8W8A4XQA%2FWwA924A0XkD7HIE7nIA%2Fm4A2XkA%2BXAA%2F28C%2B3EA9nMA%2F3AE8XUA%2FHIA8nYA6HkA2H4A%2FXMC%2BHUA%2F3QA3n4A%2F3QE%2F3UA73oA%2F3YA%2B3cC63wA%2FHgE%2FXkA6YAA%2F3oA%2F3sA8IAA%2B30A%2F3wA9n8D%2Fn8A%2BIEA%2F4AA%2BoIA%2F4EA%2F4IA%2FoUA%2F4YA%2F4cA%2B4kA%2F4gB%'+
+    '2FYsA%2F4wC9pAA%2F40E%2F44A%2FpEA%2F5MA%2BpQF%2F5QA%2F5cA%2BpkA%2F5gA%2F5kA%2FZsA%2F50A%2F58A%2FKEA%2FqIA%2F6MD%2F6UA%2FKYC%2F6gA%2F6oA%2FawA%2F68A%2FrMA%2F7UA%2FrgB%2F7sA%2F78A%2F8UA%2FMcA%2F8cA%2FsoA%2F8wG%2F9EA%2F9cA%2FtsAySQxEgAAAAF0Uk5TAEDm2GYAAAP2SURBVFjD7'+
+    'ZZxaBtVGMCbppN2ujm3OB1mFmMjRkun2aLitB3JMJtKrKVdK3ImFUlFgivVTM1KsSZqkDRdNGSsUF95C5xmFsy7Uoqk3gkTYbyWK9e7wBUOCSGhDQukpE0ZWrxs%2FhNdXe4v%2F8kPDg4ev3t83%2Fu%2B711dXY0aNWrU%2BD95w%2B0DsRhCKAaAz2Wr3huhcBxjFpeh5Xf3qepEIshni9lxfpkrczFbSLH%2BqrbtInmBT98QxvgyE%2BKWxC1z41X'+
+    'sOpDgsBygsHFxQRD4JXKTRxBh9gpxJ%2FELFiMIIQBS5rIoirOrIogAKLv4%2FH96XycwBSAWeAxBenpBWprLAECzHANBDF8Z2VmMMTGvjxay%2BbUNCaDsr9TiGgJiIZ1N8cjnj1HRnUQXCH0axZc%2FPHtp7LtCErKF4jqG%2FNq3Y5fePztFBz2%2B0G2DjdOv2bwA0d0uUsiKi7MFTGMJI5yfXRJTXLD%2FdYSAx3IS%2FWtfPGR91uxFzJz9XEJc3'+
+    '46S10WGmZ9nxOsz1HZeiDu7ZijkMR0xu5lKcY7seOaw0Y3QSm8fXl4rTYUlCTM0gyUpOltKs4zl5RUI%2B%2FWHjnaQ0xXmUg9enG61BSKZj48jnEx3%2B3gOMwyDeT70dppnoPHd3yNei24iQTsWKsxrX0KGfcHk8k3%2BdKx95ELPi%2BOYLdcty%2BFJi%2BPCedOTP4x7CONz8qF981uF%2BfPVCEBTGsvQ4Ojn%2BhbdkeEEm5JEQZTSHDX8dPPh5'+
+    'k8%2Bcjrb90%2BgUODqjxWmY2VGroBXD77kIjq%2Fessx6qHypWIum9%2FcylGe0b4zw9bOAbPmXjISplbOVKboPZZC%2BIF6bUcv0WkfCmKx%2BGdpc6P0x3ZBYIJuwtpnM2kaVK0wzr7zz2N5JRFFu1WqfYb27kGAGC57YzO%2Fvl7aSrEMDLisJt0elUrVHE2cvE0tOD4wyIu79mnbzHZ%2FjM3lpFwmv4qjnq52w4N7G%2BS1emPPTvWnVstPw133H'+
+    'NBbgqwg11IS%2B08037d7V7361uIdUMtf32NCXG6rIESNcggqddWTSHa1%2FtVispjxaJR4Mqq9bQPXMvn0L326JpWyuXm%2Ftetxp7dfb%2B3Yr3DiPu%2BBhPbAQQI4n1JongblWYsxEzArE59wI7ycTAochm8%2Bosg86kWYF8omGjIoMk%2BEaMzyPCfPUK9JkWkD83JvllsU%2BZQFSsjmzd5mUOi0EvFRJ5y%2FeZPJJuh9SFFqoTy9%2FjbtDys'+
+    'wjeUWvXV9onB%2FixLTFYaIJOOTJAJeQq%2FAbCXO%2BcJt%2BpbHjAG%2Fy6ZTYGrNvc5Bp1iQBt1223GNkuQeMhiPWYa%2F%2F8xibGvRKCz5usbGprubGhtrP2o1atSogr8Ab10ZQ%2F2y5NUAAAAASUVORK5CYII%3D'
 }
 
 function queryXPath(node,xpath){
@@ -389,6 +401,11 @@ function isHTMLElement(what)
   //   in normal code, it is not. Just hope every node has its constants defined.
   return !isEmpty(what) &&
    ((what.ELEMENT_NODE) || (what.nodeType));
+}
+
+function apply(el,fn) {
+  fn.apply(el);
+  return el;
 }
 
 //http://www.infocamp.de/javascript_htmlspecialchars.php
@@ -1356,7 +1373,7 @@ function OverlayWindow(x,y,w,h,content,id)
 
   this.Outer = this.createElement('div');
   this.Outer.className='overlayWin';
-  this.Outer.style.cssText = 'overflow:visible; left:'+x+';top:'+y+';min-width:'+w+';min-height:'+h+';width:'+w+';height:'+h;
+  this.Outer.style.cssText = 'overflow:visible; left:'+x+'px;top:'+y+'px;min-width:'+w+'px;min-height:'+h+'px;width:'+w+';height:'+h+'px';
   this.id = id;
 
   this.Frame = this.createElement('div');
@@ -1513,7 +1530,6 @@ function SettingsStore() {
   this.AddCategory('Ergonomie', [
     this.AddSetting( 'Separates Men&uuml; f&uuml;r PNs', 'pagehack.privmenu', 'bool', false),
     this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r Login', 'pagehack.quickLoginMenu', 'bool', true),
-    this.AddSetting( 'Dropdown-Men&uuml; f&uuml;r die Suche', 'pagehack.quickSearchMenu', 'bool', true),
     this.AddSetting( 'Weiterleitung auf ungelesene Themen nach dem Absenden von Beiträgen', 'pagehack.extPostSubmission', 'bool', true),
     this.AddSetting( 'Smiley-Auswahlfenster in Overlays &ouml;ffnen', 'pagehack.smileyOverlay',[
           ['Nein', 0],
@@ -2279,9 +2295,8 @@ ButtonBar.prototype = {
     if (img!='') btn.innerHTML+='<img class="navbar" border="0" alt="'+caption+'" src="'+img+'" style="width: 19px; height: 18px;">';
     if (caption!='') btn.innerHTML+=caption;
     this.container.appendChild(btn);
-    var a=this.container.innerHTML;
-    a+='&nbsp; &nbsp; ';
-    this.container.innerHTML=a;
+    var a=document.createTextNode('  ');
+    this.container.appendChild(a);
   }
 }
 
@@ -2499,14 +2514,19 @@ UserManager.prototype = {
 }
 
 function Notifier() {
-  var c=queryXPathNode(document,'/html/body/div[3]/table/tbody/tr');
+  var c=EM.Buttons.container;
   if (isEmpty(c))
     return;
 
-  this.container = c;
+  this.container = document.createElement('table');
+  c.appendChild(this.container);
+  with (this.container) {
+    style.cssText='display: inline; vertical-align: bottom; margin-right: 20px;';
+  }
+  this.container = this.container.insertRow(-1);
 
   this.PNs = new Notifier.Field(this,'notmen_PN',
-     '<img src="/graphics/my/Portal-PM.gif" border="0" style="position: absolute; clip: rect(10px, 22px, 26px, 0px);"/>',
+     '<img src="/graphics/my/pms/inbox.gif" border="0" width="17" height="17"/>',
      'PNs');
   this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
   this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
@@ -2515,7 +2535,7 @@ function Notifier() {
   }
 
   this.EMStuff = new Notifier.Field(this,'notmen_EM',
-     '<img src="/graphics/sitemap/group.gif" border="0" style="height: 38px; margin-top: -3px;"/>',
+     '<img src="/graphics/sitemap/group.gif" border="0" style="height: 17px; margin-top: -3px;"/>',
      'EM');
   this.EMStuff.setImageAction('javascript:EM.Notifier.AlertDropdown()');
   this.EMStuff.setTextAction('javascript:EM.Notifier.AlertDropdown()');
@@ -2675,14 +2695,12 @@ Notifier.BLINKTIME=700;
 Notifier.Field = function(parent,id,img,text) {
   var cImg = parent.container.insertCell(-1);
   var cText = parent.container.insertCell(-1);
-  cImg.className='mainmenuItemLeft';
-  cText.className='mainmenuItemRight';
 
-  cImg.innerHTML='<a href="" class="dfnav" style="float:left; height:30px; width: 30px">'+img+'</a>';
+  cImg.innerHTML='<a href="" class="dfnav" style="float:left; height:18px; width:19px">'+img+'</a>';
 
   var link = document.createElement('a');
   link.style.cssText='vertical-align:middle';
-  link.className='dfnav';
+  link.className='gensmall';
   cText.appendChild(link);
   link.innerHTML = text;
 
@@ -3579,14 +3597,9 @@ function Pagehacks() {
     /\bposting\.php/i.test(Env.url)) {
     this.FixPostingDialog();
   }
+  this.AddMonkeyMenu();
   if(EM.Settings.GetValue('pagehack','quickLoginMenu')) {
     this.AddQuickLoginMenu();
-  }
-  if(EM.Settings.GetValue('pagehack','quickSearchMenu')) {
-    this.AddQuickSearchMenu();
-  }
-  if(EM.Settings.GetValue('ui','betaFeatures')) {
-    this.AddBetaLinks();
   }
   if(EM.Settings.GetValue('pagehack','smileyOverlay')>0) {
     this.AddSmileyOverlay();
@@ -4154,16 +4167,88 @@ Pagehacks.prototype = {
         '</p>';
   },
 
+  AddMonkeyMenu: function() {
+    var menu = queryXPathNode(unsafeWindow.document, "//div[@class='mainmenu']");
+    menu.appendChild(apply(document.createElement('div'),
+    function() {
+      this.className='mainmenuitem drop-sensitive';
+      this.appendChild(apply(document.createElement('a'),
+      function() {
+        this.href="javascript:EM.Settings.ev_EditSettings()";
+        this.innerHTML = '<img src="'+data.menu+'" alt="Edgemonkey">';
+      }));
+      this.appendChild(apply(document.createElement('div'),
+      function() {
+        this.className="dropdown dropdown-left";
+        this.appendChild(apply(document.createElement('table'),
+        function() {
+          this.className='droptable';
+          var tbl=this;
+          function addMenuItem(i,a,t,s) {
+            with(tbl.insertRow(-1)) {
+              insertCell(-1).innerHTML= '<a href="'+a+'"><img src="'+i+'"></a>';
+              var sub='';
+              if (s && s.length) {
+                for (var i=0; i<s.length;i++) {
+                  if (s[i].length)
+                    sub+='<a href="'+s[i][0]+'" class="gensmall">'+s[i][1]+'</a> ';
+                  else
+                    sub+='<br />';
+                }
+              }
+              if (sub) {
+                sub='<div class="dropsubline">'+sub+'</div>';
+              }
+              insertCell(-1).innerHTML= '<a href="'+a+'" class="gen">'+t+'</a>'+sub;
+            }
+          }
+          addMenuItem(
+              "/graphics/viewforum/topic_unread.gif",
+              "/search.php?search_id=unread",
+              "Ungelesene Themen", [
+              ['/search.php?search_id=newposts', 'Beitr&auml;ge seit letztem Besuch']
+              ]);
+          addMenuItem(
+              "/graphics/my/watched_small.png",
+              "/watched_topics.php",
+              "Beobachtete Themen",[
+               ['/search.php?search_id=egosearch', 'Eigene Beitr&auml;ge'],
+               ['/search.php?search_id=startedtopics', 'Eigene Themen'],
+               '',
+               ['/search.php?search_id=myopen', 'Meine offenen Fragen']
+              ]);
+          addMenuItem(
+              "/graphics/viewforum/topic_open.gif",
+              "/search.php?search_id=open",
+              "Offene Fragen",[
+              ["/search.php?search_id=unanswered","Unbeantwortete Themen"]
+              ]);
+          if (EM.Settings.GetValue('ui','betaFeatures')) {
+            var linkto;
+            if (/^http\:\/\/(branch)\./i.test(Env.url)) {
+              linkto = [Env.url.replace(/^http\:\/\/(branch)\./i,'http://www.'),'Echtforum','http://trunk.entwickler-ecke.de','Trunk'];
+            } else
+            if (/^http\:\/\/(trunk)\./i.test(Env.url)) {
+              linkto = ['http://www.entwickler-ecke.de','Echtforum','http://branch.entwickler-ecke.de','Branch'];
+            } else {
+              linkto = [Env.url.replace(/^http\:\/\/(www)\./i,'http://branch.'),'Branch','http://trunk.entwickler-ecke.de','Trunk'];
+            }
+            addMenuItem(
+                "/graphics/my/pms/sentbox.gif",
+                linkto[0],
+                'Zum '+linkto[1]+' wechseln',[
+                [linkto[2], 'Zum '+linkto[3]+' wechseln']
+                ]);
+          }
+	    }));
+	  }));
+	}));
+  },
+
   AddQuickLoginMenu: function() {
     var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table/tbody/tr/td[3]/a");
     if(link==null) return;
     link.setAttribute('onclick','return EM.Pagehacks.QuickLoginMenu()');
-  },
-
-  AddQuickSearchMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td/a");
-	if(link==null) return;
-    link.setAttribute('onclick','return EM.Pagehacks.QuickSearchMenu()');
   },
 
   QuickLoginMenu: function() {
@@ -4209,96 +4294,6 @@ Pagehacks.prototype = {
     w.ContentArea.appendChild(f);
 
     return false;
-  },
-
-  QuickSearchMenu: function() {
-    var link = queryXPathNode(unsafeWindow.document, "/html/body/div[3]/table[2]/tbody/tr/td/a");
-	if(link==null) return;
-    var bcr = link.getBoundingClientRect();
-    var coords = new Point(bcr.left, bcr.bottom+2);
-    coords.TranslateWindow();
-
-    var w = new OverlayWindow(coords.x,coords.y,275,241,'','em_QSM');
-    w.InitDropdown();
-    var tbl = w.CreateMenu();
-
-    tbl.addMenuItem(
-        "/graphics/index/forum_unread.gif",
-        "/search.php?search_id=newposts",
-        "Beitr&auml;ge seit letztem Besuch");
-    tbl.addMenuItem(
-        "/graphics/my/Portal-PM.gif",
-        "/search.php?search_id=unread",
-        "Ungelesene Themen");
-    tbl.addMenuItem(
-        "/graphics/viewforum/topic_unread.gif",
-        "/search.php?search_id=unanswered",
-        "Unbeantwortete Themen");
-
-    tbl.addMenuItem(
-        "graphics/my/Postings.gif",
-        "/search.php?search_id=egosearch",
-        "Eigene Beitr&auml;ge");
-    tbl.addMenuItem(
-        "/graphics/my/Topics.gif",
-        "/search.php?search_id=startedtopics",
-        "Eigene Themen");
-    tbl.addMenuItem(
-        "/graphics/my/Watched.gif",
-        "/watched_topics.php",
-        "Beobachtete Themen");
-
-    tbl.addMenuItem(
-        "/graphics/viewforum/topic_open.gif",
-        "/search.php?search_id=open",
-        "Offene Fragen");
-    tbl.addMenuItem(
-        "/graphics/my/Open.gif",
-        "/search.php?search_id=myopen",
-        "Meine offenen Fragen");
-
-    return false;
-  },
-
-  AddBetaLinks: function() {
-    var table = queryXPathNode(unsafeWindow.document, "/html/body/div[@class='mainlogo']/table");
-    if (!table) return;
-    RegExp.prototype.replace = function(str,rep) {
-      return str.replace(this,rep);
-    }
-    var Lks = [];
-    with (/http\:\/\/(branch|trunk)\./i) {
-      if (test(Env.url))
-        Lks.push(['Echt-Forum',replace(Env.url, 'http://www.')]);
-    }
-    with (/http\:\/\/(www|trunk)\./i) {
-      if (test(Env.url)) {
-        var loc = replace(Env.url, 'http://branch.');
-        if (! /[\?\&]sid=/.test(loc)) {
-          var p=loc.indexOf('?');
-          if (p<0) loc+='?sid='+EM.User.loggedOnSessionId;
-          else loc = loc.substring(0,p+1)+'sid='+EM.User.loggedOnSessionId+'&'+loc.substring(p+1,loc.length);
-
-        }
-        Lks.push(['Branch', loc]);
-      }
-    }
-    with (/http\:\/\/(www|branch)\./i) {
-      if (test(Env.url))
-        Lks.push(['Trunk', 'http://'+window.location.host.replace(/(www|branch)/i,'trunk')+'/my.php']);
-    }
-    with (table.insertRow(-1)) {
-      with (insertCell(-1)) {
-        innerHTML='<a href="'+Lks[0][1]+'" class="gensmall" title="Zum '+Lks[0][0]+' wechseln"><b>'+
-                   Lks[0][0]+'</b><img border="0" alt="no new" src="/graphics/mainmenu/website.gif"'+
-                   ' style="margin-left: 1px; width: 12px; height: 9px;"/></a>';
-        style.cssText='text-align: right; white-space: nowrap;';
-      }
-      insertCell(-1).innerHTML='<a href="'+Lks[1][1]+'" class="gensmall" title="Zum '+Lks[1][0]+' wechseln">'+
-                               '<img border="0" alt="no new" src="/graphics/mainmenu/website.gif"'+
-                               ' style="margin-left: 1px; width: 12px; height: 9px;"/><b>'+Lks[1][0]+'</b></a>';
-      insertCell(-1);
-    }
   },
 
   AddSmileyOverlay: function() {
@@ -5149,7 +5144,7 @@ function initEdgeApe() {
         shared(EM).Notifier = new Notifier();
 
         with(EM.Buttons) {
-          addButton('','Einstellungen','EM.Settings.ev_EditSettings()','em_setting');
+          addButton('./graphics/sitemap/settings_small.png','Einstellungen','EM.Settings.ev_EditSettings()','em_setting');
         }
         EM.Pagehacks = new Pagehacks();
         shared(EM).Shouts = new ShoutboxControls();
