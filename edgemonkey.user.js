@@ -1260,6 +1260,10 @@ AJAXObject.prototype = {
     var request = this.prepareRequest(url,postData,true);
     request.addEventListener('load',readyEvent,false);
     return request.send(request.postBody);
+  },
+  SyncAPIRequest: function(cl,me,data) {
+    var ret = this.SyncRequest('api/'+cl+'/'+me,JSON.stringify(data));
+    return JSON.parse(ret);
   }
 }
 
@@ -2232,9 +2236,8 @@ PNAPI.PN.prototype = {
       return cachedResult.data;
     }
     var get = new AJAXObject();
-    var res = get.SyncRequest('/ajax_get_message_text.php?privmsg_id='+this.id+'&folder='+this.box, null);
-    var re = /\[CDATA\[([\s\S]*?)\]\]/gi;
-    var data = re.execAll(res).map(function(a){ return a[1]; }).join('');
+    var res = get.SyncAPIRequest('privmsg','getMessage',{msgid:this.id,folder:this.box});
+    var data = res.code;
     var host = document.createElement('div');
     host.innerHTML=data;
     data=host.firstChild.innerHTML.split('<hr>')[0].trim();
@@ -2330,13 +2333,9 @@ UserManager.prototype = {
     if (isUndef(this.knownUIDs[name])) {
       if (!this.AjaxAvail) return -1;
       var prof = new AJAXObject();
-      prof = prof.SyncRequest('ajax_get_userid.php?username='+name, null);
-      if (/<(error)>.*<\/\1>/.test(prof)) {
-        this.AjaxAvail = false;
-        return -1;
-      }
-      var id = prof.match(/<userid><!\[CDATA\[([0-9]*)\]\]><\/userid>/ );
-      if (id) this.knownUIDs[name] = id[1];
+      prof = prof.SyncAPIRequest('user','getUID',{name:name,checkdraft:false});
+      var id = prof.uid;
+      if (id) this.knownUIDs[name] = id;
       EM.Settings.store_field('uidcache', this.knownUIDs);
     }
     return this.knownUIDs[name];
