@@ -2525,7 +2525,7 @@ function Notifier() {
   this.container = this.container.insertRow(-1);
 
   this.PNs = new Notifier.Field(this,'notmen_PN',
-     '<img src="/graphics/my/pms/inbox.gif" border="0" width="17" height="17"/>',
+     '<img src="/graphics/my/pms/inbox.png" border="0" width="17" height="17"/>',
      'PNs');
   this.PNs.setImageAction('javascript:EM.Notifier.MenuPNDropdown()');
   this.PNs.setTextAction('javascript:EM.Notifier.MenuPNDropdown()');
@@ -3580,7 +3580,7 @@ function Pagehacks() {
   if (EM.Settings.GetValue('pagehack','monospace'))
     this.cssHacks();
   if (EM.Env.isTopLevel) {
-    EM.Buttons.addButton('/graphics/viewforum/topic_hot_open_unread.gif','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
+    EM.Buttons.addButton('/graphics/viewforum/topic_hot_open_unread.png','Auf neue PNs pr&uuml;fen','EM.Pagehacks.checkPMs()','em_checkPM');
     EM.Buttons.addButton('/graphics/sitemap/search.gif','Schnellsuche','EM.Pagehacks.fastSearch()','em_fastSearch');
   }
   this.AddCustomStyles();
@@ -4202,7 +4202,7 @@ Pagehacks.prototype = {
             }
           }
           addMenuItem(
-              "/graphics/viewforum/topic_unread.gif",
+              "/graphics/viewforum/topic_unread.png",
               "/search.php?search_id=unread",
               "Ungelesene Themen", [
               ['/search.php?search_id=newposts', 'Beitr&auml;ge seit letztem Besuch']
@@ -4217,7 +4217,7 @@ Pagehacks.prototype = {
                ['/search.php?search_id=myopen', 'Meine offenen Fragen']
               ]);
           addMenuItem(
-              "/graphics/viewforum/topic_open.gif",
+              "/graphics/viewforum/topic_open.png",
               "/search.php?search_id=open",
               "Offene Fragen",[
               ["/search.php?search_id=unanswered","Unbeantwortete Themen"]
@@ -4233,7 +4233,7 @@ Pagehacks.prototype = {
               linkto = [Env.url.replace(/^http\:\/\/(www)\./i,'http://branch.'),'Branch','http://trunk.entwickler-ecke.de','Trunk'];
             }
             addMenuItem(
-                "/graphics/my/pms/sentbox.gif",
+                "/graphics/my/pms/sentbox.png",
                 linkto[0],
                 'Zum '+linkto[1]+' wechseln',[
                 [linkto[2], 'Zum '+linkto[3]+' wechseln']
