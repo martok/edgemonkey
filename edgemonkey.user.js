@@ -2568,7 +2568,7 @@ Notifier.prototype = {
     }
     if (EM.Settings.GetValue('pagehack','privmenu')) {
       tbl.addMenuItem(
-        "/graphics/my/pms/inbox.gif",
+        "/graphics/my/pms/inbox.png",
         "/privmsg.php",
         "Private Nachrichten",
         "<a href=\"/privmsg.php?folder=inbox\">Eingang</a>, "+
@@ -2589,7 +2589,7 @@ Notifier.prototype = {
     l.slice(0,EM.Settings.GetValue('pagehack','privmenu')?4:5).reverse().forEach(function(pn) {
       var d = new Date(1000*pn.date);
       tbl.addMenuItem(
-        '/graphics/viewforum/topic'+(pn.unread?'_unread':'')+'.gif',
+        '/graphics/viewforum/topic'+(pn.unread?'_unread':'')+'.png',
         '/privmsg.php?folder=inbox&amp;mode=read&amp;p='+pn.id,
         pn.title,
         '<span class="intbl">'+
@@ -3764,7 +3764,7 @@ Pagehacks.prototype = {
   TLColourize: function (tltable, isForum) {
     if(!tltable) return;
     var entries = queryXPathNodeSet(tltable,"./tbody/tr");
-    var singlePostMode=false;;
+    var singlePostMode=false;
 
     for(var i = 1; i < entries.length; i++) { //Skip entry 0 (table header)
       var row = entries[i];
@@ -4314,7 +4314,7 @@ Pagehacks.prototype = {
     for(var i=0;i<tbls.length;i++){
       elAutor=queryXPathNode(tbls[i],"tbody/tr/th[1]");
       elNachricht=queryXPathNode(tbls[i],"tbody/tr/th[2]");
-      if(elAutor && elNachricht && elAutor.textContent=="Autor" && elNachricht.textContent=="Nachricht"){
+      if(elAutor && elNachricht && elAutor.textContent=="Autor" && elNachricht.textContent=="Beitrag"){
         tbl=tbls[i];
         break;
       }
