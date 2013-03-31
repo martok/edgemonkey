@@ -9,6 +9,9 @@
 // @include        *.delphi-forum.de/*
 // @include        *.delphi-library.de/*
 // @include        *.delphiforum.de/*
+// @grant       GM_getValue
+// @grant       GM_setValue
+// @grant       GM_xmlhttpRequest
 // @exclude
 // ==/UserScript==
 
@@ -3160,10 +3163,10 @@ ShoutboxControls.prototype = {
   ev_shoutchange: function(evt) {
     var shout = this.replacer.do_replace(this.form_text.value),
         disp = this.form_chars;
-    if (unsafeWindow.setShoutChars)
-      unsafeWindow.setShoutChars(shout, disp);
-    else
-      unsafeWindow.Sidebar.shoutboxAssumeText(shout, disp);
+    var func = unsafeWindow.setShoutChars ||                             // altes design
+               unsafeWindow.Sidebar.shoutboxAssumeText ||                // Tampermonkey, Fx<4
+               unsafeWindow.Sidebar.wrappedJSObject.shoutboxAssumeText;  //GM; Fx>=4
+    func(shout, disp);
   },
 
   ev_shoutkeys: function(evt) {
